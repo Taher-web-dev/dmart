@@ -15,6 +15,7 @@ A minmalist structure-oriented content management system.
   
 ###  Folder hierarchy ...
 
+```
 space/
   ├── users/       Users and roles
   ├── schema/      Schema definitions
@@ -22,7 +23,7 @@ space/
   ├── submissions/ Anonymous/public submissions
   ├── scripts/     Server-side logic executed through Api or triggers
   └── triggers/    Time or event based triggers to inovke a script
-
+```
 
 ### Install / usage
 
