@@ -1,2 +1,2 @@
 #!/bin/bash
-export BACKEND_ENV=secrets.env
+export BACKEND_ENV=config.env

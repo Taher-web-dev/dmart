@@ -4,7 +4,6 @@ from main import app
 
 client = TestClient(app)
 
-def test_debug_sample():
-    response = client.get("/debug/sample")
+def test_card():
+    response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {'users': ['a', 'b', 'c']}
