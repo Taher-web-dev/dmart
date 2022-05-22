@@ -65,9 +65,10 @@ space/
 | subpath | The path within space root that leads to an entry. e.g. `content/stuff/todo` |
 | Locator | A *link* to another entry. |
 | payload | The actual content associated with the entry or attachment |
-| .dm | a hidden folder used to store meta information and attachments |
+| .dm | a hidden folder used to store meta information and attachments and their payload files |
 
-### Meta and file disposition
+### Meta and file disposition scheme
+
 
 | File path | Description |
 |----|----|
@@ -75,7 +76,9 @@ space/
 | `[sub/path]/.dm/[entryshortname]/meta.[entrytype].json` | The meta file of a regular entry |
 | `[sub/path]/[entrypayload]` | The optional payload file of the entry. it may not clash with another payload file within that folder|
 | `[sub/path]/.dm/[entryshortname]/attachments.[attachementtype]/meta.[attachmentshortname].json` | The meta file of an attachment |
-| `[sub/path]/.dm/[entryshortname]/attachments.[attachementtype]/[attachmentpayload]` | The optional attachment payload file. it may not clash with meta.*.json or another payload file within that folder|
+| `[sub/path]/.dm/[entryshortname]/attachments.[attachementtype]/[attachmentpayload]` | The optional attachment payload file. it may not clash with meta.[xxx].json or another payload file within that folder|
+
+With this scheme, when browsing the file system, only proper entry payload files appear to the user. All meta data and attachments data is in the hidden folders.
 
 
 ### Install / usage
