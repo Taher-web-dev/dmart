@@ -14,8 +14,8 @@ rm -f ../space/users/.dm/${SHORTNAME}/meta.User.json
 [[ -d ../space/users/.dm/${SHORTNAME}/ ]] && rmdir ../space/users/.dm/${SHORTNAME}/
 
 echo "Create user"
-CREATE=$(jq -c -n --arg displayname "$DISPLAYNAME" --arg email "$EMAIL" --arg password "$PASSWORD" '{display_name: $displayname, email: $email, password: $password}')
-curl -s -H "$CT" -d "$CREATE" "${API_URL}/user/create/${SHORTNAME}?invitation=$INVITATION" | jq
+CREATE=$(jq -c -n --arg shortname "$SHORTNAME" --arg displayname "$DISPLAYNAME" --arg email "$EMAIL" --arg password "$PASSWORD" '{resource_type: "user", subpath: "users", shortname: $shortname, attributes:{display_name: $displayname, email: $email, password: $password}}')
+curl -s -H "$CT" -d "$CREATE" "${API_URL}/user/create?invitation=$INVITATION" | jq
 
 echo "Login"
 LOGIN=$(jq -c -n --arg shortname "$SHORTNAME" --arg password "$PASSWORD" '{shortname: $shortname, password: $password}')
@@ -25,8 +25,8 @@ TOKEN=$(curl -s -H "$CT" -d "$LOGIN" ${API_URL}/user/login | jq .auth_token | tr
 
 AUTH="Authorization: Bearer ${TOKEN}"
 
-echo "Set profile"
-UPDATE='{"display_name": "a new one", "email":"howaboutthis@me.com"}'
+echo "Update profile"
+UPDATE=$(jq -c -n --arg shortname "$SHORTNAME" '{resource_type: "user", subpath: "users", shortname: $shortname, attributes:{display_name: "New display name", email: "new@email.coom"}}')
 curl -s -H "$AUTH" -H "$CT" -d "$UPDATE" $API_URL/user/profile | jq
 
 echo "Get profile"
