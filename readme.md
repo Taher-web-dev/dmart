@@ -1,9 +1,20 @@
 ## DataMart 
 
-A minmalist structure-oriented content management system.
+A minimalist structure-oriented content management system.
+
+The main data entity is called *entry*; each entry has:
+ - A meta-file (json) that holds *meta* information about the entry; such as name, description, tags, attributes ...etc. 
+ - Within the meta file, each entry should have a globally unique UUID and a shortname that must be unique within the parent folder.
+ - A payload which could be either embedded in the mata-file or separate json file)
+ - Change history (aka Alterations) on that entry.
+ - An entry has an arbitrary number of attachments, each attachment has a meta-file and payload. 
+   - Alteration: Describing a change
+   - Comment 
+   - Relationship: A pointer to another entry
+   - Media: Binary payload such as images, videos ...etc
 
 - Uses flat-files and file-system to store and organize the content
-  - File-based routes: Content is organized in folder-structure
+  - File-based routes: Entries are organized in an arbitrary (free from) folder-structure within a space root folder.
   - Structured content: JSON files are to both;  describe the content (json schema) and persist the data.
   - Arbitrary attachments: Any structured entity could have attachments (binary or otherwise)
   - Version control: Track change history by git 
@@ -12,7 +23,13 @@ A minmalist structure-oriented content management system.
   - Management  : Create/update/delete schema, content, scripts, triggers, users and roles
   - Discovery   : Users, paths, scripts, changes/history, schema and content
   - Consumption : Content/attachments, scripts and submissions   
-  
+
+
+The primary type of entries is "Content" which is a json data that could be linked with a schema for strict validation.
+
+ACL rules are used to control permissions of users and groups on the space.
+
+
 ###  Folder hierarchy ...
 
 ```
@@ -35,9 +52,9 @@ space/
 
 | Set | Endpoints | Description |
 |----|----|----|
-| /user/ | create,login,profile,delete | User account |
-| /managed | query,create,delete,update,move,media | Users-only apis to manage content |
-| /public | query,media | Public apis for public consumers |
+| /user | create,login,profile,delete | User account |
+| /managed | query,create,delete,update,move,media(create/read) | Users-only apis to manage content |
+| /public | query(read),media(read),submission(create) | Public apis for public consumers |
 
 ### Install / usage
 
