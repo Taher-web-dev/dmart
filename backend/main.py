@@ -11,7 +11,7 @@ from utils.settings import settings
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-import models.api as api 
+import models.api as api
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from api.managed.router import router as managed
@@ -29,7 +29,7 @@ app = FastAPI(
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 log_handler = logging.handlers.RotatingFileHandler(
-    filename=settings.log_path / 'x-ljson.log', maxBytes=5000000, backupCount=10
+    filename=settings.log_path / "x-ljson.log", maxBytes=5000000, backupCount=10
 )
 logger.addHandler(log_handler)
 json_logging.init_fastapi(enable_json=True)
@@ -56,13 +56,15 @@ async def app_shutdown():
 
 @app.middleware("http")
 async def middle(request: Request, call_next):
-    """ Wrapper function to manage errors and logging """
+    """Wrapper function to manage errors and logging"""
     try:
         response = await call_next(request)
     except api.Exception as ex:
         response = JSONResponse(
             status_code=ex.status_code,
-            content=jsonable_encoder(api.Response(status=api.Status.failed, error=ex.error)),
+            content=jsonable_encoder(
+                api.Response(status=api.Status.failed, error=ex.error)
+            ),
         )
     except Exception as ex:
         if ex:
@@ -86,9 +88,9 @@ async def middle(request: Request, call_next):
             ),
         )
 
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
 
     return response
 
@@ -105,9 +107,9 @@ async def root():
     }
 
 
-app.include_router(user, prefix='/user')
-app.include_router(managed, prefix='/managed')
-app.include_router(public, prefix='/public')
+app.include_router(user, prefix="/user")
+app.include_router(managed, prefix="/managed")
+app.include_router(public, prefix="/public")
 
 # @app.get("/items/{item_id}")
 # async def read_item(item_id: int, q: Optional[str] = None):
@@ -115,4 +117,4 @@ app.include_router(public, prefix='/public')
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port) # type: ignore
+    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore

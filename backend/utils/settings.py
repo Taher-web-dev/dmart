@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 class Settings(BaseSettings):
-    """ Main settings class """
+    """Main settings class"""
 
     app_name: str = "datamart"
     log_path: Path = Path("./logs/")
@@ -14,15 +14,15 @@ class Settings(BaseSettings):
     jwt_algorithm: str = ""
     listening_host: str = "0.0.0.0"
     listening_port: int = 8282
-    space_root : Path = Path("../space") 
-
+    space_root: Path = Path("../space")
 
     class Config:
-        """ Load config """
+        """Load config"""
 
-        env_file = os.getenv('BACKEND_ENV', '.env')
-        env_file_encoding = 'utf-8'
+        env_file = os.getenv("BACKEND_ENV", ".env")
+        env_file_encoding = "utf-8"
 
 
 settings = Settings()
 
+print(settings)
