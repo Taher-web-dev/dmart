@@ -11,7 +11,7 @@ from utils.settings import settings
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-import models.api as api 
+import models.api as api
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from api.managed.router import router as managed
@@ -115,4 +115,4 @@ app.include_router(public, prefix='/public')
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port) # type: ignore
+    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
