@@ -107,9 +107,8 @@ class Event(Resource):
     timestamp : datetime
     attributes : dict[str, Any]
 
-class Alteration(Resource):
+class Alteration(Attachment):
     uuid : UUID
-    resource : Locator
     user : Locator
     previous_alteration : UUID
     timestamp : datetime

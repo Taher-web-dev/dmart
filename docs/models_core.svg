@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="689px" preserveAspectRatio="none" style="width:961px;height:689px;background:#FFFFFF;" version="1.1" viewBox="0 0 961 689" width="961px" zoomAndPan="magnify"><defs><filter height="300%" id="f1dse89htgoz63" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[2c2e2644034c00788261e03c85b06837]
+cluster Core--><g id="cluster_Core"><path d="M8.5,6 L47.5,6 A3.75,3.75 0 0 1 50,8.5 L57,28.2969 L951.5,28.2969 A2.5,2.5 0 0 1 954,30.7969 L954,679.5 A2.5,2.5 0 0 1 951.5,682 L8.5,682 A2.5,2.5 0 0 1 6,679.5 L6,8.5 A2.5,2.5 0 0 1 8.5,6 " filter="url(#f1dse89htgoz63)" style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="6" x2="57" y1="28.2969" y2="28.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="38" x="10" y="20.9951">Core</text></g><!--MD5=[6b13f1b330d33795af281e5c1dfe1e98]
+class Resource--><g id="elem_Resource"><rect codeLine="4" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="32" id="Resource" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="99" x="588.5" y="77.5"/><ellipse cx="603.5" cy="93.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M606.4688,99.1406 Q605.8906,99.4375 605.25,99.5781 Q604.6094,99.7344 603.9063,99.7344 Q601.4063,99.7344 600.0781,98.0938 Q598.7656,96.4375 598.7656,93.3125 Q598.7656,90.1875 600.0781,88.5313 Q601.4063,86.875 603.9063,86.875 Q604.6094,86.875 605.25,87.0313 Q605.9063,87.1875 606.4688,87.4844 L606.4688,90.2031 Q605.8438,89.625 605.25,89.3594 Q604.6563,89.0781 604.0313,89.0781 Q602.6875,89.0781 602,90.1563 Q601.3125,91.2188 601.3125,93.3125 Q601.3125,95.4063 602,96.4844 Q602.6875,97.5469 604.0313,97.5469 Q604.6563,97.5469 605.25,97.2813 Q605.8438,97 606.4688,96.4219 L606.4688,99.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="67" x="617.5" y="98.3467">Resource</text></g><!--MD5=[047ad69fa5569e11f99d9c52b6049560]
+class ResourceType--><g id="elem_ResourceType"><rect codeLine="7" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="105.1875" id="ResourceType" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="133" x="221.5" y="41"/><ellipse cx="236.5" cy="57" fill="#EB937F" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M240.6094,63 L232.8906,63 L232.8906,50.6094 L240.6094,50.6094 L240.6094,52.7656 L235.3438,52.7656 L235.3438,55.4375 L240.1094,55.4375 L240.1094,57.5938 L235.3438,57.5938 L235.3438,60.8438 L240.6094,60.8438 L240.6094,63 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="101" x="250.5" y="61.8467">ResourceType</text><line style="stroke:#181818;stroke-width:0.5;" x1="222.5" x2="353.5" y1="73" y2="73"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="31" x="227.5" y="89.9951">user</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="41" x="227.5" y="106.292">group</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="54" x="227.5" y="122.5889">content</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="19" x="227.5" y="138.8857">acl</text></g><!--MD5=[860bdac442eb7aea1fa0c6c63c6b560e]
+class Meta--><g id="elem_Meta"><rect codeLine="14" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="137.7813" id="Meta" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="143" x="371.5" y="206"/><ellipse cx="421.75" cy="222" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M424.7188,227.6406 Q424.1406,227.9375 423.5,228.0781 Q422.8594,228.2344 422.1563,228.2344 Q419.6563,228.2344 418.3281,226.5938 Q417.0156,224.9375 417.0156,221.8125 Q417.0156,218.6875 418.3281,217.0313 Q419.6563,215.375 422.1563,215.375 Q422.8594,215.375 423.5,215.5313 Q424.1563,215.6875 424.7188,215.9844 L424.7188,218.7031 Q424.0938,218.125 423.5,217.8594 Q422.9063,217.5781 422.2813,217.5781 Q420.9375,217.5781 420.25,218.6563 Q419.5625,219.7188 419.5625,221.8125 Q419.5625,223.9063 420.25,224.9844 Q420.9375,226.0469 422.2813,226.0469 Q422.9063,226.0469 423.5,225.7813 Q424.0938,225.5 424.7188,224.9219 L424.7188,227.6406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="34" x="442.25" y="226.8467">Meta</text><line style="stroke:#181818;stroke-width:0.5;" x1="372.5" x2="513.5" y1="238" y2="238"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="77" x="377.5" y="254.9951">uuid : UUID</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="106" x="377.5" y="271.292">shortname : str</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="101" x="377.5" y="287.5889">is_active : bool</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="131" x="377.5" y="303.8857">display_name : str?</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="127" x="377.5" y="320.1826">owner_uuid : UUID</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="53" x="377.5" y="336.4795">payload</text></g><!--MD5=[18c9a02beee653044d22b6acaa9140eb]
+class Locator--><g id="elem_Locator"><rect codeLine="23" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="121.4844" id="Locator" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="177" x="549.5" y="214.5"/><ellipse cx="608.25" cy="230.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M611.2188,236.1406 Q610.6406,236.4375 610,236.5781 Q609.3594,236.7344 608.6563,236.7344 Q606.1563,236.7344 604.8281,235.0938 Q603.5156,233.4375 603.5156,230.3125 Q603.5156,227.1875 604.8281,225.5313 Q606.1563,223.875 608.6563,223.875 Q609.3594,223.875 610,224.0313 Q610.6563,224.1875 611.2188,224.4844 L611.2188,227.2031 Q610.5938,226.625 610,226.3594 Q609.4063,226.0781 608.7813,226.0781 Q607.4375,226.0781 606.75,227.1563 Q606.0625,228.2188 606.0625,230.3125 Q606.0625,232.4063 606.75,233.4844 Q607.4375,234.5469 608.7813,234.5469 Q609.4063,234.5469 610,234.2813 Q610.5938,234 611.2188,233.4219 L611.2188,236.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="51" x="628.75" y="235.3467">Locator</text><line style="stroke:#181818;stroke-width:0.5;" x1="550.5" x2="725.5" y1="246.5" y2="246.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="84" x="555.5" y="263.4951">uuid : UUID?</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="144" x="555.5" y="279.792">type : ResourceType</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="88" x="555.5" y="296.0889">subpath : str</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="106" x="555.5" y="312.3857">shortname : str</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="165" x="555.5" y="328.6826">parent_shortname : str?</text></g><!--MD5=[44201db48fb57df1a9c7f5b6b15426b0]
+class Actor--><g id="elem_Actor"><rect codeLine="31" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="32" id="Actor" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="68" x="171" y="424.5"/><ellipse cx="186" cy="440.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M188.9688,446.1406 Q188.3906,446.4375 187.75,446.5781 Q187.1094,446.7344 186.4063,446.7344 Q183.9063,446.7344 182.5781,445.0938 Q181.2656,443.4375 181.2656,440.3125 Q181.2656,437.1875 182.5781,435.5313 Q183.9063,433.875 186.4063,433.875 Q187.1094,433.875 187.75,434.0313 Q188.4063,434.1875 188.9688,434.4844 L188.9688,437.2031 Q188.3438,436.625 187.75,436.3594 Q187.1563,436.0781 186.5313,436.0781 Q185.1875,436.0781 184.5,437.1563 Q183.8125,438.2188 183.8125,440.3125 Q183.8125,442.4063 184.5,443.4844 Q185.1875,444.5469 186.5313,444.5469 Q187.1563,444.5469 187.75,444.2813 Q188.3438,444 188.9688,443.4219 L188.9688,446.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="36" x="200" y="445.3467">Actor</text></g><!--MD5=[3fd616f346a44cd59a91eb10b19e157c]
+class User--><g id="elem_User"><rect codeLine="34" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="72.5938" id="User" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="110" x="22" y="565"/><ellipse cx="57.7" cy="581" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M60.6688,586.6406 Q60.0906,586.9375 59.45,587.0781 Q58.8094,587.2344 58.1063,587.2344 Q55.6063,587.2344 54.2781,585.5938 Q52.9656,583.9375 52.9656,580.8125 Q52.9656,577.6875 54.2781,576.0313 Q55.6063,574.375 58.1063,574.375 Q58.8094,574.375 59.45,574.5313 Q60.1063,574.6875 60.6688,574.9844 L60.6688,577.7031 Q60.0438,577.125 59.45,576.8594 Q58.8563,576.5781 58.2313,576.5781 Q56.8875,576.5781 56.2,577.6563 Q55.5125,578.7188 55.5125,580.8125 Q55.5125,582.9063 56.2,583.9844 Q56.8875,585.0469 58.2313,585.0469 Q58.8563,585.0469 59.45,584.7813 Q60.0438,584.5 60.6688,583.9219 L60.6688,586.6406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="32" x="76.3" y="585.8467">User</text><line style="stroke:#181818;stroke-width:0.5;" x1="23" x2="131" y1="597" y2="597"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="67" x="28" y="613.9951">email : str</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="98" x="28" y="630.292">password : str</text></g><!--MD5=[41314a0efc36828092cff9ebad2fcafd]
+class Group--><g id="elem_Group"><rect codeLine="39" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="32" id="Group" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="75" x="167.5" y="585.5"/><ellipse cx="182.5" cy="601.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M185.4688,607.1406 Q184.8906,607.4375 184.25,607.5781 Q183.6094,607.7344 182.9063,607.7344 Q180.4063,607.7344 179.0781,606.0938 Q177.7656,604.4375 177.7656,601.3125 Q177.7656,598.1875 179.0781,596.5313 Q180.4063,594.875 182.9063,594.875 Q183.6094,594.875 184.25,595.0313 Q184.9063,595.1875 185.4688,595.4844 L185.4688,598.2031 Q184.8438,597.625 184.25,597.3594 Q183.6563,597.0781 183.0313,597.0781 Q181.6875,597.0781 181,598.1563 Q180.3125,599.2188 180.3125,601.3125 Q180.3125,603.4063 181,604.4844 Q181.6875,605.5469 183.0313,605.5469 Q183.6563,605.5469 184.25,605.2813 Q184.8438,605 185.4688,604.4219 L185.4688,607.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="43" x="196.5" y="606.3467">Group</text></g><!--MD5=[028e5a1dffb388095f9b7f9e3d783fca]
+class Attachment--><g id="elem_Attachment"><rect codeLine="42" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="32" id="Attachment" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="112" x="327" y="424.5"/><ellipse cx="342" cy="440.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M344.9688,446.1406 Q344.3906,446.4375 343.75,446.5781 Q343.1094,446.7344 342.4063,446.7344 Q339.9063,446.7344 338.5781,445.0938 Q337.2656,443.4375 337.2656,440.3125 Q337.2656,437.1875 338.5781,435.5313 Q339.9063,433.875 342.4063,433.875 Q343.1094,433.875 343.75,434.0313 Q344.4063,434.1875 344.9688,434.4844 L344.9688,437.2031 Q344.3438,436.625 343.75,436.3594 Q343.1563,436.0781 342.5313,436.0781 Q341.1875,436.0781 340.5,437.1563 Q339.8125,438.2188 339.8125,440.3125 Q339.8125,442.4063 340.5,443.4844 Q341.1875,444.5469 342.5313,444.5469 Q343.1563,444.5469 343.75,444.2813 Q344.3438,444 344.9688,443.4219 L344.9688,446.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="80" x="356" y="445.3467">Attachment</text></g><!--MD5=[9d93cc8568a88ed605ddd50c0dd874e2]
+class Media--><g id="elem_Media"><rect codeLine="45" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="32" id="Media" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="73" x="277.5" y="585.5"/><ellipse cx="292.5" cy="601.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M295.4688,607.1406 Q294.8906,607.4375 294.25,607.5781 Q293.6094,607.7344 292.9063,607.7344 Q290.4063,607.7344 289.0781,606.0938 Q287.7656,604.4375 287.7656,601.3125 Q287.7656,598.1875 289.0781,596.5313 Q290.4063,594.875 292.9063,594.875 Q293.6094,594.875 294.25,595.0313 Q294.9063,595.1875 295.4688,595.4844 L295.4688,598.2031 Q294.8438,597.625 294.25,597.3594 Q293.6563,597.0781 293.0313,597.0781 Q291.6875,597.0781 291,598.1563 Q290.3125,599.2188 290.3125,601.3125 Q290.3125,603.4063 291,604.4844 Q291.6875,605.5469 293.0313,605.5469 Q293.6563,605.5469 294.25,605.2813 Q294.8438,605 295.4688,604.4219 L295.4688,607.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="41" x="306.5" y="606.3467">Media</text></g><!--MD5=[042fa140da40c49659127f611bcff931]
+class Comment--><g id="elem_Comment"><rect codeLine="48" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="32" id="Comment" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="100" x="386" y="585.5"/><ellipse cx="401" cy="601.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M403.9688,607.1406 Q403.3906,607.4375 402.75,607.5781 Q402.1094,607.7344 401.4063,607.7344 Q398.9063,607.7344 397.5781,606.0938 Q396.2656,604.4375 396.2656,601.3125 Q396.2656,598.1875 397.5781,596.5313 Q398.9063,594.875 401.4063,594.875 Q402.1094,594.875 402.75,595.0313 Q403.4063,595.1875 403.9688,595.4844 L403.9688,598.2031 Q403.3438,597.625 402.75,597.3594 Q402.1563,597.0781 401.5313,597.0781 Q400.1875,597.0781 399.5,598.1563 Q398.8125,599.2188 398.8125,601.3125 Q398.8125,603.4063 399.5,604.4844 Q400.1875,605.5469 401.5313,605.5469 Q402.1563,605.5469 402.75,605.2813 Q403.3438,605 403.9688,604.4219 L403.9688,607.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="68" x="415" y="606.3467">Comment</text></g><!--MD5=[af1976e18eeac3c7667e84ffa08640a2]
+class Relationship--><g id="elem_Relationship"><rect codeLine="51" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="72.5938" id="Relationship" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="177" x="521.5" y="565"/><ellipse cx="563.5" cy="581" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M566.4688,586.6406 Q565.8906,586.9375 565.25,587.0781 Q564.6094,587.2344 563.9063,587.2344 Q561.4063,587.2344 560.0781,585.5938 Q558.7656,583.9375 558.7656,580.8125 Q558.7656,577.6875 560.0781,576.0313 Q561.4063,574.375 563.9063,574.375 Q564.6094,574.375 565.25,574.5313 Q565.9063,574.6875 566.4688,574.9844 L566.4688,577.7031 Q565.8438,577.125 565.25,576.8594 Q564.6563,576.5781 564.0313,576.5781 Q562.6875,576.5781 562,577.6563 Q561.3125,578.7188 561.3125,580.8125 Q561.3125,582.9063 562,583.9844 Q562.6875,585.0469 564.0313,585.0469 Q564.6563,585.0469 565.25,584.7813 Q565.8438,584.5 566.4688,583.9219 L566.4688,586.6406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="85" x="583.5" y="585.8467">Relationship</text><line style="stroke:#181818;stroke-width:0.5;" x1="522.5" x2="697.5" y1="597" y2="597"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="133" x="527.5" y="613.9951">related_to : Locator</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="165" x="527.5" y="630.292">attributes : dict[str, Any]</text></g><!--MD5=[fd7366e9f96236d9aa60dcc04f2b83e5]
+class Content--><g id="elem_Content"><rect codeLine="56" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="72.5938" id="Content" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="165" x="474.5" y="404"/><ellipse cx="524.75" cy="420" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M527.7188,425.6406 Q527.1406,425.9375 526.5,426.0781 Q525.8594,426.2344 525.1563,426.2344 Q522.6563,426.2344 521.3281,424.5938 Q520.0156,422.9375 520.0156,419.8125 Q520.0156,416.6875 521.3281,415.0313 Q522.6563,413.375 525.1563,413.375 Q525.8594,413.375 526.5,413.5313 Q527.1563,413.6875 527.7188,413.9844 L527.7188,416.7031 Q527.0938,416.125 526.5,415.8594 Q525.9063,415.5781 525.2813,415.5781 Q523.9375,415.5781 523.25,416.6563 Q522.5625,417.7188 522.5625,419.8125 Q522.5625,421.9063 523.25,422.9844 Q523.9375,424.0469 525.2813,424.0469 Q525.9063,424.0469 526.5,423.7813 Q527.0938,423.5 527.7188,422.9219 L527.7188,425.6406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="56" x="545.25" y="424.8467">Content</text><line style="stroke:#181818;stroke-width:0.5;" x1="475.5" x2="638.5" y1="436" y2="436"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="127" x="480.5" y="452.9951">scheme : Locator?</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="153" x="480.5" y="469.292">history : list[Alteration]</text></g><!--MD5=[ac13618b1a974308c1f12eb6c57723dc]
+class Event--><g id="elem_Event"><rect codeLine="61" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="121.4844" id="Event" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="177" x="761.5" y="214.5"/><ellipse cx="826.25" cy="230.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M829.2188,236.1406 Q828.6406,236.4375 828,236.5781 Q827.3594,236.7344 826.6563,236.7344 Q824.1563,236.7344 822.8281,235.0938 Q821.5156,233.4375 821.5156,230.3125 Q821.5156,227.1875 822.8281,225.5313 Q824.1563,223.875 826.6563,223.875 Q827.3594,223.875 828,224.0313 Q828.6563,224.1875 829.2188,224.4844 L829.2188,227.2031 Q828.5938,226.625 828,226.3594 Q827.4063,226.0781 826.7813,226.0781 Q825.4375,226.0781 824.75,227.1563 Q824.0625,228.2188 824.0625,230.3125 Q824.0625,232.4063 824.75,233.4844 Q825.4375,234.5469 826.7813,234.5469 Q827.4063,234.5469 828,234.2813 Q828.5938,234 829.2188,233.4219 L829.2188,236.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="39" x="846.75" y="235.3467">Event</text><line style="stroke:#181818;stroke-width:0.5;" x1="762.5" x2="937.5" y1="246.5" y2="246.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="99" x="767.5" y="263.4951">entry : Locator</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="95" x="767.5" y="279.792">user : Locator</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="160" x="767.5" y="296.0889">request : RequestType</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="147" x="767.5" y="312.3857">timestamp : datetime</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="165" x="767.5" y="328.6826">attributes : dict[str, Any]</text></g><!--MD5=[eb68a793c26fc2d419c5b522c1f26374]
+class Alteration--><g id="elem_Alteration"><rect codeLine="69" fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="129.4844" id="Alteration" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="205" x="733.5" y="537"/><ellipse cx="799.25" cy="553" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M802.2188,558.6406 Q801.6406,558.9375 801,559.0781 Q800.3594,559.2344 799.6563,559.2344 Q797.1563,559.2344 795.8281,557.5938 Q794.5156,555.9375 794.5156,552.8125 Q794.5156,549.6875 795.8281,548.0313 Q797.1563,546.375 799.6563,546.375 Q800.3594,546.375 801,546.5313 Q801.6563,546.6875 802.2188,546.9844 L802.2188,549.7031 Q801.5938,549.125 801,548.8594 Q800.4063,548.5781 799.7813,548.5781 Q798.4375,548.5781 797.75,549.6563 Q797.0625,550.7188 797.0625,552.8125 Q797.0625,554.9063 797.75,555.9844 Q798.4375,557.0469 799.7813,557.0469 Q800.4063,557.0469 801,556.7813 Q801.5938,556.5 802.2188,555.9219 L802.2188,558.6406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="65" x="819.75" y="557.8467">Alteration</text><line style="stroke:#181818;stroke-width:0.5;" x1="734.5" x2="937.5" y1="569" y2="569"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="77" x="739.5" y="585.9951">uuid : UUID</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="95" x="739.5" y="602.292">user : Locator</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="177" x="739.5" y="618.5889">previous_alteration : UUID</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="147" x="739.5" y="634.8857">timestamp : datetime</text><line style="stroke:#181818;stroke-width:0.5;" x1="734.5" x2="937.5" y1="642.1875" y2="642.1875"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="193" x="739.5" y="659.1826">diff : dict[str, tuple(Any,Any)]</text></g><!--MD5=[2f421283e4272715588b1e10d4842c5f]
+class Schema--><g id="elem_Schema"><rect fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="32" id="Schema" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="88" x="675" y="424.5"/><ellipse cx="690" cy="440.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M692.9688,446.1406 Q692.3906,446.4375 691.75,446.5781 Q691.1094,446.7344 690.4063,446.7344 Q687.9063,446.7344 686.5781,445.0938 Q685.2656,443.4375 685.2656,440.3125 Q685.2656,437.1875 686.5781,435.5313 Q687.9063,433.875 690.4063,433.875 Q691.1094,433.875 691.75,434.0313 Q692.4063,434.1875 692.9688,434.4844 L692.9688,437.2031 Q692.3438,436.625 691.75,436.3594 Q691.1563,436.0781 690.5313,436.0781 Q689.1875,436.0781 688.5,437.1563 Q687.8125,438.2188 687.8125,440.3125 Q687.8125,442.4063 688.5,443.4844 Q689.1875,444.5469 690.5313,444.5469 Q691.1563,444.5469 691.75,444.2813 Q692.3438,444 692.9688,443.4219 L692.9688,446.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="56" x="704" y="445.3467">Schema</text></g><!--MD5=[d1dcc9c41ef051a777528f9336a950e3]
+class Folder--><g id="elem_Folder"><rect fill="#FFFFFF" filter="url(#f1dse89htgoz63)" height="32" id="Folder" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="75" x="797.5" y="424.5"/><ellipse cx="812.5" cy="440.5" fill="#ADD1B2" rx="11" ry="11" style="stroke:#181818;stroke-width:1.0;"/><path d="M815.4688,446.1406 Q814.8906,446.4375 814.25,446.5781 Q813.6094,446.7344 812.9063,446.7344 Q810.4063,446.7344 809.0781,445.0938 Q807.7656,443.4375 807.7656,440.3125 Q807.7656,437.1875 809.0781,435.5313 Q810.4063,433.875 812.9063,433.875 Q813.6094,433.875 814.25,434.0313 Q814.9063,434.1875 815.4688,434.4844 L815.4688,437.2031 Q814.8438,436.625 814.25,436.3594 Q813.6563,436.0781 813.0313,436.0781 Q811.6875,436.0781 811,437.1563 Q810.3125,438.2188 810.3125,440.3125 Q810.3125,442.4063 811,443.4844 Q811.6875,444.5469 813.0313,444.5469 Q813.6563,444.5469 814.25,444.2813 Q814.8438,444 815.4688,443.4219 L815.4688,446.1406 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="43" x="826.5" y="445.3467">Folder</text></g><!--MD5=[bdecc0fbd02d87096a2f9ddd66789307]
+reverse link Resource to Meta--><g id="link_Resource_Meta"><path codeLine="77" d="M606.43,123.56 C581.62,146.4 546.1,179.1 514.5,208.18 " fill="none" id="Resource-backto-Meta" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="601.92,118.2,621.37,109.8,611.4,128.5,601.92,118.2" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[845c9c42f044797352fde331ac961f17]
+reverse link Resource to Locator--><g id="link_Resource_Locator"><path codeLine="78" d="M638,129.89 C638,153.96 638,186.38 638,214.38 " fill="none" id="Resource-backto-Locator" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="631,129.8,638,109.8,645,129.8,631,129.8" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[2cde1c40236e01b173246f7bdc7f7ee7]
+reverse link Resource to Event--><g id="link_Resource_Event"><path codeLine="79" d="M671.35,122.73 C700.27,147.22 743.11,183.5 779.59,214.38 " fill="none" id="Resource-backto-Event" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="666.82,128.07,656.08,109.8,675.86,117.39,666.82,128.07" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[4cf13fc4fb158d4df64f463e7c32f666]
+reverse link Attachment to Alteration--><g id="link_Attachment_Alteration"><path codeLine="80" d="M429.1,465.52 C438.2,469.72 447.78,473.77 457,477 C568.49,516.12 605.3,495.69 716,537 C721.74,539.14 727.55,541.51 733.37,544.02 " fill="none" id="Attachment-backto-Alteration" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="425.77,471.69,410.84,456.65,431.89,459.1,425.77,471.69" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[b8aafda77c4e2d14e92e45d73fdf17e8]
+reverse link Actor to User--><g id="link_Actor_User"><path codeLine="82" d="M179.95,472.61 C158.63,499.1 127.99,537.16 105.68,564.87 " fill="none" id="Actor-backto-User" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="174.73,467.94,192.73,456.75,185.64,476.71,174.73,467.94" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[e41f249f3fd314841a7dc2ddfa026a89]
+reverse link Actor to Group--><g id="link_Actor_Group"><path codeLine="83" d="M205,476.75 C205,510.61 205,560.19 205,585.07 " fill="none" id="Actor-backto-Group" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="198,476.75,205,456.75,212,476.75,198,476.75" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[276d40bbaf57014179f0489c0b97c655]
+reverse link Meta to Actor--><g id="link_Meta_Actor"><path codeLine="84" d="M354.65,336.7 C308.57,368.35 255.91,404.52 226.96,424.41 " fill="none" id="Meta-backto-Actor" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="350.82,330.83,371.27,325.28,358.75,342.37,350.82,330.83" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[c68137318d127322a4617c2172be0fa0]
+reverse link Meta to Schema--><g id="link_Meta_Schema"><path codeLine="85" d="M531.74,343.84 C531.82,343.89 531.91,343.95 532,344 C584.54,376.21 602.45,375.34 657,404 C669.19,410.4 682.46,417.93 693.59,424.4 " fill="none" id="Meta-backto-Schema" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="527.92,349.71,514.99,332.92,535.57,337.98,527.92,349.71" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[b4ff6d3d4e664bc40726797aafa80f90]
+reverse link Meta to Content--><g id="link_Meta_Content"><path codeLine="86" d="M502.16,360.85 C512.77,376.06 523.27,391.13 532.21,403.94 " fill="none" id="Meta-backto-Content" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="496.38,364.8,490.69,344.39,507.87,356.79,496.38,364.8" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[0858b691988d836283602e2cb05d1b2d]
+reverse link Meta to Folder--><g id="link_Meta_Folder"><path codeLine="87" d="M533.11,343.1 C639.36,389.56 682.06,361.12 781,404 C793.25,409.31 805.78,417.35 815.68,424.44 " fill="none" id="Meta-backto-Folder" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="529.98,349.36,514.76,334.62,535.85,336.65,529.98,349.36" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[fc5e9de40a50ed3a1e80b5955b0ce70f]
+reverse link Meta to Attachment--><g id="link_Meta_Attachment"><path codeLine="89" d="M410.97,363.28 C402.32,386.85 393.9,409.81 388.59,424.26 " fill="none" id="Meta-backto-Attachment" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="404.44,360.76,417.9,344.39,417.58,365.58,404.44,360.76" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[1de60d8bfcf7024ae3c4a21429eec2b7]
+reverse link Attachment to Comment--><g id="link_Attachment_Comment"><path codeLine="90" d="M394.43,475.78 C405.72,509.66 422.49,559.96 430.86,585.07 " fill="none" id="Attachment-backto-Comment" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="387.77,477.93,388.08,456.75,401.05,473.51,387.77,477.93" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[1c3ea9093cc8baa7a5cca2b64ab8c043]
+reverse link Attachment to Media--><g id="link_Attachment_Media"><path codeLine="91" d="M368.33,475.3 C353.63,509.18 331.65,559.84 320.7,585.07 " fill="none" id="Attachment-backto-Media" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="362,472.31,376.38,456.75,374.84,477.88,362,472.31" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[31d140e3f9d4fc5b9ba0eeb2103329b7]
+reverse link Attachment to Relationship--><g id="link_Attachment_Relationship"><path codeLine="92" d="M421.33,468.35 C459.21,494.88 517.4,535.64 559.13,564.87 " fill="none" id="Attachment-backto-Relationship" style="stroke:#006400;stroke-width:1.0;"/><polygon fill="none" points="417.13,473.95,404.77,456.75,425.16,462.49,417.13,473.95" style="stroke:#006400;stroke-width:1.0;"/></g><!--MD5=[e9d9d43df7a00d283b2ac0c918014220]
+@startuml
+<style>
+
+root {
+  Shadowing: 0.5;
+  /*LineColor: darkgreen;
+  BackgroundColor transparent;*/
+}
+
+arrow {
+  LineColor darkgreen
+}
+
+jsonDiagram {
+  node {
+    BackgroundColor Ivory;
+  }
+  highlight {
+    BackgroundColor #EEFFEE;
+  }
+}
+
+usecase {
+  BackgroundColor Ivory;
+  Linecolor red;
+}
+
+wbsDiagram {
+  node {
+    BackgroundColor Ivory;
+  }
+}
+
+ganttDiagram {
+  task {
+    BackGroundColor GreenYellow
+    LineColor Green 
+    unstarted {
+      BackGroundColor Fuchsia 
+      LineColor FireBrick
+    }
+  }
+}
+</style>
+hide empty members
+package Core {
+class Resource {
+}
+
+enum ResourceType {
+  user
+  group
+  content
+  acl
+}
+
+class Meta {
+  uuid : UUID
+  shortname : str
+  is_active : bool
+  display_name : str?
+  owner_uuid : UUID
+  payload
+}
+
+class Locator {
+  uuid : UUID?
+  type : ResourceType
+  subpath : str
+  shortname : str
+  parent_shortname : str?
+}
+
+class Actor {
+}
+
+class User {
+  email : str
+  password : str
+}
+
+class Group {
+}
+
+class Attachment {
+}
+
+class Media {
+}
+
+class Comment {
+}
+
+class Relationship {
+  related_to : Locator
+  attributes : dict[str, Any]
+}
+
+class Content {
+  scheme : Locator?
+  history : list[Alteration]
+}
+
+class Event {
+  entry : Locator
+  user : Locator
+  request : RequestType
+  timestamp : datetime
+  attributes : dict[str, Any]
+}
+
+class Alteration {
+  uuid : UUID
+  user : Locator
+  previous_alteration : UUID
+  timestamp : datetime
+  diff : dict[str, tuple(Any,Any)]
+}
+
+Resource <|- - Meta
+Resource <|- - Locator
+Resource <|- - Event
+Attachment <|- - Alteration
+
+Actor <|- - User
+Actor <|- - Group
+Meta <|- - Actor
+Meta <|- - Schema
+Meta <|- - Content
+Meta <|- - Folder
+
+Meta <|- - Attachment
+Attachment <|- - Comment
+Attachment <|- - Media
+Attachment <|- - Relationship
+
+}
+
+@enduml
+
+PlantUML version 1.2022.2(Sat Mar 05 19:30:19 TRT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

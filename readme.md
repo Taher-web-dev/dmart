@@ -25,6 +25,20 @@ space/
   └── triggers/    Time or event based triggers to inovke a script
 ```
 
+### Models
+
+![Core models](./docs/models_core.svg)
+
+![Api models](./docs/models_api.svg)
+
+### Api sets
+
+| Set | Endpoints | Description |
+|----|----|----|
+| /user/ | create,login,profile,delete | User account |
+| /managed | query,create,delete,update,move,media | Users-only apis to manage content |
+| /public | query,media | Public apis for public consumers |
+
 ### Install / usage
 
 #### Requirements
