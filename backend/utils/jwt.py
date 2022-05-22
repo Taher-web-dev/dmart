@@ -19,7 +19,6 @@ class JWTBearer(HTTPBearer):
             ).__call__(request)
             if credentials and credentials.scheme == "Bearer":
                 decoded = decode_jwt(credentials.credentials)
-                print("############### ", decoded)
                 if decoded and "username" in decoded:
                     return decoded["username"]
         except:

@@ -87,6 +87,7 @@ class Actor(Meta):
 
 class User(Actor):
     password : str
+    email : str | None = None
 
 class Group(Actor):
     pass
@@ -127,9 +128,4 @@ class Content(Meta):
 
 class Folder(Meta):
     pass
-
-class Entry: 
-    locator : Locator
-    meta : Meta
-    space_root : Path
 

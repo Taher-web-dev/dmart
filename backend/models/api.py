@@ -8,13 +8,12 @@ from typing import Any
 from builtins import Exception as PyException
 
 class Record(BaseModel):
-    resource : ResourceType
-    timestamp : datetime
-    parent_shortname : str | None
-    uuid : UUID
-    shortname : str | None
-    subpath : str | None
-    attchments : dict[ResourceType, Any] # Any should be Record
+    resource_type : ResourceType
+    parent_shortname : str | None = None
+    uuid : UUID | None = None
+    shortname : str 
+    subpath : str
+    attributes : dict[str,Any] 
 
 class QueryType(str, Enum):
     search = 'search'
@@ -24,6 +23,7 @@ class QueryType(str, Enum):
     history = 'history'
 
 class Query(BaseModel):
+    type : QueryType
     subpath : str
     resource_uuids : list[UUID]
     resource_types : list[ResourceType]
@@ -38,16 +38,9 @@ class Query(BaseModel):
     offset : int
     tags : list[str]
 
-class Request(BaseModel):
-    request : RequestType
-    auth_token : str
-    query : Query | None 
-    records : list[Record]
-
 class Status(str, Enum):
     success = 'success'
     failed = 'failed'
-
 
 class Error(BaseModel):
     type : str
@@ -59,6 +52,7 @@ class Response(BaseModel):
     error : Error | None = None
     auth_token : str | None = None
     records : list[Record] | None = None
+    supplement : list[Record] | None = None
 
 class Exception(PyException):
     status_code : int

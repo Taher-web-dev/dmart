@@ -15,7 +15,7 @@ import models.api as api
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from api.managed.router import router as managed
-from api.session.router import router as session
+from api.user.router import router as user
 from api.public.router import router as public
 
 
@@ -105,7 +105,7 @@ async def root():
     }
 
 
-app.include_router(session, prefix='/session')
+app.include_router(user, prefix='/user')
 app.include_router(managed, prefix='/managed')
 app.include_router(public, prefix='/public')
 
