@@ -7,7 +7,6 @@ from typing import Any
 from datetime import datetime
 from pathlib import Path
 
-
 class Resource(BaseModel):
     class Config:
         use_enum_values = True
@@ -31,16 +30,16 @@ class Language(str, Enum):
 
 
 class ResourceType(str, Enum):
-    relationship = 'Relationship'
     user = 'user'
     group = 'group'
+    folder = 'folder'
+    schema = 'schema'
+    content = 'content'
+    acl = 'acl'
     comment = 'comment'
     media = 'media'
-    folder = 'folder'
-    acl = 'acl'
-    locator = 'locator'
-    record = 'record'
-    content = 'content'
+    relationship = 'relationship'
+    alteration = 'alteration'
 
 class ContentType(str, Enum):
     text = 'text'
@@ -117,7 +116,6 @@ class Schema(Meta):
 
 class Content(Meta):
     schema_shortname : str | None = None
-
 
 class Folder(Meta):
     pass

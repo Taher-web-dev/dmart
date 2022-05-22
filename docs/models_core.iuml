@@ -6,10 +6,10 @@ package Core {
   enum ResourceType {
     user
     group
-    content
-    acl
     folder
     schema
+    content
+    acl
     comment
     media
     relationship
@@ -22,7 +22,10 @@ package Core {
     is_active : bool
     display_name : str?
     owner_shortname : str
-    payload : Payload
+    payload : Payload?
+    description : str?
+    attributes : dict[str, Any]?
+    tags : list[str]?
   }
 
   class Payload {
