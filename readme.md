@@ -59,6 +59,8 @@ space/
 
 ### Additional terminology
 
+| Term | Description |
+|----|----|
 | space (or space root)| The root directory under which all content exist. All read-write operations must be within the space root| 
 | subpath | The path within space root that leads to an entry. e.g. `content/stuff/todo` |
 | Locator | A *link* to another entry. |
@@ -67,11 +69,13 @@ space/
 
 ### Meta and file disposition
 
-| `{space-root}/[my/deeper/path]/.dm/meta.folder.json` | The meta file of a Folder |
-| `{space-root}/[my/deeper/path]/.dm/[myentryshortname]/meta.[entry-type].json` | The meta file of a regular entry |
-| `{space-root}/[my/deeper/path]/[myentrypayloadfile]` | The optional payload file of the entry. it may not clash with another payload file |
-| `{space-root}/[my/deeper/path]/.dm/[myentryshortname]/attachments.[myattachementtype]/meta.[attachmentshortname].json` | The meta file of an attachment |
-| `{space-root}/[my/deeper/path]/.dm/[myentryshortname]/attachments.[myattachementtype]/[attachmentpayloadfile]` | The optional attachment payload file. it may not clash with meta.*.json or another payload file |
+| File path | Description |
+|----|----|
+| `[sub/path]/.dm/meta.folder.json` | The meta file of a Folder |
+| `[sub/path]/.dm/[entryshortname]/meta.[entrytype].json` | The meta file of a regular entry |
+| `[sub/path]/[entrypayload]` | The optional payload file of the entry. it may not clash with another payload file within that folder|
+| `[sub/path]/.dm/[entryshortname]/attachments.[attachementtype]/meta.[attachmentshortname].json` | The meta file of an attachment |
+| `[sub/path]/.dm/[entryshortname]/attachments.[attachementtype]/[attachmentpayload]` | The optional attachment payload file. it may not clash with meta.*.json or another payload file within that folder|
 
 
 ### Install / usage
