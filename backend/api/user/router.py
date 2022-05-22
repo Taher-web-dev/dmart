@@ -29,7 +29,7 @@ async def create_user(shortname : str, profile : UserProfile, invitation : str) 
     if not profile.password:
         raise api.Exception(status_code=400, error=api.Error(type="create", code=50, message="empty password"))
 
-    user = core.User (shortname=shortname, password=profile.password)
+    user = core.User (owner_shortname=shortname, shortname=shortname, password=profile.password)
 
     if profile.display_name:
         user.display_name=profile.display_name

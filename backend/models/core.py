@@ -43,16 +43,17 @@ class ResourceType(str, Enum):
     query = 'query'
     locator = 'locator'
     record = 'record'
-    structured_content = 'structured_content'
+    content = 'content'
 
 class ContentType(str, Enum):
+    text = 'text'
+    markdown = 'markdown'
     json = 'json'
     image = 'image'
 
 class Payload(Resource):
     content_type : ContentType
-    embedded : str | dict[str, Any] | None
-    filepath : str | None
+    body : str | dict[str, Any] #  | Path in the future. 
 
 class Meta(Resource):
     uuid : UUID = Field(default_factory=uuid4) 
@@ -64,7 +65,7 @@ class Meta(Resource):
     created_at : datetime = datetime.now()
     updated_at : datetime = datetime.now()
     attributes : dict[str, Any] | None = None
-    owner_uuid : UUID | None = None
+    owner_shortname : str
     payload : Payload | None = None
 
 
@@ -118,8 +119,8 @@ class Schema(Meta):
     pass
 
 class Content(Meta):
-    scheme : Locator | None
-    history : list[Alteration] = []
+    scheme : Locator | None = None
+
 
 class Folder(Meta):
     pass

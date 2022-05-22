@@ -9,7 +9,7 @@ from builtins import Exception as PyException
 
 class Record(BaseModel):
     resource_type : ResourceType
-    parent_shortname : str | None = None
+    parent_shortname : str | None = None # This is only required when dealing with attachments.
     uuid : UUID | None = None
     shortname : str 
     subpath : str
