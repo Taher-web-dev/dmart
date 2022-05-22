@@ -1,0 +1,70 @@
+@startuml
+hide empty members
+
+package Api {
+
+  class Record {
+    resource_type : ResourceType
+    parent_shortname : str?
+    uuid : UUID?
+    shortname : str
+    subpath : str
+    attributes : dict[str, Any]
+  }
+
+  enum QueryType {
+    search
+    subpath
+    folders
+    events
+    history
+  }
+
+  class Query {
+    type : QueryType
+    subpath : str
+    resource_uuids : list[UUID]?
+    resource_types : list[ResourceType]?
+    resource_shortnames : list[str]?
+    search : str?
+    from_date : datetime?
+    to_date : datetime?
+    exclude_fields : list[str]?
+    include_fields : list[str]?
+    sort_by : str?
+    limit : int?
+    offset : int?
+    tags : list[str]?
+  }
+
+  class Response {
+    status : Status
+    error : Error?
+    auth_token : str?
+    records : list[Record]?
+    supplement : list[Record]?
+  }
+
+  class Error {
+    type : str
+    code : int
+    message : str
+  }
+
+  class Exception {
+    status_code : int
+    error : Error
+  }
+
+  Exception::error o-up- Error
+  Response::status o-right- Status
+  Response::error o-up- Error
+  Query::type o-right- QueryType
+  Response::records }-left- Record
+
+  enum Status {
+    success
+    failed
+  }
+}
+@enduml

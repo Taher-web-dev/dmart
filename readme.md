@@ -42,12 +42,6 @@ space/
   └── triggers/    Time or event based triggers to inovke a script
 ```
 
-### Models
-
-![Core models](./docs/models_core.svg)
-
-![Api models](./docs/models_api.svg)
-
 ### Api sets
 
 | Set | Endpoints | Description |
@@ -80,6 +74,11 @@ space/
 
 With this scheme, when browsing the file system, only proper entry payload files appear to the user. All meta data and attachments data is in the hidden folders.
 
+
+### Models
+
+![Core models](http://www.plantuml.com/plantuml/proxy?cache=no&fmt=svg&src=https://raw.githubusercontent.com/kefahi/datamart/master/docs/models_core.iuml)
+![Api  models](http://www.plantuml.com/plantuml/proxy?cache=no&fmt=svg&src=https://raw.githubusercontent.com/kefahi/datamart/master/docs/models_api.iuml)
 
 ### Install / usage
 
