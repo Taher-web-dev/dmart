@@ -95,6 +95,6 @@ def delete(subpath : str, meta : core.Meta):
         raise api.Exception(status_code=404, error=api.Error(type="delete", code=30, message = "does not exist"))
     pathname=path/filename
     if pathname.is_file():
-        pathname.unlink
+        os.remove(pathname)
     # Remove folder if empty
     os.rmdir(path)

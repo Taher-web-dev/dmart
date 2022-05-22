@@ -9,10 +9,6 @@ from pathlib import Path
 
 
 class Resource(BaseModel):
-
-    #def json(self, *args, exclude_none=True, **kwargs) -> dict[str, Any]:
-    #    return super().dict(*args, exclude_none=exclude_none, **kwargs)
-
     class Config:
         use_enum_values = True
 
