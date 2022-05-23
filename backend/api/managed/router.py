@@ -6,6 +6,7 @@ import models.core as core
 import utils.db as db
 from utils.jwt import JWTBearer
 import sys
+from resources.resource_meta_context import ResourceMetaContext
 
 router = APIRouter()
 
@@ -17,26 +18,10 @@ async def query_request(query: api.Query) -> api.Response:
 
 @router.post("/create", response_model=api.Response, response_model_exclude_none=True)
 async def change(record: api.Record, shortname=Depends(JWTBearer())) -> api.Response:
-    match record.resource_type:
-        case core.ResourceType.comment:
-            comment = core.Comment(owner_shortname=shortname, shortname=record.shortname, body=record.attributes["body"])
-            db.save(record.subpath, comment)
-            return api.Response(status=api.Status.success)
-        case core.ResourceType.content:
-            if "body" in record.attributes:
-                content = core.Content(
-                    owner_shortname=shortname,
-                    shortname=record.shortname,
-                    payload=core.Payload(
-                        content_type=core.ContentType.text,
-                        body=record.attributes["body"],
-                    ),
-                )
-                db.save(record.subpath, content)
-                return api.Response(status=api.Status.success)
-    raise api.Exception(
-        status_code=404, error=api.Error(type="content", code=111, message="empty body")
-    )
+    resource_obj = core.Meta.generate_resource_from_record(record=record, shortname=shortname)
+    db.save(record.subpath, resource_obj)
+    return api.Response(status=api.Status.success)
+    
 
 
 @router.post("/update", response_model=api.Response, response_model_exclude_none=True)

@@ -1,56 +1,21 @@
-from enum import Enum
-from pydantic import BaseModel, Field
-from pydantic.types import UUID4 as UUID
-from uuid import uuid4
-from typing import Any
-from datetime import datetime
+from pydantic import BaseModel
 from pathlib import Path
 
+from typing import Any
+from models.api import Record
+from pydantic.types import UUID4 as UUID
+from uuid import uuid4
+from pydantic import Field
+from datetime import datetime
+import sys
+
+from models.enum import ContentType, RequestType, ResourceType
 
 class Resource(BaseModel):
     class Config:
         use_enum_values = True
 
 
-class RequestType(str, Enum):
-    login = "login"
-    logout = "logout"
-    query = "query"
-    create = "create"
-    update = "update"
-    delete = "delete"
-    copy = "copy"
-    move = "move"
-
-
-
-class Language(str, Enum):
-    ar = "arabic"
-    en = "english"
-    ku = "kurdish"
-    fr = "french"
-    tr = "trukish"
-
-
-class ResourceType(str, Enum):
-    user = "user"
-    group = "group"
-    folder = "folder"
-    schema = "schema"
-    content = "content"
-    acl = "acl"
-    comment = "comment"
-    media = "media"
-    relationship = "relationship"
-    alteration = "alteration"
-
-
-
-class ContentType(str, Enum):
-    text = "text"
-    markdown = "markdown"
-    json = "json"
-    image = "image"
 
 
 
@@ -71,6 +36,15 @@ class Meta(Resource):
     owner_shortname: str
     payload: Payload | None = None
 
+    @staticmethod
+    def generate_resource_from_record(record: Record, shortname: str):
+        child_resource_cls = getattr(sys.modules["models.core"], record.resource_type.title())
+        child_resource_obj = child_resource_cls(owner_shortname=shortname, shortname=record.shortname, **record.attributes)
+        child_resource_obj.parse_record(record) # PAYLOAD
+        return child_resource_obj
+
+    def parse_record(self, record: Record):
+        return None
 
 class Locator(Resource):
     uuid: UUID | None = None
@@ -91,6 +65,17 @@ class User(Actor):
     password: str
     email: str | None = None
 
+    def parse_record(self, record: Record):
+        payload_dict = {
+            "password": record.attributes["password"]
+        }
+        if "email" in record.attributes:
+            payload_dict["email"] = record.attributes["email"]
+
+        self.payload = Payload(
+            content_type=ContentType.json,
+            body= payload_dict
+        )
 
 class Group(Actor):
     pass
@@ -136,7 +121,18 @@ class Schema(Meta):
 
 class Content(Meta):
     schema_shortname: str | None = None
+    body: str
+    def parse_record(self, record: Record):
+        payload_dict = {
+            "body": record.attributes["body"]
+        }
+        if "schema_shortname" in record.attributes:
+            payload_dict["schema_shortname"] = record.attributes["schema_shortname"]
 
+        self.payload = Payload(
+            content_type=ContentType.json,
+            body= payload_dict
+        )
 
 class Folder(Meta):
     pass
