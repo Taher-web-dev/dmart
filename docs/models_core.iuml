@@ -24,7 +24,6 @@ package Core {
     owner_shortname : str
     payload : Payload?
     description : str?
-    attributes : dict[str, Any]?
     tags : list[str]?
   }
 

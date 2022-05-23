@@ -65,7 +65,6 @@ class Meta(Resource):
     tags: list[str] | None = None
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
-    attributes: dict[str, Any] | None = None
     owner_shortname: str
     payload: Payload | None = None
 
@@ -99,7 +98,7 @@ class Attachment(Meta):
 
 
 class Comment(Attachment):
-    pass
+    body : str
 
 
 class Media(Attachment):
@@ -108,6 +107,7 @@ class Media(Attachment):
 
 class Relationship(Attachment):
     related_to: Locator
+    attributes: dict[str, Any]
 
 
 class Event(Resource):

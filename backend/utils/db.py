@@ -109,6 +109,10 @@ def update(subpath: str, meta: core.Meta):
     with open(path / filename, "w") as file:
         file.write(meta.json(exclude_none=True))
 
+def move(subpath: str, newpath: str, meta : core.Meta):
+    path, filename = metapath(subpath, meta.shortname, meta.__class__)
+    # Fixme ... decide what to move depending on the type
+    os.rename(src=path/filename, dst=newpath)
 
 def delete(subpath: str, meta: core.Meta):
     path, filename = metapath(subpath, meta.shortname, meta.__class__)
@@ -122,3 +126,4 @@ def delete(subpath: str, meta: core.Meta):
         os.remove(pathname)
     # Remove folder if empty
     os.rmdir(path)
+
