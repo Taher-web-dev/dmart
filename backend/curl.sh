@@ -35,5 +35,20 @@ curl -s -H "$AUTH" -H "$CT" -d "$UPDATE" $API_URL/user/profile | jq
 echo "Get profile"
 curl -s -H "$AUTH" -H "$CT" $API_URL/user/profile | jq
 
+SUBPATH="curl_content"
+echo "Create Content Resource"
+RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "content", subpath: $subpath, shortname: $shortname, attributes:{body: "this content created from curl request for testing"}}')
+curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq 
+
+echo "Update The Content Resource"
+RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "content", subpath: $subpath, shortname: $shortname, attributes:{body: "-----UPDATED-------this content created from curl request for testing"}}')
+curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/update | jq 
+
+
+echo "Create Comment Resource Under The Content Resource"
+SUBPATH="curl_content/$SHORTNAME"
+RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "comment", subpath: $subpath, shortname: $shortname, attributes:{body: "A comment insdie the content resource"}}')
+curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq 
+
 echo "Delete"
 curl -s -H "$AUTH" -H "$CT" -d '{}' $API_URL/user/delete | jq
