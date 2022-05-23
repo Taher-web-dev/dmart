@@ -4,39 +4,31 @@ from fastapi import APIRouter, Body, status, Depends
 
 import models.api as api
 import models.core as core
-import utils.regex as regex
 import utils.db as db
 from utils.jwt import JWTBearer, sign_jwt
-from pydantic import BaseModel
 from typing import Any
 
 
 router = APIRouter()
 
 
-class UserProfile(BaseModel):
-    password: str | None = None
-    display_name: str | None = None
-    email: str | None = None
-
-
-@router.post("/create/{shortname}", response_model=api.Response, response_model_exclude_none=True)
-async def create_user(shortname: str, profile: UserProfile, invitation: str) -> api.Response:
+@router.post("/create", response_model=api.Response, response_model_exclude_none=True)
+async def create_user(record: api.Record, invitation: str) -> api.Response:
     """ Register a new user by invitation """
     if not invitation:
         # TBD validate invitation.
         # jwt-signed shortname, email and expiration time
         raise api.Exception(status_code=400, error=api.Error(type="create", code=50, message="bad invitation"))
-    if not profile.password:
+    if not record.attributes or not "password" in record.attributes:
         raise api.Exception(status_code=400, error=api.Error(type="create", code=50, message="empty password"))
 
-    user = core.User(owner_shortname=shortname, shortname=shortname, password=profile.password)
+    user = core.User(owner_shortname=record.shortname, shortname=record.shortname, password=record.attributes["password"])
 
-    if profile.display_name:
-        user.display_name = profile.display_name
+    if "display_name" in record.attributes:
+        user.display_name = record.attributes["display_name"]
 
-    if profile.email:
-        user.email = profile.email
+    if "email" in record.attributes:
+        user.email = record.attributes["email"]
 
     db.create("users", user)
     return api.Response(status=api.Status.success)

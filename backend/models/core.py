@@ -34,15 +34,12 @@ class Language(str, Enum):
 
 class ResourceType(str, Enum):
     relationship = 'Relationship'
-    actor = 'Actor'
-    user = 'User'
-    group = 'Group'
+    user = 'user'
+    group = 'group'
     comment = 'comment'
-    meta = 'meta'
-    media = 'Media'
-    folder = 'Folder'
+    media = 'media'
+    folder = 'folder'
     acl = 'acl'
-    query = 'query'
     locator = 'locator'
     record = 'record'
     content = 'content'
@@ -116,7 +113,7 @@ class Relationship(Attachment):
 
 class Event(Resource):
     resource: Locator
-    user: Locator
+    user_shortname: str
     request: RequestType
     timestamp: datetime
     attributes: dict[str, Any]
@@ -124,7 +121,7 @@ class Event(Resource):
 
 class Alteration(Attachment):
     uuid: UUID
-    user: Locator
+    user_shortname: str
     previous_alteration: UUID
     timestamp: datetime
     diff: dict[str, Any]
@@ -135,7 +132,7 @@ class Schema(Meta):
 
 
 class Content(Meta):
-    scheme: Locator | None = None
+    schema_shortname: str | None = None
 
 
 class Folder(Meta):
