@@ -68,8 +68,8 @@ async def update_profile(
     """Update user profile"""
     user = db.load("users", shortname, core.User)
 
-    if profile.password:
-        user.password = profile.password
+    if "password" in profile.attributes:
+        user.password = profile.attributes["password"]
 
     if "display_name" in profile.attributes:
         user.display_name = profile.attributes["display_name"]
