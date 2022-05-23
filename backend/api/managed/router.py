@@ -6,7 +6,6 @@ import models.core as core
 import utils.db as db
 from utils.jwt import JWTBearer
 import sys
-from resources.resource_meta_context import ResourceMetaContext
 
 router = APIRouter()
 
@@ -18,14 +17,16 @@ async def query_request(query: api.Query) -> api.Response:
 
 @router.post("/create", response_model=api.Response, response_model_exclude_none=True)
 async def change(record: api.Record, shortname=Depends(JWTBearer())) -> api.Response:
-    resource_obj = core.Meta.generate_resource_from_record(record=record, shortname=shortname)
+    resource_obj = core.Meta.from_record(record=record, shortname=shortname)
     db.save(record.subpath, resource_obj)
     return api.Response(status=api.Status.success)
     
 
 
 @router.post("/update", response_model=api.Response, response_model_exclude_none=True)
-async def update(record: api.Record) -> api.Response:
+async def update(record: api.Record, shortname=Depends(JWTBearer())) -> api.Response:
+    resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+    db.update(record.subpath, resource_obj)
     return api.Response(status=api.Status.success)
 
 

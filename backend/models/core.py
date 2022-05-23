@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from pathlib import Path
 
 from typing import Any
-from models.api import Record
+from models.api import Error, Record, Exception
 from pydantic.types import UUID4 as UUID
 from uuid import uuid4
 from pydantic import Field
@@ -37,7 +37,7 @@ class Meta(Resource):
     payload: Payload | None = None
 
     @staticmethod
-    def generate_resource_from_record(record: Record, shortname: str):
+    def from_record(record: Record, shortname: str):
         child_resource_cls = getattr(sys.modules["models.core"], record.resource_type.title())
         child_resource_obj = child_resource_cls(owner_shortname=shortname, shortname=record.shortname, **record.attributes)
         child_resource_obj.parse_record(record) # PAYLOAD
@@ -64,18 +64,6 @@ class Actor(Meta):
 class User(Actor):
     password: str
     email: str | None = None
-
-    def parse_record(self, record: Record):
-        payload_dict = {
-            "password": record.attributes["password"]
-        }
-        if "email" in record.attributes:
-            payload_dict["email"] = record.attributes["email"]
-
-        self.payload = Payload(
-            content_type=ContentType.json,
-            body= payload_dict
-        )
 
 class Group(Actor):
     pass
@@ -123,15 +111,12 @@ class Content(Meta):
     schema_shortname: str | None = None
     body: str
     def parse_record(self, record: Record):
-        payload_dict = {
-            "body": record.attributes["body"]
-        }
-        if "schema_shortname" in record.attributes:
-            payload_dict["schema_shortname"] = record.attributes["schema_shortname"]
-
+        if "body" not in record.attributes:
+            raise Exception(status_code=422, error=Error(type="create", code=422, message="The body field is required inside the attributes"))
+        
         self.payload = Payload(
             content_type=ContentType.json,
-            body= payload_dict
+            body = record.attributes["body"]
         )
 
 class Folder(Meta):
