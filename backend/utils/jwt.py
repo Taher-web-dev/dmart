@@ -22,8 +22,14 @@ class JWTBearer(HTTPBearer):
                 if decoded and "username" in decoded:
                     return decoded["username"]
         except:
-            raise api.Exception(status.HTTP_401_UNAUTHORIZED, api.Error(type="jwtauth", code=10, message="Not authenticated"))
-        raise api.Exception(status.HTTP_401_UNAUTHORIZED, api.Error(type="jwtauth", code=11, message="Not authenticated"))
+            raise api.Exception(
+                status.HTTP_401_UNAUTHORIZED,
+                api.Error(type="jwtauth", code=10, message="Not authenticated"),
+            )
+        raise api.Exception(
+            status.HTTP_401_UNAUTHORIZED,
+            api.Error(type="jwtauth", code=11, message="Not authenticated"),
+        )
 
 
 def sign_jwt(data: dict, expires: int = 600) -> str:

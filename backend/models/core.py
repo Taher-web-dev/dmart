@@ -1,4 +1,3 @@
-
 from enum import Enum
 from pydantic import BaseModel, Field
 from pydantic.types import UUID4 as UUID
@@ -14,47 +13,50 @@ class Resource(BaseModel):
 
 
 class RequestType(str, Enum):
-    login = 'login'
-    logout = 'logout'
-    query = 'query'
-    create = 'create'
-    update = 'update'
-    delete = 'delete'
-    copy = 'copy'
-    move = 'move'
+    login = "login"
+    logout = "logout"
+    query = "query"
+    create = "create"
+    update = "update"
+    delete = "delete"
+    copy = "copy"
+    move = "move"
+
 
 
 class Language(str, Enum):
-    ar = 'arabic'
-    en = 'english'
-    ku = 'kurdish'
-    fr = 'french'
-    tr = 'trukish'
+    ar = "arabic"
+    en = "english"
+    ku = "kurdish"
+    fr = "french"
+    tr = "trukish"
 
 
 class ResourceType(str, Enum):
-    relationship = 'Relationship'
-    user = 'user'
-    group = 'group'
-    comment = 'comment'
-    media = 'media'
-    folder = 'folder'
-    acl = 'acl'
-    locator = 'locator'
-    record = 'record'
-    content = 'content'
+    user = "user"
+    group = "group"
+    folder = "folder"
+    schema = "schema"
+    content = "content"
+    acl = "acl"
+    comment = "comment"
+    media = "media"
+    relationship = "relationship"
+    alteration = "alteration"
+
 
 
 class ContentType(str, Enum):
-    text = 'text'
-    markdown = 'markdown'
-    json = 'json'
-    image = 'image'
+    text = "text"
+    markdown = "markdown"
+    json = "json"
+    image = "image"
+
 
 
 class Payload(Resource):
     content_type: ContentType
-    body: str | dict[str, Any]  # | Path in the future.
+    body: str | dict[str, Any] | Path
 
 
 class Meta(Resource):
@@ -66,7 +68,6 @@ class Meta(Resource):
     tags: list[str] | None = None
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
-    attributes: dict[str, Any] | None = None
     owner_shortname: str
     payload: Payload | None = None
 
@@ -100,7 +101,8 @@ class Attachment(Meta):
 
 
 class Comment(Attachment):
-    pass
+    body : str
+
 
 
 class Media(Attachment):
@@ -109,6 +111,7 @@ class Media(Attachment):
 
 class Relationship(Attachment):
     related_to: Locator
+    attributes: dict[str, Any]
 
 
 class Event(Resource):

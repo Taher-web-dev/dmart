@@ -10,7 +10,7 @@ API_URL=http://127.0.0.1:8282
 CT="content-type: application/json"
 
 echo "Delete previously created user (if any)"
-rm -f ../space/users/.dm/${SHORTNAME}/meta.User.json
+rm -f ../space/users/.dm/${SHORTNAME}/meta.user.json
 [[ -d ../space/users/.dm/${SHORTNAME}/ ]] && rmdir ../space/users/.dm/${SHORTNAME}/
 
 echo "Create user"
@@ -24,6 +24,9 @@ curl -s -H "$CT" -d "$LOGIN" ${API_URL}/user/login | jq
 TOKEN=$(curl -s -H "$CT" -d "$LOGIN" ${API_URL}/user/login | jq .auth_token | tr -d '"')
 
 AUTH="Authorization: Bearer ${TOKEN}"
+
+echo "Get profile"
+curl -s -H "$AUTH" -H "$CT" $API_URL/user/profile | jq
 
 echo "Update profile"
 UPDATE=$(jq -c -n --arg shortname "$SHORTNAME" '{resource_type: "user", subpath: "users", shortname: $shortname, attributes:{display_name: "New display name", email: "new@email.coom"}}')

@@ -1,0 +1,101 @@
+@startuml
+hide empty members
+package Core {
+  abstract class Resource { }
+
+  enum ResourceType {
+    user
+    group
+    folder
+    schema
+    content
+    acl
+    comment
+    media
+    relationship
+    alteration
+  }
+
+  abstract class Meta {
+    uuid : UUID
+    shortname : str
+    is_active : bool
+    display_name : str?
+    owner_shortname : str
+    payload : Payload?
+    description : str?
+    tags : list[str]?
+  }
+
+  class Payload {
+    content_type : ContentType
+    body : str | dict[str,Any] | Path
+  }
+
+  class Locator {
+    uuid : UUID?
+    type : ResourceType
+    subpath : str
+    shortname : str
+    parent_shortname : str?
+  }
+
+  abstract class Actor { }
+
+  class User {
+    email : str
+    password : str
+  }
+
+  class Group { }
+
+  abstract class Attachment { }
+
+  class Media { }
+
+  class Comment { }
+
+  class Relationship {
+    related_to : Locator
+    attributes : dict[str, Any]
+  }
+
+  class Content {
+    schema_shortname : str?
+  }
+
+  class Event {
+    entry : Locator
+    user_shortname : str
+    request : RequestType
+    timestamp : datetime
+    attributes : dict[str, Any]
+  }
+
+  class Alteration {
+    uuid : UUID
+    user_shortname : str
+    previous_alteration : UUID
+    timestamp : datetime
+    diff : dict[str, tuple(Any,Any)]
+  }
+
+  Resource <|-- Meta
+  Resource <|-- Locator
+  Resource <|-- Event
+  Attachment <|-- Alteration
+
+  Actor <|-- User
+  Actor <|-- Group
+  Meta <|-- Actor
+  Meta <|-- Schema
+  Meta <|-- Content
+  Meta <|-- Folder
+
+  Meta <|-- Attachment
+  Attachment <|-- Comment
+  Attachment <|-- Media
+  Attachment <|-- Relationship
+
+}
+@enduml

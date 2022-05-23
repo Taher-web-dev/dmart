@@ -42,12 +42,6 @@ space/
   └── triggers/    Time or event based triggers to inovke a script
 ```
 
-### Models
-
-![Core models](./docs/models_core.svg)
-
-![Api models](./docs/models_api.svg)
-
 ### Api sets
 
 | Set | Endpoints | Description |
@@ -55,6 +49,36 @@ space/
 | /user | create,login,profile,delete | User account |
 | /managed | query,create,delete,update,move,media(create/read) | Users-only apis to manage content |
 | /public | query(read),media(read),submission(create) | Public apis for public consumers |
+
+
+### Additional terminology
+
+| Term | Description |
+|----|----|
+| space (or space root)| The root directory under which all content exist. All read-write operations must be within the space root| 
+| subpath | The path within space root that leads to an entry. e.g. `content/stuff/todo` |
+| Locator | A *link* to another entry. |
+| payload | The actual content associated with the entry or attachment |
+| .dm | a hidden folder used to store meta information and attachments and their payload files |
+
+### Meta and file disposition scheme
+
+
+| File path | Description |
+|----|----|
+| `[sub/path]/.dm/meta.folder.json` | The meta file of a Folder |
+| `[sub/path]/.dm/[entryshortname]/meta.[entrytype].json` | The meta file of a regular entry |
+| `[sub/path]/[entrypayload]` | The optional payload file of the entry. it may not clash with another payload file within that folder|
+| `[sub/path]/.dm/[entryshortname]/attachments.[attachementtype]/meta.[attachmentshortname].json` | The meta file of an attachment |
+| `[sub/path]/.dm/[entryshortname]/attachments.[attachementtype]/[attachmentpayload]` | The optional attachment payload file. it may not clash with meta.[xxx].json or another payload file within that folder|
+
+With this scheme, when browsing the file system, only proper entry payload files appear to the user. All meta data and attachments data is in the hidden folders.
+
+
+### Models
+
+![Core models](http://www.plantuml.com/plantuml/proxy?cache=no&fmt=svg&src=https://raw.githubusercontent.com/kefahi/datamart/master/docs/models_core.iuml)
+![Api  models](http://www.plantuml.com/plantuml/proxy?cache=no&fmt=svg&src=https://raw.githubusercontent.com/kefahi/datamart/master/docs/models_api.iuml)
 
 ### Install / usage
 
