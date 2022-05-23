@@ -116,6 +116,7 @@ class Content(Meta):
                 content_type=ContentType.json,
                 body = record.attributes["body"]
             )
+        self.payload = None
         
 
 class Folder(Meta):
