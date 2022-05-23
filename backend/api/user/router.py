@@ -101,6 +101,7 @@ async def login(
     )
 
 
+
 @router.post("/delete", response_model=api.Response, response_model_exclude_none=True)
 async def delete(shortname=Depends(JWTBearer())) -> api.Response:
     """Delete own user"""

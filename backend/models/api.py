@@ -1,4 +1,4 @@
-from models.core import ResourceType
+from models.enum import ResourceType
 from enum import Enum
 from pydantic import BaseModel
 from pydantic.types import UUID5 as UUID
