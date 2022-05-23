@@ -111,13 +111,12 @@ class Content(Meta):
     schema_shortname: str | None = None
     body: str
     def parse_record(self, record: Record):
-        if "body" not in record.attributes:
-            raise Exception(status_code=422, error=Error(type="create", code=422, message="The body field is required inside the attributes"))
+        if "body" in record.attributes:
+            self.payload = Payload(
+                content_type=ContentType.json,
+                body = record.attributes["body"]
+            )
         
-        self.payload = Payload(
-            content_type=ContentType.json,
-            body = record.attributes["body"]
-        )
 
 class Folder(Meta):
     pass
