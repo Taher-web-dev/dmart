@@ -17,6 +17,7 @@ from fastapi.encoders import jsonable_encoder
 from api.managed.router import router as managed
 from api.user.router import router as user
 from api.public.router import router as public
+from urllib.parse import urlparse
 
 
 app = FastAPI(
@@ -88,6 +89,13 @@ async def middle(request: Request, call_next):
             ),
         )
 
+    response.headers["Access-Control-Allow-Origin"] = urlparse(
+        request.headers.get(
+            "Referer", f"http://{settings.listening_host}:{settings.listening_port}"
+        )
+    ).netloc
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, HEAD, POST, PUT, DELETE, OPTIONS"
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
