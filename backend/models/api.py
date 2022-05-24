@@ -1,7 +1,7 @@
-from models.enum import ResourceType
+from models.enums import ResourceType
 from enum import Enum
 from pydantic import BaseModel
-from pydantic.types import UUID5 as UUID
+from pydantic.types import UUID4 as UUID
 from datetime import datetime
 from typing import Any
 from builtins import Exception as PyException
@@ -60,6 +60,7 @@ class Response(BaseModel):
     auth_token: str | None = None
     records: list[Record] | None = None
     supplement: list[Record] | None = None
+    attributes: dict[str, Any] | None = None
 
 
 class Exception(PyException):

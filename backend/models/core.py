@@ -9,7 +9,7 @@ from pydantic import Field
 from datetime import datetime
 import sys
 
-from models.enum import ContentType, RequestType, ResourceType
+from models.enums import ContentType, RequestType, ResourceType
 
 class Resource(BaseModel):
     class Config:
@@ -45,6 +45,25 @@ class Meta(Resource):
 
     def parse_record(self, record: Record):
         return None
+
+    def to_record(self, subpath: str, include: list[str], exclude: list[str]):
+        # fields = self.get_record_fields(include=include, exclude=exclude, subpath=subpath)
+        fields = {
+            "resource_type": type(self).__name__.lower(),
+            "subpath": subpath,
+            "shortname": self.shortname,
+            "uuid": self.uuid,
+        }
+        # print(self.__dict__.items())
+        # for key, value in self.__dict__.items():
+        #     if((not include or key in include) and (not exclude or key not in exclude)):
+        #         fields[key] = value
+
+        fields["attributes"] = self.get_record_attributes(include=include, exclude=exclude)
+        return Record(**fields)
+        
+    def get_record_attributes(self, include: list[str], exclude: list[str]):
+        return {}
 
 class Locator(Resource):
     uuid: UUID | None = None
@@ -117,7 +136,27 @@ class Content(Meta):
                 body = record.attributes["body"]
             )
         self.payload = None
+
+    def get_record_attributes(self, include: list[str], exclude: list[str]):
+        meta_fields = list(Meta.__fields__.keys())
+        attributes = {}
+        for key, value in self.__dict__.items():
+            if((not include or key in include) and (not exclude or key not in exclude) and key not in meta_fields):
+                attributes[key] = value
+        return attributes
         
 
 class Folder(Meta):
     pass
+
+
+if __name__ == '__main__':
+    content = Content(shortname="test", owner_shortname="SAAD", body="TEST BODY")
+    record = content.to_record("subpath_test", [], [])
+    # parent_class = getattr(content.__class__)
+
+    print("\n Record:",record.__dict__)
+    # for attr, val in cls_dict.iteritems():
+    #     print("%s = %s", attr, val)
+    # for key, value in Meta.__fields__.keys():
+    #     print(key, " => ", value)
