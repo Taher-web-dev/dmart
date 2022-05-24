@@ -46,9 +46,10 @@ curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/update | jq
 
 
 echo "Create Comment Resource Under The Content Resource"
+COMMENT_SHORTNAME="Hello there"
 SUBPATH="curl_content/$SHORTNAME"
-RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "comment", subpath: $subpath, shortname: $shortname, attributes:{body: "A comment insdie the content resource"}}')
+RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$COMMENT_SHORTNAME"  '{resource_type: "comment", subpath: $subpath, shortname: $shortname, is_attachment: true, attributes:{body: "A comment insdie the content resource"}}')
 curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq 
 
-echo "Delete"
-curl -s -H "$AUTH" -H "$CT" -d '{}' $API_URL/user/delete | jq
+# echo "Delete"
+# curl -s -H "$AUTH" -H "$CT" -d '{}' $API_URL/user/delete | jq

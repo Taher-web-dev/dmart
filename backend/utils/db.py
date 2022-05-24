@@ -1,3 +1,6 @@
+import json
+import sys
+from models.enums import ResourceType
 from utils.settings import settings
 import models.core as core
 from typing import TypeVar, Type
@@ -9,6 +12,9 @@ Meta = TypeVar("Meta", bound=core.Meta)
 
 
 def serve_query(query: api.Query) -> api.Response:
+    records: list = []
+    total: int = 0
+
     """Return requested information"""
     if query.type == api.QueryType.subpath:
         folder_metapath = settings.space_root / query.subpath / ".dm/meta.folder.json"
@@ -20,7 +26,41 @@ def serve_query(query: api.Query) -> api.Response:
                 ),
             )
 
-    return api.Response(status=api.Status.success)
+    elif query.type == api.QueryType.folders:
+        folder_path = settings.space_root / query.subpath / ".dm/"
+        for shortname in query.resource_shortnames:
+            if not os.path.isdir(folder_path/shortname):
+                continue
+            entries = os.scandir(folder_path/shortname)
+            for entry in entries:
+                resource_name = entry.name.split('.')[1].lower()
+                if entry.is_file() and ResourceType(resource_name) in query.resource_types:
+                    record = get_record_from_file(path=entry.path, resource_name=resource_name, include=query.include_fields, exclude=query.exclude_fields)
+                    if total >= query.offset and len(records) < query.limit:
+                        records.append(record)
+                    total += 1
+
+                elif entry.is_dir() and ResourceType.folder in query.resource_types:
+                    sub_entries = os.scandir(folder_path/shortname/entry.name)
+                    for sub_entry in sub_entries:
+                        resource_name = entry.name.split('.')[1].lower()
+                        if sub_entry.is_file() and ResourceType(resource_name) in query.resource_types:
+                            record = get_record_from_file(path=sub_entry.path, resource_name=resource_name, include=query.include_fields, exclude=query.exclude_fields)
+                            if total >= query.offset and len(records) < query.limit:
+                                records.append(record)
+                            
+                            total += 1
+    
+    return api.Response(status=api.Status.success, records=records, attributes={"total": total})
+
+def get_record_from_file(path: str, resource_name: str, include: list[str], exclude: list[str]):
+    file = open(path, 'r')
+    file_content = json.load(file)
+    resource_class = getattr(sys.modules["models.core"], resource_name.title())
+    resource_obj = resource_class(**file_content)
+    file.close()
+    return resource_obj.to_record(subpath=path.split('/')[-2], include=include, exclude=exclude)
+                        
 
 
 def metapath(subpath: str, shortname: str, class_type: Type[Meta]) -> tuple[Path, str]:

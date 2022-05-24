@@ -28,6 +28,7 @@ class Meta(Resource):
     uuid: UUID = Field(default_factory=uuid4)
     shortname: str
     is_active: bool = False
+    is_attachment: bool | None = None
     display_name: str | None = None
     description: str | None = None
     tags: list[str] | None = None
@@ -47,23 +48,24 @@ class Meta(Resource):
         return None
 
     def to_record(self, subpath: str, include: list[str], exclude: list[str]):
-        # fields = self.get_record_fields(include=include, exclude=exclude, subpath=subpath)
         fields = {
             "resource_type": type(self).__name__.lower(),
-            "subpath": subpath,
-            "shortname": self.shortname,
+            "is_attachment": self.is_attachment,
             "uuid": self.uuid,
+            "shortname": self.shortname,
+            "subpath": subpath,
         }
-        # print(self.__dict__.items())
-        # for key, value in self.__dict__.items():
-        #     if((not include or key in include) and (not exclude or key not in exclude)):
-        #         fields[key] = value
 
         fields["attributes"] = self.get_record_attributes(include=include, exclude=exclude)
         return Record(**fields)
         
     def get_record_attributes(self, include: list[str], exclude: list[str]):
-        return {}
+        meta_fields = list(Meta.__fields__.keys())
+        attributes = {}
+        for key, value in self.__dict__.items():
+            if((not include or key in include) and (not exclude or key not in exclude) and key not in meta_fields):
+                attributes[key] = value
+        return attributes
 
 class Locator(Resource):
     uuid: UUID | None = None
@@ -94,7 +96,6 @@ class Attachment(Meta):
 
 class Comment(Attachment):
     body : str
-
 
 
 class Media(Attachment):
@@ -135,16 +136,7 @@ class Content(Meta):
                 content_type=ContentType.json,
                 body = record.attributes["body"]
             )
-        self.payload = None
-
-    def get_record_attributes(self, include: list[str], exclude: list[str]):
-        meta_fields = list(Meta.__fields__.keys())
-        attributes = {}
-        for key, value in self.__dict__.items():
-            if((not include or key in include) and (not exclude or key not in exclude) and key not in meta_fields):
-                attributes[key] = value
-        return attributes
-        
+        self.payload = None   
 
 class Folder(Meta):
     pass
