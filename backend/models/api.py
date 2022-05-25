@@ -57,7 +57,7 @@ class Response(BaseModel):
     auth_token: str | None = None
     records: list[Record] | None = None
     supplement: list[Record] | None = None
-    attributes: dict[str, Any] | None = None
+    attributes: dict[str,Any] | None = None
 
 
 class Exception(PyException):
