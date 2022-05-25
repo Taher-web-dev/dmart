@@ -22,9 +22,25 @@ from urllib.parse import urlparse
 
 app = FastAPI(
     title="Datamart API",
-    description="Structured-content Content Management System",
+    description="Structured Content Management System",
     version="0.0.1",
     redoc_url=None,
+    swagger_ui_parameters={"defaultModelsExpandDepth": -1},
+    openapi_tags=[
+        {
+        "name": "user",
+        "description": "User registration, login, profile and delete"
+        },
+        {
+        "name": "managed",
+        "description": "Login-only content management api and media upload"
+        },
+        {
+        "name": "public",
+        "description": "Public api for query and GET access to media"
+        },
+    ]
+
 )
 
 logger = logging.getLogger(__name__)
@@ -107,7 +123,7 @@ async def middle(request: Request, call_next):
 async def root():
     """Micro-service card identifier"""
     return {
-        "name": "CMS",
+        "name": "DMART",
         "type": "microservice",
         "decription": "Structured CMS",
         "status": "Up and running",
@@ -115,9 +131,9 @@ async def root():
     }
 
 
-app.include_router(user, prefix="/user")
-app.include_router(managed, prefix="/managed")
-app.include_router(public, prefix="/public")
+app.include_router(user, prefix="/user", tags=["user"])
+app.include_router(managed, prefix="/managed", tags=["managed"])
+app.include_router(public, prefix="/public", tags=["public"])
 
 # @app.get("/items/{item_id}")
 # async def read_item(item_id: int, q: Optional[str] = None):
