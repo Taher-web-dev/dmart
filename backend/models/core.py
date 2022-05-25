@@ -45,6 +45,8 @@ class Meta(Resource):
         child_resource_obj = child_resource_cls(owner_shortname=shortname, shortname=record.shortname, **record.attributes)
         child_resource_obj.parse_record(record) # PAYLOAD
         return child_resource_obj
+    def parse_record(self, record: Record):
+        pass
 
     def to_record(self, subpath: str, shortname: str, include: list[str]):
         # Sanity check
