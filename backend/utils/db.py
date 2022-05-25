@@ -14,7 +14,7 @@ from utils.logger import logger
 
 Meta = TypeVar("Meta", bound=core.Meta)
 
-FILE_PATTERN=re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([A-Z][a-z]*)\\.json$")
+FILE_PATTERN=re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
 FOLDER_PATTERN=re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
     records : list[core.Record] = [] 
@@ -47,11 +47,12 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
         subfolders_glob = "*/.dm/meta.folder.json" 
         for one in path.glob(subfolders_glob):
             match = FOLDER_PATTERN.search(str(one))
+
             if not match or not one.is_file:
                 logger.error("Invalid file pattern")
                 continue
-            shortname = match.group(0)
-            if query.filter_shortnames and shortname in query.filter_shortnames:
+            shortname = match.group(1)
+            if query.filter_shortnames and shortname not in query.filter_shortnames:
                 continue
             total += 1
             if len(records) >= query.limit or total < query.offset:
@@ -148,6 +149,6 @@ def delete(subpath: str, meta: core.Meta):
     if pathname.is_file():
         os.remove(pathname)
     # Remove folder if empty
-    if len(os.listdir(pathname)) == 0:
+    if len(os.listdir(path)) == 0:
         os.rmdir(path)
 
