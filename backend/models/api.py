@@ -17,9 +17,8 @@ class QueryType(str, Enum):
 class Query(BaseModel):
     type: QueryType
     subpath: str
-    resource_uuids: list[UUID]
-    resource_types: list[ResourceType]
-    resource_shortnames: list[str]
+    filter_types: list[ResourceType]
+    filter_shortnames: list[str]
     search: str
     from_date: datetime
     to_date: datetime

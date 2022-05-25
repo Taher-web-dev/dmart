@@ -1,4 +1,3 @@
-import json
 import sys
 from models.enums import ResourceType
 from utils.settings import settings
@@ -28,11 +27,14 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
                 continue
             shortname = match.group(0)
             resource_name = match.group(1)
-            if not ResourceType(resource_name) in query.resource_types:
+            if not ResourceType(resource_name) in query.filter_types:
                 # FIXME log an error about the type
                 continue
 
-            if query.resource_types and resource_name not in query.resource_types:
+            if query.filter_types and resource_name not in query.filter_types:
+                continue
+
+            if query.filter_shortnames and shortname in query.filter_shortnames:
                 continue
 
             total += 1
@@ -49,6 +51,8 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
                 # FIXME report error about file
                 continue
             shortname = match.group(0)
+            if query.filter_shortnames and shortname in query.filter_shortnames:
+                continue
             total += 1
             if len(records) > query.limit or total < query.offset:
                 continue
