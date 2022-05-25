@@ -4,8 +4,9 @@ from enum import Enum
 from pydantic import BaseModel
 from pydantic.types import UUID4 as UUID
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List
 from builtins import Exception as PyException
+
 
 class QueryType(str, Enum):
     search = "search"
@@ -38,7 +39,7 @@ class Status(str, Enum):
 class Error(BaseModel):
     type: str
     code: int
-    message: str
+    message: str | List[Dict]
 
 
 class Response(BaseModel):
@@ -46,7 +47,7 @@ class Response(BaseModel):
     error: Error | None = None
     auth_token: str | None = None
     records: list[core.Record] | None = None
-    attributes: dict[str,Any] | None = None
+    attributes: dict[str, Any] | None = None
 
 
 class Exception(PyException):
