@@ -6,61 +6,54 @@ import models.core as core
 from typing import TypeVar, Type
 import models.api as api
 import os
+import re
 from pathlib import Path
 
 Meta = TypeVar("Meta", bound=core.Meta)
 
-
-def serve_query(query: api.Query) -> api.Response:
-    records: list = []
-    total: int = 0
-
-    """Return requested information"""
+FILE_PATTERN=re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-z]*)\\.json$")
+FOLDER_PATTERN=re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
+def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
+    records : list[core.Record] = [] 
+    total : int = 0
     if query.type == api.QueryType.subpath:
-        folder_metapath = settings.space_root / query.subpath / ".dm/meta.folder.json"
-        if not folder_metapath.is_file():
-            raise api.Exception(
-                status_code=404,
-                error=api.Error(
-                    type="db", code=12, message="requested object not found"
-                ),
-            )
+        path = settings.space_root / query.subpath
 
-    elif query.type == api.QueryType.folders:
-        folder_path = settings.space_root / query.subpath / ".dm/"
-        for shortname in query.resource_shortnames:
-            if not os.path.isdir(folder_path/shortname):
+        # Gel all matching entries
+        entries_glob = ".dm/*/meta.*.json" 
+        for one in path.glob(entries_glob):
+            match = FILE_PATTERN.search(str(one))
+            if not match or not one.is_file:
+                # FIXME log an error about the file
                 continue
-            entries = os.scandir(folder_path/shortname)
-            for entry in entries:
-                resource_name = entry.name.split('.')[1].lower()
-                if entry.is_file() and ResourceType(resource_name) in query.resource_types:
-                    record = get_record_from_file(path=entry.path, resource_name=resource_name, include=query.include_fields, exclude=query.exclude_fields)
-                    if total >= query.offset and len(records) < query.limit:
-                        records.append(record)
-                    total += 1
+            shortname = match.group(0)
+            resource_name = match.group(1)
+            if not ResourceType(resource_name) in query.resource_types:
+                # FIXME log an error about the type
+                continue
 
-                elif entry.is_dir() and ResourceType.folder in query.resource_types:
-                    sub_entries = os.scandir(folder_path/shortname/entry.name)
-                    for sub_entry in sub_entries:
-                        resource_name = entry.name.split('.')[1].lower()
-                        if sub_entry.is_file() and ResourceType(resource_name) in query.resource_types:
-                            record = get_record_from_file(path=sub_entry.path, resource_name=resource_name, include=query.include_fields, exclude=query.exclude_fields)
-                            if total >= query.offset and len(records) < query.limit:
-                                records.append(record)
-                            
-                            total += 1
-    
-    return api.Response(status=api.Status.success, records=records, attributes={"total": total})
+            if query.resource_types and resource_name not in query.resource_types:
+                continue
 
-def get_record_from_file(path: str, resource_name: str, include: list[str], exclude: list[str]):
-    file = open(path, 'r')
-    file_content = json.load(file)
-    resource_class = getattr(sys.modules["models.core"], resource_name.title())
-    resource_obj = resource_class(**file_content)
-    file.close()
-    return resource_obj.to_record(subpath=path.split('/')[-2], include=include, exclude=exclude)
-                        
+            total += 1
+            if len(records) > query.limit or total < query.offset:
+                continue
+            resource_class = getattr(sys.modules["models.core"], resource_name.title())
+            records.append(resource_class.parse_raw(path.read_text()).to_record(query.subpath, shortname, query.include_fields))
+            
+        # Get all matching sub folders
+        subfolders_glob = "*/.dm/meta.folder.json" 
+        for one in path.glob(subfolders_glob):
+            match = FOLDER_PATTERN.search(str(one))
+            if not match or not one.is_file:
+                # FIXME report error about file
+                continue
+            shortname = match.group(0)
+            total += 1
+            if len(records) > query.limit or total < query.offset:
+                continue
+            records.append(core.Folder.parse_raw(path.read_text()).to_record(query.subpath, shortname, query.include_fields))
+    return total, records
 
 
 def metapath(subpath: str, shortname: str, class_type: Type[Meta]) -> tuple[Path, str]:
@@ -100,21 +93,6 @@ def load(subpath: str, shortname: str, class_type: Type[Meta]) -> Meta:
 def save(subpath: str, meta: core.Meta):
     """Save Meta Json to respectiv file"""
     path, filename = metapath(subpath, meta.shortname, meta.__class__)
-    """
-
-    path = settings.space_root
-    filename : str
-    if isinstance(meta, core.Folder):
-        path = path / subpath / meta.shortname / ".dm"
-        filename = f"meta.{type(meta).__name__}.json"
-    elif isinstance(meta, core.Attachment):
-        [parent_subpath, parent_name] = subpath.rsplit('/',1)
-        path = path / parent_subpath / ".dm" / f"{parent_name}/attachments.{type(meta).__name__}"
-        filename = f"meta.{meta.shortname}.json"
-    else:
-        path = path / subpath / ".dm" / meta.shortname
-        filename = f"meta.{type(meta).__name__}.json"
-    """
 
     if not path.is_dir():
         os.makedirs(path)

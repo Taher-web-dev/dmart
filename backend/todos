@@ -2,7 +2,7 @@
 - Full and proper OpenApi documentation
 - Capture validation errors and general excptions
 - Log errors and exceptions into jsonl log file
-- shortnames/subpaths should only be alphanumeric with _ 1..32 chars # this is for security
+- shortnames/subpaths/filenames should only be alphanumeric with _ 1..32 chars # this is for security
 - security labels and acl rules
 - redis index, search
 - move api: if attachment, should include the payload. if entry should include all attachments

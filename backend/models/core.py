@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from pathlib import Path
 
 from typing import Any
-from models.api import Error, Record, Exception
 from pydantic.types import UUID4 as UUID
 from uuid import uuid4
 from pydantic import Field
@@ -16,13 +15,17 @@ class Resource(BaseModel):
         use_enum_values = True
 
 
-
-
-
 class Payload(Resource):
     content_type: ContentType
-    body: str | dict[str, Any] | Path
+    body: str | dict[str,Any] | Path
 
+
+class Record(BaseModel):
+    resource_type: ResourceType
+    uuid: UUID | None = None
+    shortname: str
+    subpath: str
+    attributes: dict[str, Any]
 
 class Meta(Resource):
     uuid: UUID = Field(default_factory=uuid4)
@@ -43,10 +46,9 @@ class Meta(Resource):
         child_resource_obj.parse_record(record) # PAYLOAD
         return child_resource_obj
 
-    def parse_record(self, record: Record):
-        return None
-
-    def to_record(self, subpath: str, include: list[str], exclude: list[str]):
+    def to_record(self, subpath: str, shortname: str, include: list[str]):
+        # Sanity check
+        assert self.shortname == shortname
         fields = {
             "resource_type": type(self).__name__.lower(),
             "uuid": self.uuid,
@@ -99,7 +101,7 @@ class Media(Attachment):
 
 class Relationship(Attachment):
     related_to: Locator
-    attributes: dict[str, Any]
+    attributes: dict[str,Any]
 
 
 class Event(Resource):
@@ -107,7 +109,7 @@ class Event(Resource):
     user_shortname: str
     request: RequestType
     timestamp: datetime
-    attributes: dict[str, Any]
+    attributes: dict[str,Any]
 
 
 class Alteration(Attachment):
@@ -115,7 +117,7 @@ class Alteration(Attachment):
     user_shortname: str
     previous_alteration: UUID
     timestamp: datetime
-    diff: dict[str, Any]
+    diff: dict[str,Any]
 
 
 class Schema(Meta):

@@ -1,4 +1,5 @@
 from models.enums import ResourceType
+import models.core as core
 from enum import Enum
 from pydantic import BaseModel
 from pydantic.types import UUID4 as UUID
@@ -6,19 +7,9 @@ from datetime import datetime
 from typing import Any
 from builtins import Exception as PyException
 
-
-class Record(BaseModel):
-    resource_type: ResourceType
-    uuid: UUID | None = None
-    shortname: str
-    subpath: str
-    attributes: dict[str, Any]
-
-
 class QueryType(str, Enum):
     search = "search"
     subpath = "subpath"
-    folders = "folders"
     events = "events"
     history = "history"
 
@@ -52,11 +43,10 @@ class Error(BaseModel):
 
 
 class Response(BaseModel):
-    status: Status = Status.success
+    status: Status
     error: Error | None = None
     auth_token: str | None = None
-    records: list[Record] | None = None
-    supplement: list[Record] | None = None
+    records: list[core.Record] | None = None
     attributes: dict[str,Any] | None = None
 
 

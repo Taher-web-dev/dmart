@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/create", response_model=api.Response, response_model_exclude_none=True)
-async def create_user(record: api.Record, invitation: str) -> api.Response:
+async def create_user(record: core.Record, invitation: str) -> api.Response:
     """Register a new user by invitation"""
     if not invitation:
         # TBD validate invitation.
@@ -52,7 +52,7 @@ async def get_profile(shortname=Depends(JWTBearer())) -> api.Response:
         attributes["email"] = user.email
     if user.display_name:
         attributes["display_name"] = user.display_name
-    record = api.Record(
+    record = core.Record(
         subpath="users",
         shortname=user.shortname,
         resource_type=core.ResourceType.user,
@@ -63,7 +63,7 @@ async def get_profile(shortname=Depends(JWTBearer())) -> api.Response:
 
 @router.post("/profile", response_model=api.Response, response_model_exclude_none=True)
 async def update_profile(
-    profile: api.Record, shortname=Depends(JWTBearer())
+    profile: core.Record, shortname=Depends(JWTBearer())
 ) -> api.Response:
     """Update user profile"""
     user = db.load("users", shortname, core.User)
