@@ -1,11 +1,12 @@
 from models.enums import ResourceType
 import models.core as core
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic.types import UUID4 as UUID
 from datetime import datetime
 from typing import Any, Dict, List
 from builtins import Exception as PyException
+from utils.regex import FILE_NAME, SUBPATH
 
 
 class QueryType(str, Enum):
@@ -17,9 +18,9 @@ class QueryType(str, Enum):
 
 class Query(BaseModel):
     type: QueryType
-    subpath: str
+    subpath: str = Field(regex=SUBPATH)
     filter_types: list[ResourceType]
-    filter_shortnames: list[str]
+    filter_shortnames: list[str] = Field(regex=FILE_NAME)
     search: str
     from_date: datetime
     to_date: datetime
