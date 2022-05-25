@@ -70,21 +70,22 @@ def metapath(subpath: str, shortname: str, class_type: Type[Meta]) -> tuple[Path
     """Construct the full path of the meta file"""
     path = settings.space_root
     filename = ""
-    if type == core.Folder:
+    if issubclass(class_type, core.Folder):
         path = path / subpath / shortname / ".dm"
-        filename = f"meta.{class_type.__name__}.json"
+        filename = "meta."+ class_type.__name__.lower() + ".json"
     elif issubclass(class_type, core.Attachment):
         [parent_subpath, parent_name] = subpath.rsplit("/", 1)
+        attachment_folder = parent_name + "/attachments." + class_type.__name__.lower()
         path = (
             path
             / parent_subpath
             / ".dm"
-            / f"{parent_name}/attachments.{class_type.__name__}"
+            / attachment_folder
         )
         filename = f"meta.{shortname}.json"
     else:
         path = path / subpath / ".dm" / shortname
-        filename = f"meta.{class_type.__name__}.json"
+        filename = "meta."+ class_type.__name__.lower() + ".json"
     return path, filename
 
 
@@ -153,5 +154,6 @@ def delete(subpath: str, meta: core.Meta):
     if pathname.is_file():
         os.remove(pathname)
     # Remove folder if empty
-    os.rmdir(path)
+    if len(os.listdir('/your/path')) > 0:
+        os.rmdir(path)
 
