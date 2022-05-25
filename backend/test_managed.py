@@ -1,4 +1,3 @@
-from pathlib import Path
 import shutil
 from urllib import response
 from fastapi.testclient import TestClient
@@ -28,7 +27,6 @@ def test_login():
     request_data = {"shortname": user_shortname, "password": password}
 
     response = client.post(endpoint, json=request_data, headers=headers)
-    print("\n\n\nresponse.json()", response.json())
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"
@@ -51,26 +49,7 @@ def test_create_content_resource():
     assert_code_and_status_success(client.post(endpoint, json=request_data, headers=headers))
 
 
-def test_delete_resource():
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-    endpoint = "/managed/delete"
-    request_data = {
-        "resource_type": "content",
-        "subpath": subpath,
-        "shortname": shortname,
-        "attributes": {
-        },
-    }
-
-    response = client.post(endpoint, json=request_data, headers=headers)
-    print("\n\n\n\nresponse.json()", response.json())
-    assert response.status_code == status.HTTP_200_OK
-    json_response = response.json()
-    assert json_response["status"] == "success"
-
-
 def test_create_user_resource():
-    print("\n\n\nTOKEN: ", token)
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
     endpoint = "/managed/create"
     request_data = {
@@ -84,6 +63,7 @@ def test_create_user_resource():
     }
 
     assert_code_and_status_success(client.post(endpoint, json=request_data, headers=headers))
+
 
 def test_update_user_resource():
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
@@ -99,6 +79,7 @@ def test_update_user_resource():
     }
 
     assert_code_and_status_success(client.post(endpoint, json=request_data, headers=headers))
+
 
 def test_create_folder_resource():
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
@@ -168,22 +149,57 @@ def test_query_subpath():
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"
-    assert json_response["attributes"]["returned"] <= limit
+    assert json_response["attributes"]["returned"] == limit
     for record in json_response["records"]:
         assert record["resource_type"] in filter_types
 
 
+def test_delete_all():
+    # DELETE USER
+    response = delete_user()
+    assert_code_and_status_success(response=response)
 
-def assert_code_and_status_success(response):
-    assert response.status_code == status.HTTP_200_OK
-    json_response = response.json()
-    assert json_response["status"] == "success"
+    # DELETE CONTENT RESOURCE
+    response = delete_resource(resource="content", del_subpath=subpath, del_shortname=shortname)
+    assert_code_and_status_success(response=response)
+
+    # DELETE USER RESOURCE
+    response = delete_resource(resource="user", del_subpath=subpath, del_shortname=shortname)
+    assert_code_and_status_success(response=response)
+
+    # DELETE FOLDER RESOURCE
+    response = delete_resource(resource="folder", del_subpath=subpath, del_shortname=shortname)
+    assert_code_and_status_success(response=response)
+
+    # DELETE COMMENT RESOURCE
+    response = delete_resource(resource="comment", del_subpath=f"{subpath}/{shortname}", del_shortname=attachment_shortname)
+    assert_code_and_status_success(response=response)
+
+    shutil.rmtree(f"../space/{subpath}")
 
 
-def test_delete_user():
+
+def delete_user():
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
     endpoint = "/user/delete"
-    response = client.post(endpoint, json={}, headers=headers)
+    return client.post(endpoint, json={}, headers=headers)
+
+
+def delete_resource(resource: str, del_subpath: str, del_shortname: str):
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+    endpoint = "/managed/delete"
+    request_data = {
+        "resource_type": resource,
+        "subpath": del_subpath,
+        "shortname": del_shortname,
+        "attributes": {
+        },
+    }
+
+    return client.post(endpoint, json=request_data, headers=headers)
+
+
+def assert_code_and_status_success(response):
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"

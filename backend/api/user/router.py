@@ -7,6 +7,7 @@ import models.core as core
 import utils.db as db
 from utils.jwt import JWTBearer, sign_jwt
 from typing import Any
+from utils.regex import FILE_NAME
 
 
 router = APIRouter()
@@ -87,7 +88,7 @@ async def update_profile(
     response_model_exclude_none=True,
 )
 async def login(
-    shortname: str = Body(...),  # , regex=regex.USERNAME),
+    shortname: str = Body(..., regex=FILE_NAME),  # , regex=regex.USERNAME),
     password: str = Body(...),  # , regex=regex.PASSWORD),
 ) -> api.Response:
     """Login and generate refresh token"""
