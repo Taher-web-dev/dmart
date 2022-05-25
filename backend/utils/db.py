@@ -11,16 +11,18 @@ from utils.logger import logger
 
 Meta = TypeVar("Meta", bound=core.Meta)
 
-FILE_PATTERN=re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
-FOLDER_PATTERN=re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
-def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
-    records : list[core.Record] = [] 
-    total : int = 0
+FILE_PATTERN = re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
+FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
+
+
+def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
+    records: list[core.Record] = []
+    total: int = 0
     if query.type == api.QueryType.subpath:
         path = settings.space_root / query.subpath
 
         # Gel all matching entries
-        entries_glob = ".dm/*/meta.*.json" 
+        entries_glob = ".dm/*/meta.*.json"
         for one in path.glob(entries_glob):
             match = FILE_PATTERN.search(str(one))
             if not match or not one.is_file:
@@ -28,7 +30,10 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
                 continue
             shortname = match.group(1)
             resource_name = match.group(2).lower()
-            if query.filter_types and not ResourceType(resource_name) in query.filter_types:
+            if (
+                query.filter_types
+                and not ResourceType(resource_name) in query.filter_types
+            ):
                 logger.info(resource_name + " resource is not listed in filter types")
                 continue
 
@@ -39,9 +44,13 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
             if len(records) >= query.limit or total < query.offset:
                 continue
             resource_class = getattr(sys.modules["models.core"], resource_name.title())
-            records.append(resource_class.parse_raw(one.read_text()).to_record(query.subpath, shortname, query.include_fields))
+            records.append(
+                resource_class.parse_raw(one.read_text()).to_record(
+                    query.subpath, shortname, query.include_fields
+                )
+            )
         # Get all matching sub folders
-        subfolders_glob = "*/.dm/meta.folder.json" 
+        subfolders_glob = "*/.dm/meta.folder.json"
         for one in path.glob(subfolders_glob):
             match = FOLDER_PATTERN.search(str(one))
 
@@ -54,7 +63,11 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
             total += 1
             if len(records) >= query.limit or total < query.offset:
                 continue
-            records.append(core.Folder.parse_raw(one.read_text()).to_record(query.subpath, shortname, query.include_fields))
+            records.append(
+                core.Folder.parse_raw(one.read_text()).to_record(
+                    query.subpath, shortname, query.include_fields
+                )
+            )
     return total, records
 
 
@@ -64,20 +77,15 @@ def metapath(subpath: str, shortname: str, class_type: Type[Meta]) -> tuple[Path
     filename = ""
     if issubclass(class_type, core.Folder):
         path = path / subpath / shortname / ".dm"
-        filename = "meta."+ class_type.__name__.lower() + ".json"
+        filename = "meta." + class_type.__name__.lower() + ".json"
     elif issubclass(class_type, core.Attachment):
         [parent_subpath, parent_name] = subpath.rsplit("/", 1)
         attachment_folder = parent_name + "/attachments." + class_type.__name__.lower()
-        path = (
-            path
-            / parent_subpath
-            / ".dm"
-            / attachment_folder
-        )
+        path = path / parent_subpath / ".dm" / attachment_folder
         filename = f"meta.{shortname}.json"
     else:
         path = path / subpath / ".dm" / shortname
-        filename = "meta."+ class_type.__name__.lower() + ".json"
+        filename = "meta." + class_type.__name__.lower() + ".json"
     return path, filename
 
 
@@ -146,10 +154,12 @@ def update(subpath: str, meta: core.Meta):
     with open(path / filename, "w") as file:
         file.write(meta.json(exclude_none=True))
 
-def move(subpath: str, newpath: str, meta : core.Meta):
+
+def move(subpath: str, newpath: str, meta: core.Meta):
     path, filename = metapath(subpath, meta.shortname, meta.__class__)
     # Fixme ... decide what to move depending on the type
-    os.rename(src=path/filename, dst=newpath)
+    os.rename(src=path / filename, dst=newpath)
+
 
 def delete(subpath: str, meta: core.Meta):
     path, filename = metapath(subpath, meta.shortname, meta.__class__)
@@ -164,4 +174,3 @@ def delete(subpath: str, meta: core.Meta):
     # Remove folder if empty
     if len(os.listdir(path)) == 0:
         os.rmdir(path)
-

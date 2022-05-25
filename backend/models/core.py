@@ -11,6 +11,7 @@ import sys
 from models.enums import ContentType, RequestType, ResourceType
 from utils.regex import FILE_NAME, SUBPATH
 
+
 class Resource(BaseModel):
     class Config:
         use_enum_values = True
@@ -18,7 +19,7 @@ class Resource(BaseModel):
 
 class Payload(Resource):
     content_type: ContentType
-    body: str | dict[str,Any] | Path
+    body: str | dict[str, Any] | Path
 
 
 class Record(BaseModel):
@@ -27,6 +28,7 @@ class Record(BaseModel):
     shortname: str = Field(regex=FILE_NAME)
     subpath: str = Field(regex=SUBPATH)
     attributes: dict[str, Any]
+
 
 class Meta(Resource):
     uuid: UUID = Field(default_factory=uuid4)
@@ -42,10 +44,15 @@ class Meta(Resource):
 
     @staticmethod
     def from_record(record: Record, shortname: str):
-        child_resource_cls = getattr(sys.modules["models.core"], record.resource_type.title())
-        child_resource_obj = child_resource_cls(owner_shortname=shortname, shortname=record.shortname, **record.attributes)
-        child_resource_obj.parse_record(record) # PAYLOAD
+        child_resource_cls = getattr(
+            sys.modules["models.core"], record.resource_type.title()
+        )
+        child_resource_obj = child_resource_cls(
+            owner_shortname=shortname, shortname=record.shortname, **record.attributes
+        )
+        child_resource_obj.parse_record(record)  # PAYLOAD
         return child_resource_obj
+
     def parse_record(self, record: Record):
         pass
 
@@ -66,9 +73,10 @@ class Meta(Resource):
         meta_fields = list(Meta.__fields__.keys())
         attributes = {}
         for key, value in self.__dict__.items():
-            if((not include or key in include) and key not in meta_fields):
+            if (not include or key in include) and key not in meta_fields:
                 attributes[key] = value
         return attributes
+
 
 class Locator(Resource):
     uuid: UUID | None = None
@@ -88,14 +96,17 @@ class User(Actor):
     password: str
     email: str | None = None
 
+
 class Group(Actor):
     pass
+
 
 class Attachment(Meta):
     pass
 
+
 class Comment(Attachment):
-    body : str
+    body: str
 
 
 class Media(Attachment):
@@ -104,7 +115,7 @@ class Media(Attachment):
 
 class Relationship(Attachment):
     related_to: Locator
-    attributes: dict[str,Any]
+    attributes: dict[str, Any]
 
 
 class Event(Resource):
@@ -112,7 +123,7 @@ class Event(Resource):
     user_shortname: str
     request: RequestType
     timestamp: datetime
-    attributes: dict[str,Any]
+    attributes: dict[str, Any]
 
 
 class Alteration(Attachment):
@@ -120,7 +131,7 @@ class Alteration(Attachment):
     user_shortname: str
     previous_alteration: UUID
     timestamp: datetime
-    diff: dict[str,Any]
+    diff: dict[str, Any]
 
 
 class Schema(Meta):
@@ -130,14 +141,14 @@ class Schema(Meta):
 class Content(Meta):
     schema_shortname: str | None = None
     body: str
+
     def parse_record(self, record: Record):
         if "body" in record.attributes:
             self.payload = Payload(
-                content_type=ContentType.json,
-                body = record.attributes["body"]
+                content_type=ContentType.json, body=record.attributes["body"]
             )
-        self.payload = None   
+        self.payload = None
+
 
 class Folder(Meta):
     pass
-

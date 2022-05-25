@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from fastapi import status
 import os
 import test_managed as managed
+from utils.settings import settings
 
 from main import app
 
@@ -13,10 +14,10 @@ email: str = "ali@baba.com"
 password: str = "hello"
 invitation: str = "A1B2C3"
 token: str = ""
-subpath="nicepost"
+subpath = "nicepost"
 
-dirpath = f"../space/users/.dm/{shortname}"
-filepath = f"{dirpath}/meta.User.json"
+dirpath = f"{settings.space_root}/users/.dm/{shortname}"
+filepath = f"{dirpath}/meta.user.json"
 if os.path.exists(filepath):
     os.remove(filepath)
 
@@ -70,6 +71,7 @@ def test_get_profile():
     json_response = response.json()
     assert json_response["status"] == "success"
 
+
 def test_update_profile():
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
     endpoint = "/user/profile"
@@ -87,6 +89,7 @@ def test_update_profile():
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"
+
 
 if __name__ == "__main__":
     test_create_user()

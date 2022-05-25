@@ -33,7 +33,6 @@ class ResourceType(str, Enum):
     alteration = "alteration"
 
 
-
 class ContentType(str, Enum):
     text = "text"
     markdown = "markdown"

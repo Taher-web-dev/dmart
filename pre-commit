@@ -15,7 +15,7 @@ fi
 psql -h 127.0.0.1 -U galleon galleon -c 'delete from users; delete from otp;'
 export BACKEND_ENV=backend/config.env
 export LOG_PATH=backend/logs
-export SPACE_ROOT=./space
+export SPACE_ROOT=space
 if ! pytest -v; then
   echo -e "\n${red}Pytest failed${no_color}"
   exit 1
