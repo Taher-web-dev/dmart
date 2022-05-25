@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("/query", response_model=api.Response, response_model_exclude_none=True)
 async def query_request(query: api.Query) -> api.Response:
     total, records = db.serve_query(query)
-    return api.Response(records=records, attributes={"total": total, "returned":len(records)})
+    return api.Response(status=api.Status.success, records=records, attributes={"total": total, "returned":len(records)})
 
 
 @router.post("/create", response_model=api.Response, response_model_exclude_none=True)

@@ -1,4 +1,7 @@
+import logging
+import logging.handlers
 import sys
+from tokenize import group
 from models.enums import ResourceType
 from utils.settings import settings
 import models.core as core
@@ -8,9 +11,16 @@ import os
 import re
 from pathlib import Path
 
+logger=logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+log_handler = logging.handlers.RotatingFileHandler(
+    filename=settings.log_path / "db.log", maxBytes=5000000, backupCount=10
+)
+logger.addHandler(log_handler)
+
 Meta = TypeVar("Meta", bound=core.Meta)
 
-FILE_PATTERN=re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-z]*)\\.json$")
+FILE_PATTERN=re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([A-Z][a-z]*)\\.json$")
 FOLDER_PATTERN=re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
     records : list[core.Record] = [] 
@@ -23,12 +33,12 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
         for one in path.glob(entries_glob):
             match = FILE_PATTERN.search(str(one))
             if not match or not one.is_file:
-                # FIXME log an error about the file
+                logger.error("Invalid file pattern")
                 continue
-            shortname = match.group(0)
-            resource_name = match.group(1)
+            shortname = match.group(1)
+            resource_name = match.group(2).lower()
             if not ResourceType(resource_name) in query.filter_types:
-                # FIXME log an error about the type
+                logger.info(resource_name + " resource is not listed in filter types")
                 continue
 
             if query.filter_types and resource_name not in query.filter_types:
@@ -41,14 +51,13 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
             if len(records) > query.limit or total < query.offset:
                 continue
             resource_class = getattr(sys.modules["models.core"], resource_name.title())
-            records.append(resource_class.parse_raw(path.read_text()).to_record(query.subpath, shortname, query.include_fields))
-            
+            records.append(resource_class.parse_raw(one.read_text()).to_record(query.subpath, shortname, query.include_fields))
         # Get all matching sub folders
         subfolders_glob = "*/.dm/meta.folder.json" 
         for one in path.glob(subfolders_glob):
             match = FOLDER_PATTERN.search(str(one))
             if not match or not one.is_file:
-                # FIXME report error about file
+                logger.error("Invalid file pattern")
                 continue
             shortname = match.group(0)
             if query.filter_shortnames and shortname in query.filter_shortnames:
@@ -56,7 +65,7 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
             total += 1
             if len(records) > query.limit or total < query.offset:
                 continue
-            records.append(core.Folder.parse_raw(path.read_text()).to_record(query.subpath, shortname, query.include_fields))
+            records.append(core.Folder.parse_raw(one.read_text()).to_record(query.subpath, shortname, query.include_fields))
     return total, records
 
 
