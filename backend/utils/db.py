@@ -1,7 +1,4 @@
-import logging
-import logging.handlers
 import sys
-from tokenize import group
 from models.enums import ResourceType
 from utils.settings import settings
 import models.core as core
@@ -119,6 +116,22 @@ def create(subpath: str, meta: core.Meta):
 
     with open(path / filename, "w") as file:
         file.write(meta.json(exclude_none=True))
+
+
+async def save_payload(subpath: str, meta: core.Meta, attachment):
+    path, filename = metapath(subpath, meta.shortname, meta.__class__)
+
+    if not (path / filename).is_file():
+        raise api.Exception(
+            status_code=401,
+            error=api.Error(type="create", code=30, message="missing metadata"),
+        )
+
+    payload_filename = filename.replace(".json", Path(attachment.filename).suffix)
+
+    with open(path / payload_filename, "wb") as file:
+        while content := await attachment.read(1024):
+            file.write(content)
 
 
 def update(subpath: str, meta: core.Meta):

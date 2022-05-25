@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile
 
 import models.api as api
 import models.core as core
@@ -20,7 +20,7 @@ async def change(record: core.Record, shortname=Depends(JWTBearer())) -> api.Res
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
     db.save(record.subpath, resource_obj)
     return api.Response(status=api.Status.success)
-    
+
 
 
 @router.post("/update", response_model=api.Response, response_model_exclude_none=True)
@@ -58,3 +58,20 @@ async def get_media():
 @router.post("/media")
 async def upload_media():
     return {}
+
+
+@router.post(
+    "/attachment", response_model=api.Response, response_model_exclude_none=True
+)
+async def post_attachment(
+    file: UploadFile, request: UploadFile, shortname=Depends(JWTBearer())
+):
+    record = core.Record.parse_raw(request.file.read())
+    resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+
+    if not isinstance(resource_obj, core.Attachment):
+        raise api.Exception(406, api.Error(type="attachment", code=217, message="Only resources of type 'attachment' are allowed"))
+
+    db.save(record.subpath, resource_obj)
+    await db.save_payload(record.subpath, resource_obj, file)
+    return api.Response(status=api.Status.success)
