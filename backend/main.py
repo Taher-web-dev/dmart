@@ -117,10 +117,8 @@ async def middle(request: Request, call_next):
             ),
         )
 
-    response.headers["Access-Control-Allow-Origin"] = urlparse(
-            request.headers.get("x-forwarded-proto", "http") + "://" + 
-            request.headers.get("x-forwarded-host", f"{settings.listening_host}:{settings.listening_port}")
-    ).netloc
+    response.headers["Access-Control-Allow-Origin"] = ( request.headers.get("x-forwarded-proto", "http") + "://" +
+            request.headers.get("x-forwarded-host", f"{settings.listening_host}:{settings.listening_port}"))
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers[
         "Access-Control-Allow-Methods"
