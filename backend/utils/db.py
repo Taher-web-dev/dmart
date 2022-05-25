@@ -10,13 +10,7 @@ import models.api as api
 import os
 import re
 from pathlib import Path
-
-logger=logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-log_handler = logging.handlers.RotatingFileHandler(
-    filename=settings.log_path / "db.log", maxBytes=5000000, backupCount=10
-)
-logger.addHandler(log_handler)
+from utils.logger import logger
 
 Meta = TypeVar("Meta", bound=core.Meta)
 
@@ -154,6 +148,6 @@ def delete(subpath: str, meta: core.Meta):
     if pathname.is_file():
         os.remove(pathname)
     # Remove folder if empty
-    if len(os.listdir('/your/path')) > 0:
+    if len(os.listdir(pathname)) == 0:
         os.rmdir(path)
 

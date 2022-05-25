@@ -1,5 +1,6 @@
 """ Main module """
 
+import time
 import traceback
 import logging
 import logging.handlers
@@ -19,6 +20,7 @@ from api.managed.router import router as managed
 from api.user.router import router as user
 from api.public.router import router as public
 from urllib.parse import urlparse
+from utils.logger import logger
 
 
 app = FastAPI(
@@ -40,12 +42,7 @@ app = FastAPI(
     ],
 )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-log_handler = logging.handlers.RotatingFileHandler(
-    filename=settings.log_path / "x-ljson.log", maxBytes=5000000, backupCount=10
-)
-logger.addHandler(log_handler)
+
 json_logging.init_fastapi(enable_json=True)
 json_logging.init_request_instrument(app)
 
@@ -85,6 +82,7 @@ async def app_shutdown():
 @app.middleware("http")
 async def middle(request: Request, call_next):
     """Wrapper function to manage errors and logging"""
+    start_time = time.time()
     try:
         response = await call_next(request)
     except api.Exception as ex:
@@ -129,6 +127,24 @@ async def middle(request: Request, call_next):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
 
+    logger.info(
+        "Processed",
+        extra={
+            "props": {
+                "duration": 1000 * (time.time() - start_time),
+                "verb": request.method,
+                "path": str(request.url.path),
+                "request": {
+                    "headers": dict(request.headers.items()),
+                    "query_params": dict(request.query_params.items()),
+                },
+                "response": {
+                    "headers": dict(response.headers.items()),
+                },
+                "http_status": response.status_code,
+            }
+        },
+    )
     return response
 
 
