@@ -10,13 +10,13 @@ router = APIRouter()
 
 
 @router.post("/query", response_model=api.Response, response_model_exclude_none=True)
-async def query_request(query: api.Query) -> api.Response:
+async def query_entries(query: api.Query) -> api.Response:
     total, records = db.serve_query(query)
     return api.Response(status=api.Status.success, records=records, attributes={"total": total, "returned":len(records)})
 
 
 @router.post("/create", response_model=api.Response, response_model_exclude_none=True)
-async def change(record: core.Record, shortname=Depends(JWTBearer())) -> api.Response:
+async def create_entry_or_attachment(record: core.Record, shortname=Depends(JWTBearer())) -> api.Response:
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
     db.save(record.subpath, resource_obj)
     return api.Response(status=api.Status.success)
@@ -24,14 +24,14 @@ async def change(record: core.Record, shortname=Depends(JWTBearer())) -> api.Res
 
 
 @router.post("/update", response_model=api.Response, response_model_exclude_none=True)
-async def update(record: core.Record, shortname=Depends(JWTBearer())) -> api.Response:
+async def update_entry_or_attachment(record: core.Record, shortname=Depends(JWTBearer())) -> api.Response:
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
     db.update(record.subpath, resource_obj)
     return api.Response(status=api.Status.success)
 
 
 @router.post("/delete", response_model=api.Response, response_model_exclude_none=True)
-async def delete(record: core.Record) -> api.Response:
+async def delete_entry(record: core.Record) -> api.Response:
     cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
     item = db.load(record.subpath, record.shortname, cls)
     db.delete(record.subpath, item)
@@ -39,7 +39,7 @@ async def delete(record: core.Record) -> api.Response:
 
 
 @router.post("/move", response_model=api.Response, response_model_exclude_none=True)
-async def move(record: core.Record) -> api.Response:
+async def move_entry(record: core.Record) -> api.Response:
     cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
     item = db.load(record.subpath, record.shortname, cls)
     if "new_path" not in record.attributes or not record.attributes["new_path"]:
@@ -54,16 +54,11 @@ async def get_media():
     return {}
 
 
-# Upload media attachment
-@router.post("/media")
-async def upload_media():
-    return {}
-
 
 @router.post(
     "/attachment", response_model=api.Response, response_model_exclude_none=True
 )
-async def post_attachment(
+async def upload_attachment_with_payload(
     file: UploadFile, request: UploadFile, shortname=Depends(JWTBearer())
 ):
     record = core.Record.parse_raw(request.file.read())
