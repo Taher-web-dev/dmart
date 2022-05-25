@@ -37,18 +37,15 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
                 continue
             shortname = match.group(1)
             resource_name = match.group(2).lower()
-            if not ResourceType(resource_name) in query.filter_types:
+            if query.filter_types and not ResourceType(resource_name) in query.filter_types:
                 logger.info(resource_name + " resource is not listed in filter types")
                 continue
 
-            if query.filter_types and resource_name not in query.filter_types:
-                continue
-
-            if query.filter_shortnames and shortname in query.filter_shortnames:
+            if query.filter_shortnames and shortname not in query.filter_shortnames:
                 continue
 
             total += 1
-            if len(records) > query.limit or total < query.offset:
+            if len(records) >= query.limit or total < query.offset:
                 continue
             resource_class = getattr(sys.modules["models.core"], resource_name.title())
             records.append(resource_class.parse_raw(one.read_text()).to_record(query.subpath, shortname, query.include_fields))
@@ -63,7 +60,7 @@ def serve_query(query : api.Query) -> tuple[int,list[core.Record]]:
             if query.filter_shortnames and shortname in query.filter_shortnames:
                 continue
             total += 1
-            if len(records) > query.limit or total < query.offset:
+            if len(records) >= query.limit or total < query.offset:
                 continue
             records.append(core.Folder.parse_raw(one.read_text()).to_record(query.subpath, shortname, query.include_fields))
     return total, records
