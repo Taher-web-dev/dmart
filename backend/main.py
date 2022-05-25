@@ -82,6 +82,9 @@ async def app_shutdown():
 @app.middleware("http")
 async def middle(request: Request, call_next):
     """Wrapper function to manage errors and logging"""
+    if request.url._url.endswith("/docs") or request.url._url.endswith("/openapi.json"):
+        return await call_next(request)
+
     start_time = time.time()
     try:
         response = await call_next(request)
@@ -115,9 +118,8 @@ async def middle(request: Request, call_next):
         )
 
     response.headers["Access-Control-Allow-Origin"] = urlparse(
-        request.headers.get(
-            "Referer", f"http://{settings.listening_host}:{settings.listening_port}"
-        )
+            request.headers.get("x-forwarded-proto", "http") + "://" + 
+            request.headers.get("x-forwarded-host", f"{settings.listening_host}:{settings.listening_port}")
     ).netloc
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers[
