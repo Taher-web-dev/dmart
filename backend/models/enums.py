@@ -1,7 +1,3 @@
-# from enum import Enum
-
-
-
 from enum import Enum
 
 
@@ -14,7 +10,6 @@ class RequestType(str, Enum):
     delete = "delete"
     copy = "copy"
     move = "move"
-
 
 
 class Language(str, Enum):

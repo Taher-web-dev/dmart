@@ -28,7 +28,6 @@ class Meta(Resource):
     uuid: UUID = Field(default_factory=uuid4)
     shortname: str
     is_active: bool = False
-    is_attachment: bool | None = None
     display_name: str | None = None
     description: str | None = None
     tags: list[str] | None = None
@@ -50,20 +49,19 @@ class Meta(Resource):
     def to_record(self, subpath: str, include: list[str], exclude: list[str]):
         fields = {
             "resource_type": type(self).__name__.lower(),
-            "is_attachment": self.is_attachment,
             "uuid": self.uuid,
             "shortname": self.shortname,
             "subpath": subpath,
         }
 
-        fields["attributes"] = self.get_record_attributes(include=include, exclude=exclude)
+        fields["attributes"] = self.get_record_attributes(include=include)
         return Record(**fields)
-        
-    def get_record_attributes(self, include: list[str], exclude: list[str]):
+
+    def get_record_attributes(self, include: list[str]):
         meta_fields = list(Meta.__fields__.keys())
         attributes = {}
         for key, value in self.__dict__.items():
-            if((not include or key in include) and (not exclude or key not in exclude) and key not in meta_fields):
+            if((not include or key in include) and key not in meta_fields):
                 attributes[key] = value
         return attributes
 
@@ -72,9 +70,8 @@ class Locator(Resource):
     type: ResourceType
     subpath: str
     shortname: str
-    parent_shortname: str | None  # Reuired for Attachments only
-    display_name: str | None
-    description: str | None
+    display_name: str | None = None
+    description: str | None = None
     tags: list[str] | None = None
 
 
@@ -89,10 +86,8 @@ class User(Actor):
 class Group(Actor):
     pass
 
-
 class Attachment(Meta):
     pass
-
 
 class Comment(Attachment):
     body : str
@@ -141,14 +136,3 @@ class Content(Meta):
 class Folder(Meta):
     pass
 
-
-if __name__ == '__main__':
-    content = Content(shortname="test", owner_shortname="SAAD", body="TEST BODY")
-    record = content.to_record("subpath_test", [], [])
-    # parent_class = getattr(content.__class__)
-
-    print("\n Record:",record.__dict__)
-    # for attr, val in cls_dict.iteritems():
-    #     print("%s = %s", attr, val)
-    # for key, value in Meta.__fields__.keys():
-    #     print(key, " => ", value)
