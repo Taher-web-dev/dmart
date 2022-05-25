@@ -8,7 +8,8 @@ import uvicorn
 # from settings import settings
 import json_logging
 from utils.settings import settings
-
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 import models.api as api
@@ -27,20 +28,16 @@ app = FastAPI(
     redoc_url=None,
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     openapi_tags=[
+        {"name": "user", "description": "User registration, login, profile and delete"},
         {
-        "name": "user",
-        "description": "User registration, login, profile and delete"
+            "name": "managed",
+            "description": "Login-only content management api and media upload",
         },
         {
-        "name": "managed",
-        "description": "Login-only content management api and media upload"
+            "name": "public",
+            "description": "Public api for query and GET access to media",
         },
-        {
-        "name": "public",
-        "description": "Public api for query and GET access to media"
-        },
-    ]
-
+    ],
 )
 
 logger = logging.getLogger(__name__)
@@ -51,6 +48,20 @@ log_handler = logging.handlers.RotatingFileHandler(
 logger.addHandler(log_handler)
 json_logging.init_fastapi(enable_json=True)
 json_logging.init_request_instrument(app)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def my_exception_handler(_, exception):
+    return JSONResponse(content=exception.detail, status_code=exception.status_code)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc: RequestValidationError):
+    err = jsonable_encoder({"detail": exc.errors()})["detail"]
+    raise api.Exception(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        error=api.Error(code=422, type="validation", message=err),
+    )
 
 
 @app.on_event("startup")
@@ -111,7 +122,9 @@ async def middle(request: Request, call_next):
         )
     ).netloc
     response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Methods"] = "GET, HEAD, POST, PUT, DELETE, OPTIONS"
+    response.headers[
+        "Access-Control-Allow-Methods"
+    ] = "GET, HEAD, POST, PUT, DELETE, OPTIONS"
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
