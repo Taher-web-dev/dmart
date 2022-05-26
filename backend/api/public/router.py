@@ -53,7 +53,7 @@ async def get_media(
         meta.payload is None
         or meta.payload.body is None
         or meta.payload.body != f"{shortname}.{ext}"
-        or shortname != filename.replace(".json", "")
+        or shortname != filename.split(".")[1]
     ):
         raise api.Exception(
             404,

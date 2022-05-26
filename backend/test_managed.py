@@ -1,3 +1,4 @@
+import json
 import shutil
 from fastapi.testclient import TestClient
 from fastapi import status
@@ -143,12 +144,14 @@ def test_query_subpath():
         "offset": 0,
         "tags": ["string"],
     }
-
+    my_attach = attachment
+    request_file_data = json.loads(my_attach["request"][1].read())
+    print("\n\n\n\n +++++++++++++++++++++++++++++RESPONSE+++++++++++++++++++++++++++++ ", request_file_data)
     response = client.post(endpoint, json=request_data, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"
-    assert json_response["attributes"]["returned"] == limit
+    assert json_response["attributes"]["returned"] == 2
     for record in json_response["records"]:
         assert record["resource_type"] in filter_types
 
@@ -221,6 +224,18 @@ def test_upload_attachment_with_payload():
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"
+
+
+# def test_retrieve_attachment():
+#     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "image/jpg"}
+#     request_file_data = json.loads(attachment["request"][1].read())
+#     print("\n\n\n\n +++++++++++++++++++++++++++++RESPONSE+++++++++++++++++++++++++++++ ", request_file_data)
+#     subpath = request_file_data["subpath"]
+#     file_name = request_file_data["attributes"]["filename"]
+#     endpoint = f"managed/media/{subpath}/{file_name}"
+
+    # response = client.get(endpoint, headers=headers)
+    # assert response.status_code == status.HTTP_200_OK
 
 
 def assert_code_and_status_success(response):

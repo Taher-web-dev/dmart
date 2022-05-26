@@ -110,7 +110,10 @@ class Comment(Attachment):
 
 
 class Media(Attachment):
-    pass
+    filename: str
+
+    def parse_record(self, record: Record):
+        self.payload = Payload(content_type=ContentType.image, body=record.attributes["filename"])
 
 
 class Relationship(Attachment):

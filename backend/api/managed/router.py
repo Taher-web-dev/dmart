@@ -53,7 +53,7 @@ async def move_entry(record: core.Record) -> api.Response:
     item = db.load(record.subpath, record.shortname, cls)
     if "new_path" not in record.attributes or not record.attributes["new_path"]:
         raise api.Exception(
-            404, api.Error(type="move", code=202, message="error moving")
+            404, api.Error(type="move", code=202, message="Please provide the new_path at the attributes field")
         )
     newpath = record.attributes["new_path"]
     db.move(record.subpath, newpath, item)
@@ -72,7 +72,7 @@ async def get_media(
         meta.payload is None
         or meta.payload.body is None
         or meta.payload.body != f"{shortname}.{ext}"
-        or shortname != filename.replace(".json", "")
+        or shortname != filename.split(".")[1]
     ):
         raise api.Exception(
             404,
@@ -91,6 +91,17 @@ async def get_media(
 async def upload_attachment_with_payload(
     file: UploadFile, request: UploadFile, shortname=Depends(JWTBearer())
 ):
+
+    if request.content_type != "application/json":
+        raise api.Exception(
+            406,
+            api.Error(
+                type="attachment",
+                code=217,
+                message="Only json files allowed in the request file",
+            ),
+        )
+
     record = core.Record.parse_raw(request.file.read())
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
 
