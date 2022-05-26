@@ -154,8 +154,6 @@ def test_query_subpath():
 
 
 def test_delete_all():
-    post_attachment()
-    return
     # DELETE USER
     response = delete_user()
     assert_code_and_status_success(response=response)
@@ -208,7 +206,7 @@ def delete_resource(resource: str, del_subpath: str, del_shortname: str):
     return client.post(endpoint, json=request_data, headers=headers)
 
 
-def post_attachment():
+def test_upload_attachment_with_payload():
     headers = {"Authorization": f"Bearer {token}"}
     endpoint = "managed/media"
     data = [
