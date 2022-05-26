@@ -103,6 +103,7 @@ async def upload_attachment_with_payload(
         )
 
     record = core.Record.parse_raw(request.file.read())
+    record.attributes["filename"] = record.shortname + "." + file.filename.split('.')[1]
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
 
     if not isinstance(resource_obj, core.Attachment):
