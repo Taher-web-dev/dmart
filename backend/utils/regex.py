@@ -1,5 +1,6 @@
 SUBPATH = r"^[\w\/]{1,32}$"
 SHORTNAME = r"^[\w]{1,32}$"
+FILENAME = r"^\w{1,26}\.(gif|png|jpeg|jpg)$"
 EXT = r"^(gif|png|jpeg|jpg)$"
 USERNAME = r"^\w{3,10}$"
 PASSWORD = r"^[\w._]{6,}$"
