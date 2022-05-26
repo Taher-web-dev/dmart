@@ -6,4 +6,6 @@
 - shortnames/subpaths/filenames should only be alphanumeric with _ 1..32 chars # this is for security: [a-zA-Z0-9_]{1,32}
 - security labels and acl rules
 - redis index, search
+- implement history creation
+- implement histor and events query
 - move api: if attachment, should include the payload. if entry should include all attachments

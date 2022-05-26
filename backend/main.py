@@ -53,7 +53,7 @@ async def my_exception_handler(_, exception):
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc: RequestValidationError):
+async def validation_exception_handler(_, exc: RequestValidationError):
     err = jsonable_encoder({"detail": exc.errors()})["detail"]
     raise api.Exception(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -165,6 +165,9 @@ async def root():
         "date": datetime.now(),
     }
 
+@app.get("/{x:path}", include_in_schema=False)
+async def catchall():
+    raise api.Exception(status_code=status.HTTP_404_NOT_FOUND, error=api.Error(type="catchall", code=230, message="Invalid request path"))
 
 app.include_router(user, prefix="/user", tags=["user"])
 app.include_router(managed, prefix="/managed", tags=["managed"])
