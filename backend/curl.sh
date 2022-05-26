@@ -54,8 +54,9 @@ SUBPATH="curl_content/$SHORTNAME"
 RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$COMMENT_SHORTNAME"  '{resource_type: "comment", subpath: $subpath, shortname: $shortname, attributes:{body: "A comment insdie the content resource"}}')
 curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq .status 
 
+echo -n "Upload attachment: "
+curl -s -H "$AUTH" -F 'request_record=@"../space/test/createmedia.json"' -F 'file=@"../space/test/logo.jpeg"' ${API_URL}/managed/media  | jq .status
+
 echo -n "Delete user: "
 curl -s -H "$AUTH" -H "$CT" -d '{}' $API_URL/user/delete | jq .status
 
-echo -n "Upload attachment: "
-curl -s -H "$AUTH" -F 'request=@"../space/test/create-media.json"' -F 'file=@"../space/test/logo.webp"' ${API_URL}/managed/media | jq .status 

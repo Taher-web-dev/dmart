@@ -218,7 +218,7 @@ def test_upload_attachment_with_payload():
     media_file = open(attachment_media_path, 'rb')
 
     data = [
-        ("request", ("createmedia.json", request_file, "application/json")),
+        ("request_record", ("createmedia.json", request_file, "application/json")),
         ("file", ("logo.jpeg", media_file, "application/octet-stream")),
     ]
 

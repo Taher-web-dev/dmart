@@ -90,10 +90,11 @@ async def get_media(
 
 @router.post("/media", response_model=api.Response, response_model_exclude_none=True)
 async def upload_attachment_with_payload(
-    file: UploadFile, request: UploadFile, shortname=Depends(JWTBearer())
+    file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
 ):
 
-    if request.content_type != "application/json":
+    """
+    if request_record.content_type != "application/json":
         raise api.Exception(
             406,
             api.Error(
@@ -102,8 +103,9 @@ async def upload_attachment_with_payload(
                 message="Only json files allowed in the request file",
             ),
         )
+    """
 
-    record = core.Record.parse_raw(request.file.read())
+    record = core.Record.parse_raw(request_record.file.read())
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
     resource_obj.payload = core.Payload(content_type=ContentType.image, body=record.shortname + "." + file.filename.split('.')[1]) 
 
