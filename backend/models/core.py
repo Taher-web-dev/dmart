@@ -9,7 +9,7 @@ from datetime import datetime
 import sys
 
 from models.enums import ContentType, RequestType, ResourceType
-from utils.regex import FILE_NAME, SUBPATH
+import utils.regex as regex
 
 
 class Resource(BaseModel):
@@ -25,8 +25,8 @@ class Payload(Resource):
 class Record(BaseModel):
     resource_type: ResourceType
     uuid: UUID | None = None
-    shortname: str = Field(regex=FILE_NAME)
-    subpath: str = Field(regex=SUBPATH)
+    shortname: str = Field(regex=regex.SHORTNAME)
+    subpath: str = Field(regex=regex.SUBPATH)
     attributes: dict[str, Any]
 
 

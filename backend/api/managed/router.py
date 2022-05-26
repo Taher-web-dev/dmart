@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, UploadFile, Path
+from fastapi.responses import FileResponse
 
 import models.api as api
 import models.core as core
 import utils.db as db
+import utils.regex as regex
 from utils.jwt import JWTBearer
 import sys
 
@@ -58,14 +60,34 @@ async def move_entry(record: core.Record) -> api.Response:
     return api.Response(status=api.Status.success)
 
 
-@router.get("/media/{pathname}")
-async def get_media():
-    return {}
+@router.get("/media/{subpath:path}/{shortname}.{ext}")
+async def get_media(
+    subpath: str = Path(..., regex=regex.SUBPATH),
+    shortname: str = Path(..., regex=regex.SHORTNAME),
+    ext: str = Path(..., regex=regex.EXT),
+) -> FileResponse:
+    path, filename = db.metapath(subpath, shortname, core.Media)
+    meta = db.load(subpath, shortname, core.Media)
+    if (
+        meta.payload is None
+        or meta.payload.body is None
+        or meta.payload.body != f"{shortname}.{ext}"
+        or shortname != filename.replace(".json", "")
+    ):
+        raise api.Exception(
+            404,
+            error=api.Error(
+                type="media", code=220, message="Request object is not available"
+            ),
+        )
+
+    # TODO check security labels for pubblic access
+
+    media_file = path / str(meta.payload.body)
+    return FileResponse(media_file)
 
 
-@router.post(
-    "/attachment", response_model=api.Response, response_model_exclude_none=True
-)
+@router.post("/media", response_model=api.Response, response_model_exclude_none=True)
 async def upload_attachment_with_payload(
     file: UploadFile, request: UploadFile, shortname=Depends(JWTBearer())
 ):

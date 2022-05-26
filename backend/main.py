@@ -140,8 +140,9 @@ async def middle(request: Request, call_next):
                 "verb": request.method,
                 "path": str(request.url.path),
                 "request": {
-                    "headers": dict(request.headers.items()),
+                    "url": request.url._url,
                     "query_params": dict(request.query_params.items()),
+                    "headers": dict(request.headers.items()),
                 },
                 "response": {
                     "headers": dict(response.headers.items()),

@@ -6,7 +6,7 @@ from pydantic.types import UUID4 as UUID
 from datetime import datetime
 from typing import Any, Dict, List
 from builtins import Exception as PyException
-from utils.regex import FILE_NAME, SUBPATH
+import utils.regex as regex
 
 
 class QueryType(str, Enum):
@@ -18,9 +18,9 @@ class QueryType(str, Enum):
 
 class Query(BaseModel):
     type: QueryType
-    subpath: str = Field(regex=SUBPATH)
+    subpath: str = Field(regex=regex.SUBPATH)
     filter_types: list[ResourceType]
-    filter_shortnames: list[str] = Field(regex=FILE_NAME)
+    filter_shortnames: list[str] = Field(regex=regex.SHORTNAME)
     search: str
     from_date: datetime
     to_date: datetime
