@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SHORTNAME="alibaba"
 DISPLAYNAME="Ali Baba"
@@ -12,6 +12,9 @@ CT="content-type: application/json"
 echo "Delete previously created user (if any)"
 rm -f ../space/users/.dm/${SHORTNAME}/meta.*.json
 [[ -d ../space/users/.dm/${SHORTNAME}/ ]] && rmdir ../space/users/.dm/${SHORTNAME}/
+
+echo "Delete previously created attachment (if any)"
+[[ -d ../space/cool ]] && rm -r ../space/cool
 
 echo -n "Create user: "
 CREATE=$(jq -c -n --arg shortname "$SHORTNAME" --arg displayname "$DISPLAYNAME" --arg email "$EMAIL" --arg password "$PASSWORD" '{resource_type: "user", subpath: "users", shortname: $shortname, attributes:{display_name: $displayname, email: $email, password: $password}}')
@@ -53,3 +56,6 @@ curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq .status
 
 echo -n "Delete user: "
 curl -s -H "$AUTH" -H "$CT" -d '{}' $API_URL/user/delete | jq .status
+
+echo -n "Upload attachment: "
+curl -s -H "$AUTH" -F 'request=@"../space/test/create-media.json"' -F 'file=@"../space/test/logo.webp"' ${API_URL}/managed/media | jq .status 

@@ -103,3 +103,4 @@ if __name__ == "__main__":
     managed.test_create_folder_resource()
     managed.test_query_subpath()
     managed.test_delete_all()
+    managed.post_attachment()
