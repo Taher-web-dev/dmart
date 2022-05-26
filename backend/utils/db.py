@@ -173,10 +173,10 @@ def delete(subpath: str, meta: core.Meta):
     pathname = path / filename
     if pathname.is_file():
         os.remove(pathname)
-        filename_without_ext = os.path.splitext(filename)[0]
+        media_name = filename.split(".")[1]
         files = os.listdir(path)
         for file in files:
-            if filename_without_ext in file:
+            if media_name in file:
                 os.remove(path / file)
                 break
 
