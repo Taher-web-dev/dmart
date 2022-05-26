@@ -53,7 +53,7 @@ async def move_entry(record: core.Record) -> api.Response:
     item = db.load(record.subpath, record.shortname, cls)
     if "new_path" not in record.attributes or not record.attributes["new_path"]:
         raise api.Exception(
-            404, api.Error(type="move", code=202, message="error moving")
+            404, api.Error(type="move", code=202, message="Please provide the new_path at the attributes field")
         )
     newpath = record.attributes["new_path"]
     db.move(record.subpath, newpath, item)
