@@ -1,0 +1,7 @@
+{
+  "resource_type": "media",
+  "subpath": "cool/stuff",
+  "parent_shortname": "funthing",
+  "shortname": "mypicture",
+  "attributes": { "filename": "canvas.png", "tags": ["fun", "personal"] }
+}
