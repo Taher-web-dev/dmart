@@ -51,6 +51,7 @@ class Meta(Resource):
             owner_shortname=shortname, shortname=record.shortname, **record.attributes
         )
         child_resource_obj.parse_record(record)  # PAYLOAD
+        print("\n\nchild_resource_obj: ", child_resource_obj)
         return child_resource_obj
 
     def parse_record(self, record: Record):
@@ -110,7 +111,10 @@ class Comment(Attachment):
 
 
 class Media(Attachment):
-    pass
+    filename: str
+
+    def parse_record(self, record: Record):
+        self.payload = Payload(content_type=ContentType.image, body=record.attributes["filename"])
 
 
 class Relationship(Attachment):

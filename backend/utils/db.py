@@ -137,6 +137,7 @@ async def save_payload(subpath: str, meta: core.Meta, attachment):
         )
 
     payload_filename = filename.replace(".json", Path(attachment.filename).suffix)
+    payload_filename = payload_filename.replace("meta.", "")
 
     with open(path / payload_filename, "wb") as file:
         while content := await attachment.read(1024):
