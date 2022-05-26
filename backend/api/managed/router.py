@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 
 import models.api as api
 import models.core as core
+from models.enums import ContentType
 import utils.db as db
 import utils.regex as regex
 from utils.jwt import JWTBearer
@@ -103,8 +104,8 @@ async def upload_attachment_with_payload(
         )
 
     record = core.Record.parse_raw(request.file.read())
-    record.attributes["filename"] = record.shortname + "." + file.filename.split('.')[1]
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+    resource_obj.payload = core.Payload(content_type=ContentType.image, body=record.shortname + "." + file.filename.split('.')[1]) 
 
     if not isinstance(resource_obj, core.Attachment):
         raise api.Exception(
