@@ -19,18 +19,22 @@ attachment_shortname: str = "doors"
 
 dirpath = f"{settings.space_root}/{subpath}/.dm/{shortname}"
 
-attachment = {
-    "file": (
-        "logo.jpeg",
-        open("../space/test/logo.jpeg", "rb"),
-        "application/octet-stream",
-    ),
-    "request": (
-        "createmedia.json",
-        open("../space/test/createmedia.json", "rb"),
-        "application/json",
-    ),
-}
+attachment_record_path = "../space/test/createmedia.json"
+attachment_media_path = "../space/test/logo.jpeg"
+# attachment = {
+#     "file": {
+#         "logo.jpeg",
+#         attachment_media_path,
+#         # open(, "rb"),
+#         "application/octet-stream",
+#     },
+#     "request": {
+#         "createmedia.json",
+#         attachment_record_path,
+#         # open(attachment_record_path, "rb"),
+#         "application/json",
+#     },
+# }
 
 if os.path.exists(dirpath):
     shutil.rmtree(dirpath)
@@ -144,14 +148,15 @@ def test_query_subpath():
         "offset": 0,
         "tags": ["string"],
     }
-    my_attach = attachment
-    request_file_data = json.loads(my_attach["request"][1].read())
-    print("\n\n\n\n +++++++++++++++++++++++++++++RESPONSE+++++++++++++++++++++++++++++ ", request_file_data)
+    # my_attach = attachment
+    # request_file_data = json.loads(my_attach["request"][1].read())
+    # print("\n\n\n\n +++++++++++++++++++++++++++++RESPONSE+++++++++++++++++++++++++++++ ", request_file_data)
+    # print("\n\n\n\n +++++++++++++++++++++++++++++AFTER READ+++++++++++++++++++++++++++++ ", my_attach["request"][1].read())
     response = client.post(endpoint, json=request_data, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"
-    assert json_response["attributes"]["returned"] == 2
+    assert json_response["attributes"]["returned"] == limit
     for record in json_response["records"]:
         assert record["resource_type"] in filter_types
 
@@ -212,27 +217,37 @@ def delete_resource(resource: str, del_subpath: str, del_shortname: str):
 def test_upload_attachment_with_payload():
     headers = {"Authorization": f"Bearer {token}"}
     endpoint = "managed/media"
+    request_file = open(attachment_record_path, 'rb')
+    media_file = open(attachment_media_path, 'rb')
+
     data = [
-        ("request", attachment["request"]),
-        ("file", attachment["file"]),
+        ("request", ("createmedia.json", request_file, "application/json")),
+        ("file", ("logo.jpeg", media_file, "application/octet-stream")),
     ]
 
-    response = client.post(endpoint, files=data, headers=headers)
-    print("************************************************")
-    print(response.json())
-    print("************************************************")
-    assert response.status_code == status.HTTP_200_OK
-    json_response = response.json()
-    assert json_response["status"] == "success"
+    # response = client.post(endpoint, files=data, headers=headers)
+    assert_code_and_status_success(
+        client.post(endpoint, files=data, headers=headers)
+    )
+    request_file.close()
+    media_file.close()
+    # print("************************************************")
+    # print(response.json())
+    # print("************************************************")
+    # assert response.status_code == status.HTTP_200_OK
+    # json_response = response.json()
+    # assert json_response["status"] == "success"
 
 
-# def test_retrieve_attachment():
-#     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "image/jpg"}
-#     request_file_data = json.loads(attachment["request"][1].read())
-#     print("\n\n\n\n +++++++++++++++++++++++++++++RESPONSE+++++++++++++++++++++++++++++ ", request_file_data)
-#     subpath = request_file_data["subpath"]
-#     file_name = request_file_data["attributes"]["filename"]
-#     endpoint = f"managed/media/{subpath}/{file_name}"
+def test_retrieve_attachment():
+    headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "image/jpg"}
+    request_file = open(attachment_record_path, 'rb')
+    request_file_data = json.loads(request_file.read())
+    print("\n\n\n\n +++++++++++++++++++++++++++++RESPONSE+++++++++++++++++++++++++++++ ", request_file_data)
+    assert 1 == 2
+    # subpath = request_file_data["subpath"]
+    # file_name = request_file_data["attributes"]["filename"]
+    # endpoint = f"managed/media/{subpath}/{file_name}"
 
     # response = client.get(endpoint, headers=headers)
     # assert response.status_code == status.HTTP_200_OK
