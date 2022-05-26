@@ -3,5 +3,5 @@
   "subpath": "cool/stuff",
   "parent_shortname": "funthing",
   "shortname": "mypicture",
-  "attributes": { "filename": "canvas.png", "tags": ["fun", "personal"] }
+  "attributes": { "tags": ["fun", "personal"] }
 }
