@@ -168,9 +168,17 @@ def delete(subpath: str, meta: core.Meta):
             status_code=404,
             error=api.Error(type="delete", code=30, message="does not exist"),
         )
+
     pathname = path / filename
     if pathname.is_file():
         os.remove(pathname)
+        filename_without_ext = os.path.splitext(filename)[0]
+        files = os.listdir(path)
+        for file in files:
+            if filename_without_ext in file:
+                os.remove(path / file)
+                break
+
     # Remove folder if empty
     if len(os.listdir(path)) == 0:
         os.rmdir(path)
