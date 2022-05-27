@@ -2,11 +2,8 @@
 
 import time
 import traceback
-import logging
-import logging.handlers
 import uvicorn
 
-# from settings import settings
 import json_logging
 from utils.settings import settings
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -19,7 +16,6 @@ from fastapi.encoders import jsonable_encoder
 from api.managed.router import router as managed
 from api.user.router import router as user
 from api.public.router import router as public
-from urllib.parse import urlparse
 from utils.logger import logger
 
 
@@ -95,6 +91,16 @@ async def middle(request: Request, call_next):
                 api.Response(status=api.Status.failed, error=ex.error)
             ),
         )
+        stack = [
+            {
+                "file": frame.f_code.co_filename,
+                "function": frame.f_code.co_name,
+                "line": lineno,
+            }
+            for frame, lineno in traceback.walk_tb(ex.__traceback__)
+            if "site-packages" not in frame.f_code.co_filename
+        ]
+        logger.error(str(ex), extra={"props": {"stack": stack}})
     except Exception as ex:
         if ex:
             stack = [
@@ -165,18 +171,13 @@ async def root():
         "date": datetime.now(),
     }
 
-@app.get("/{x:path}", include_in_schema=False)
-async def catchall():
-    raise api.Exception(status_code=status.HTTP_404_NOT_FOUND, error=api.Error(type="catchall", code=230, message="Invalid request path"))
-
 app.include_router(user, prefix="/user", tags=["user"])
 app.include_router(managed, prefix="/managed", tags=["managed"])
 app.include_router(public, prefix="/public", tags=["public"])
 
-# @app.get("/items/{item_id}")
-# async def read_item(item_id: int, q: Optional[str] = None):
-#    return {"item_id": item_id, "q": q}
-
+@app.get("/{x:path}", include_in_schema=False)
+async def catchall():
+    raise api.Exception(status_code=status.HTTP_404_NOT_FOUND, error=api.Error(type="catchall", code=230, message="Invalid request path"))
 
 if __name__ == "__main__":
     uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore

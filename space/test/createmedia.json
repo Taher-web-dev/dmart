@@ -1,7 +1,6 @@
 {
   "resource_type": "media",
   "subpath": "cool/stuff",
-  "parent_shortname": "funthing",
   "shortname": "mypicture",
   "attributes": { "tags": ["fun", "personal"] }
 }
