@@ -20,6 +20,8 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
     total: int = 0
     if query.type == api.QueryType.subpath:
         path = settings.space_root / query.subpath
+        if query.include_fields is None:
+            query.include_fields = []
 
         # Gel all matching entries
         entries_glob = ".dm/*/meta.*.json"

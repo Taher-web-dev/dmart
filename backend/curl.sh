@@ -38,7 +38,7 @@ curl -s -H "$AUTH" -H "$CT" -d "$UPDATE" $API_URL/user/profile | jq .status
 echo -n "Get profile: "
 curl -s -H "$AUTH" -H "$CT" $API_URL/user/profile | jq .status
 
-SUBPATH="nicepost"
+SUBPATH="myposts"
 echo -n "Create Content: " 
 RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "content", subpath: $subpath, shortname: $shortname, attributes:{body: "this content created from curl request for testing"}}')
 curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq .status 
@@ -50,12 +50,16 @@ curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/update | jq .status
 
 echo -n "Comment on content: "
 COMMENT_SHORTNAME="greatcomment"
-SUBPATH="curl_content/$SHORTNAME"
-RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$COMMENT_SHORTNAME"  '{resource_type: "comment", subpath: $subpath, shortname: $shortname, attributes:{body: "A comment insdie the content resource"}}')
+COMMENT_SUBPATH="$SUBPATH/$SHORTNAME"
+RECORD=$(jq -c -n --arg subpath "$COMMENT_SUBPATH" --arg shortname "$COMMENT_SHORTNAME"  '{resource_type: "comment", subpath: $subpath, shortname: $shortname, attributes:{body: "A comment insdie the content resource"}}')
 curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq .status 
 
 echo -n "Upload attachment: "
 curl -s -H "$AUTH" -F 'request_record=@"../space/test/createmedia.json"' -F 'file=@"../space/test/logo.jpeg"' ${API_URL}/managed/media  | jq .status
+
+echo -n "Query content"
+RECORD=$(jq -c -n --arg subpath "$SUBPATH" '{type: "subpath", subpath: $subpath}')
+curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/query | jq .status
 
 echo -n "Delete user: "
 curl -s -H "$AUTH" -H "$CT" -d '{}' $API_URL/user/delete | jq .status

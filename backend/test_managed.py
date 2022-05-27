@@ -138,15 +138,8 @@ def test_query_subpath():
         "subpath": subpath,
         "filter_types": filter_types,
         "filter_shortnames": [shortname],
-        "search": "string",
-        "from_date": "2022-05-25T09:03:25.560Z",
-        "to_date": "2022-05-25T09:03:25.560Z",
-        "exclude_fields": ["string"],
-        "include_fields": [],
-        "sort_by": "string",
         "limit": limit,
         "offset": 0,
-        "tags": ["string"],
     }
     
     response = client.post(endpoint, json=request_data, headers=headers)

@@ -19,17 +19,17 @@ class QueryType(str, Enum):
 class Query(BaseModel):
     type: QueryType
     subpath: str = Field(regex=regex.SUBPATH)
-    filter_types: list[ResourceType]
-    filter_shortnames: list[str] = Field(regex=regex.SHORTNAME)
-    search: str
-    from_date: datetime
-    to_date: datetime
-    exclude_fields: list[str]
-    include_fields: list[str]
-    sort_by: str
-    limit: int
-    offset: int
-    tags: list[str]
+    filter_types: list[ResourceType] | None = None
+    filter_shortnames: list[str] | None = Field(None, regex=regex.SHORTNAME)
+    search: str | None = None
+    from_date: datetime | None = None
+    to_date: datetime | None = None
+    exclude_fields: list[str] | None = None
+    include_fields: list[str] | None = None
+    sort_by: str | None = None
+    limit: int = 10
+    offset: int = 0
+    tags: list[str] | None = None
 
 
 class Status(str, Enum):
