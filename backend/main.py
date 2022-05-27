@@ -169,6 +169,7 @@ async def root():
         "decription": "Structured CMS",
         "status": "Up and running",
         "date": datetime.now(),
+        "status": "success"
     }
 
 app.include_router(user, prefix="/user", tags=["user"])
