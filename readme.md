@@ -1,6 +1,14 @@
 ## DataMart 
 
-A minimalist structure-oriented content management system.
+A minimalist structure-oriented content management system that serves as an isolated or independent data layer. 
+
+It can also be called "Content Repository", "Content Registry".
+
+- Generic API that allows dealing with a wide variety of content
+- All content is stored in flat json files that can be version controlled
+- Able to serve an arbitrary number of application consuming it (crosses the boundaries of applications)
+- Time-proof design for maximum data longevity
+- This isolated data layer can be used as the single source of truth. 
 
 The main data entity is called *entry*; each entry has:
  - A meta-file (json) that holds *meta* information about the entry; such as name, description, tags, attributes ...etc. 
