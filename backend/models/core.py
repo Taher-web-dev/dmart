@@ -66,16 +66,15 @@ class Meta(Resource):
             "subpath": subpath,
         }
 
-        fields["attributes"] = self.get_record_attributes(include=include)
-        return Record(**fields)
-
-    def get_record_attributes(self, include: list[str]):
         meta_fields = list(Meta.__fields__.keys())
         attributes = {}
         for key, value in self.__dict__.items():
             if (not include or key in include) and key not in meta_fields:
                 attributes[key] = value
-        return attributes
+
+        fields["attributes"] = attributes
+        return Record(**fields)
+
 
 
 class Locator(Resource):
