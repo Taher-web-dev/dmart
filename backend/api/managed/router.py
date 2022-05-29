@@ -54,7 +54,12 @@ async def move_entry(record: core.Record) -> api.Response:
     item = db.load(record.subpath, record.shortname, cls)
     if "new_path" not in record.attributes or not record.attributes["new_path"]:
         raise api.Exception(
-            404, api.Error(type="move", code=202, message="Please provide the new_path at the attributes field")
+            404,
+            api.Error(
+                type="move",
+                code=202,
+                message="Please provide the new_path at the attributes field",
+            ),
         )
     newpath = record.attributes["new_path"]
     db.move(record.subpath, newpath, item)
@@ -107,7 +112,10 @@ async def upload_attachment_with_payload(
 
     record = core.Record.parse_raw(request_record.file.read())
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-    resource_obj.payload = core.Payload(content_type=ContentType.image, body=record.shortname + "." + file.filename.split('.')[1]) 
+    resource_obj.payload = core.Payload(
+        content_type=ContentType.image,
+        body=record.shortname + "." + file.filename.split(".")[1],
+    )
 
     if not isinstance(resource_obj, core.Attachment):
         raise api.Exception(

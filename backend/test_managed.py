@@ -141,7 +141,7 @@ def test_query_subpath():
         "limit": limit,
         "offset": 0,
     }
-    
+
     response = client.post(endpoint, json=request_data, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
@@ -207,28 +207,28 @@ def delete_resource(resource: str, del_subpath: str, del_shortname: str):
 def test_upload_attachment_with_payload():
     headers = {"Authorization": f"Bearer {token}"}
     endpoint = "managed/media"
-    request_file = open(attachment_record_path, 'rb')
-    media_file = open(attachment_media_path, 'rb')
+    request_file = open(attachment_record_path, "rb")
+    media_file = open(attachment_media_path, "rb")
 
     data = [
         ("request_record", ("createmedia.json", request_file, "application/json")),
         ("file", ("logo.jpeg", media_file, "application/octet-stream")),
     ]
 
-    assert_code_and_status_success(
-        client.post(endpoint, files=data, headers=headers)
-    )
+    assert_code_and_status_success(client.post(endpoint, files=data, headers=headers))
     request_file.close()
     media_file.close()
 
 
 def test_retrieve_attachment():
     headers = {"Authorization": f"Bearer {token}"}
-    request_file = open(attachment_record_path, 'rb')
+    request_file = open(attachment_record_path, "rb")
     request_file_data = json.loads(request_file.read())
 
     subpath = request_file_data["subpath"]
-    file_name = request_file_data["shortname"]+"."+attachment_media_path.split(".")[-1]
+    file_name = (
+        request_file_data["shortname"] + "." + attachment_media_path.split(".")[-1]
+    )
     endpoint = f"managed/media/{subpath}/{file_name}"
 
     response = client.get(endpoint, headers=headers)

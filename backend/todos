@@ -1,11 +1,11 @@
 
 - [x] Full and proper OpenApi documentation
 - [x] Capture validation errors and general excptions
-- Log events, errors and exceptions into jsonl log file
+- [x] Log events, errors and exceptions into jsonl log file
+- [x] shortnames/subpaths/filenames should only be alphanumeric with _ 1..32 chars # this is for security: [a-zA-Z0-9_]{1,32}
+- move api: if attachment, should include the payload. if entry should include all attachments
 - Include attachments in the query response
-- shortnames/subpaths/filenames should only be alphanumeric with _ 1..32 chars # this is for security: [a-zA-Z0-9_]{1,32}
 - security labels and acl rules
 - redis index, search
 - implement history creation
-- implement histor and events query
-- move api: if attachment, should include the payload. if entry should include all attachments
+- implement history and events query

@@ -169,16 +169,22 @@ async def root():
         "decription": "Structured CMS",
         "status": "Up and running",
         "date": datetime.now(),
-        "status": "success"
+        "status": "success",
     }
+
 
 app.include_router(user, prefix="/user", tags=["user"])
 app.include_router(managed, prefix="/managed", tags=["managed"])
 app.include_router(public, prefix="/public", tags=["public"])
 
+
 @app.get("/{x:path}", include_in_schema=False)
 async def catchall():
-    raise api.Exception(status_code=status.HTTP_404_NOT_FOUND, error=api.Error(type="catchall", code=230, message="Invalid request path"))
+    raise api.Exception(
+        status_code=status.HTTP_404_NOT_FOUND,
+        error=api.Error(type="catchall", code=230, message="Invalid request path"),
+    )
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore

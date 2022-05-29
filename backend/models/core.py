@@ -112,6 +112,7 @@ class Comment(Attachment):
 class Media(Attachment):
     pass
 
+
 class Relationship(Attachment):
     related_to: Locator
     attributes: dict[str, Any]
@@ -126,7 +127,6 @@ class Event(Resource):
 
 
 class Alteration(Attachment):
-    uuid: UUID
     user_shortname: str
     previous_alteration: UUID
     timestamp: datetime

@@ -95,6 +95,9 @@ With this scheme, when browsing the file system, only proper entry payload files
 - git
 - python 3
 - pip
+- redis
+- RedisJSON (rejson)
+- RediSearch
 
 Optional:
 

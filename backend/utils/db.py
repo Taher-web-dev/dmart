@@ -18,7 +18,11 @@ FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
     records: list[core.Record] = []
     total: int = 0
-    if query.type == api.QueryType.subpath:
+    if query.type == api.QueryType.search:
+        query.search  # This contains search request that should be executed via RediSearch.
+        # * name=dfs tags=32
+        # Send request to RediSearch and process response into the records list to be returned to the user
+    elif query.type == api.QueryType.subpath:
         path = settings.space_root / query.subpath
         if query.include_fields is None:
             query.include_fields = []

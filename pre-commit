@@ -13,12 +13,12 @@ if ! flake8; then
 fi
 
 psql -h 127.0.0.1 -U galleon galleon -c 'delete from users; delete from otp;'
-export BACKEND_ENV=backend/config.env
-export LOG_PATH=backend/logs
-export SPACE_ROOT=space
+export BACKEND_ENV=config.env
+cd backend
 if ! pytest -v; then
   echo -e "\n${red}Pytest failed${no_color}"
+  cd -
   exit 1
 fi
-
+cd -
 echo -e "\n${green}All pre-commit checks are good${no_color}"
