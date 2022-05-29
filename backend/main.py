@@ -179,10 +179,16 @@ app.include_router(public, prefix="/public", tags=["public"])
 
 
 @app.get("/{x:path}", include_in_schema=False)
+@app.post("/{x:path}", include_in_schema=False)
+@app.put("/{x:path}", include_in_schema=False)
+@app.patch("/{x:path}", include_in_schema=False)
+@app.delete("/{x:path}", include_in_schema=False)
 async def catchall():
     raise api.Exception(
         status_code=status.HTTP_404_NOT_FOUND,
-        error=api.Error(type="catchall", code=230, message="Invalid request path"),
+        error=api.Error(
+            type="catchall", code=230, message="Requested method or path is invalid"
+        ),
     )
 
 

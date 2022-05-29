@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = ""
     listening_host: str = "0.0.0.0"
     listening_port: int = 8282
+    redis_host: str = "127.0.0.1"
+    space_name: str = ""
     space_root: Path = Path("../space")
 
     class Config:

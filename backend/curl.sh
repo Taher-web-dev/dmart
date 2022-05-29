@@ -40,12 +40,12 @@ curl -s -H "$AUTH" -H "$CT" $API_URL/user/profile | jq .status
 
 SUBPATH="myposts"
 echo -n "Create Content: " 
-RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "content", subpath: $subpath, shortname: $shortname, attributes:{body: "this content created from curl request for testing"}}')
+RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "content", subpath: $subpath, shortname: $shortname, attributes:{payload: {body: "this content created from curl request for testing", content_type: "text"}, tags: ["one","two"], content_type: "text", display_name: "This is a nice one", description: "Furhter description could help"}}')
 curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq .status 
 
-echo -n "Update Content: "
-RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "content", subpath: $subpath, shortname: $shortname, attributes:{body: "-----UPDATED-------this content created from curl request for testing"}}')
-curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/update | jq .status 
+#echo -n "Update Content: "
+#RECORD=$(jq -c -n --arg subpath "$SUBPATH" --arg shortname "$SHORTNAME"  '{resource_type: "content", subpath: $subpath, shortname: $shortname, attributes:{body: "-----UPDATED-------this content created from curl request for testing"}}')
+#curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/update | jq .status 
 
 
 echo -n "Comment on content: "

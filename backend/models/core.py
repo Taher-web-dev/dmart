@@ -19,6 +19,10 @@ class Resource(BaseModel):
 
 class Payload(Resource):
     content_type: ContentType
+    content_sub_type: str | None = (
+        None  # FIXME change to proper content type static hashmap
+    )
+    schema_shortname: str | None = None
     body: str | dict[str, Any] | Path
 
 
@@ -44,16 +48,23 @@ class Meta(Resource):
 
     @staticmethod
     def from_record(record: Record, shortname: str):
-        child_resource_cls = getattr(
-            sys.modules["models.core"], record.resource_type.title()
-        )
-        child_resource_obj = child_resource_cls(
+        meta_class = getattr(sys.modules["models.core"], record.resource_type.title())
+        meta_obj = meta_class(
             owner_shortname=shortname, shortname=record.shortname, **record.attributes
         )
-        child_resource_obj.parse_record(record)  # PAYLOAD
-        return child_resource_obj
+        """
+        if "payload.body" in record.attributes and record.attributes["payload.body"]:
+            content_type = ContentType.text
+            if "payload.content_type" in record.attributes and record.attributes["payload.content_type"]:
+                content_type = record.attributes["payload.content"]
+            meta_obj.payload = Payload(
+                content_type=content_type, body=record.attributes["payload.body"]
+            )
+        """
+        meta_obj.parse_record(record)
+        return meta_obj
 
-    def parse_record(self, record: Record):
+    def parse_record(self, _: Record):
         pass
 
     def to_record(self, subpath: str, shortname: str, include: list[str]):
@@ -74,7 +85,6 @@ class Meta(Resource):
 
         fields["attributes"] = attributes
         return Record(**fields)
-
 
 
 class Locator(Resource):
@@ -137,15 +147,7 @@ class Schema(Meta):
 
 
 class Content(Meta):
-    schema_shortname: str | None = None
-    body: str
-
-    def parse_record(self, record: Record):
-        if "body" in record.attributes:
-            self.payload = Payload(
-                content_type=ContentType.json, body=record.attributes["body"]
-            )
-        self.payload = None
+    pass
 
 
 class Folder(Meta):

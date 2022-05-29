@@ -29,6 +29,7 @@ class ResourceType(str, Enum):
     acl = "acl"
     comment = "comment"
     media = "media"
+    locator = "locator"
     relationship = "relationship"
     alteration = "alteration"
 

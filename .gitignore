@@ -5,3 +5,4 @@ secrets.env
 workspace.xml
 settings.json
 .vscode
+.coverage

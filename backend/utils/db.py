@@ -2,17 +2,84 @@ import sys
 from models.enums import ResourceType
 from utils.settings import settings
 import models.core as core
-from typing import TypeVar, Type
+from typing import TypeVar, Type, Generic
 import models.api as api
 import os
 import re
+import json
 from pathlib import Path
 from utils.logger import logger
 
-Meta = TypeVar("Meta", bound=core.Meta)
+MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
 FILE_PATTERN = re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
 FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
+
+
+def locators_query(query: api.Query) -> tuple[int, list[core.Locator]]:
+    locators: list[core.Locator] = []
+    total: int = 0
+    if query.type == api.QueryType.subpath:
+        path = settings.space_root / query.subpath
+        if query.include_fields is None:
+            query.include_fields = []
+
+        # Gel all matching entries
+        entries_glob = ".dm/*/meta.*.json"
+        for one in path.glob(entries_glob):
+            match = FILE_PATTERN.search(str(one))
+            if not match or not one.is_file:
+                logger.error("Invalid file pattern")
+                continue
+            shortname = match.group(1)
+            resource_name = match.group(2).lower()
+            if (
+                query.filter_types
+                and not ResourceType(resource_name) in query.filter_types
+            ):
+                logger.info(resource_name + " resource is not listed in filter types")
+                continue
+
+            if query.filter_shortnames and shortname not in query.filter_shortnames:
+                continue
+
+            total += 1
+            if len(locators) >= query.limit or total < query.offset:
+                continue
+            resource_class = getattr(sys.modules["models.core"], resource_name.title())
+            meta = resource_class.parse_raw(one.read_text())
+            locators.append(
+                core.Locator(
+                    uuid=meta.uuid,
+                    subpath=query.subpath,
+                    shortname=shortname,
+                    type=ResourceType(resource_name),
+                )
+            )
+        # Get all matching sub folders
+        subfolders_glob = "*/.dm/meta.folder.json"
+        for one in path.glob(subfolders_glob):
+            match = FOLDER_PATTERN.search(str(one))
+
+            if not match or not one.is_file:
+                logger.error("Invalid file pattern")
+                continue
+            shortname = match.group(1)
+            if query.filter_shortnames and shortname not in query.filter_shortnames:
+                continue
+            total += 1
+            if len(locators) >= query.limit or total < query.offset:
+                continue
+            meta = core.Folder.parse_raw(one.read_text())
+            locators.append(
+                core.Locator(
+                    uuid=meta.uuid,
+                    subpath=query.subpath,
+                    shortname=shortname,
+                    type=core.ResourceType.locator,
+                )
+            )
+    return total, locators
 
 
 def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
@@ -77,7 +144,9 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
     return total, records
 
 
-def metapath(subpath: str, shortname: str, class_type: Type[Meta]) -> tuple[Path, str]:
+def metapath(
+    subpath: str, shortname: str, class_type: Type[MetaChild]
+) -> tuple[Path, str]:
     """Construct the full path of the meta file"""
     path = settings.space_root
     filename = ""
@@ -95,7 +164,7 @@ def metapath(subpath: str, shortname: str, class_type: Type[Meta]) -> tuple[Path
     return path, filename
 
 
-def load(subpath: str, shortname: str, class_type: Type[Meta]) -> Meta:
+def load(subpath: str, shortname: str, class_type: Type[MetaChild]) -> MetaChild:
     """Load a Meta Json according to the reuqested Class type"""
     path, filename = metapath(subpath, shortname, class_type)
     path /= filename

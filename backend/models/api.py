@@ -4,7 +4,7 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from pydantic.types import UUID4 as UUID
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from builtins import Exception as PyException
 import utils.regex as regex
 
@@ -18,9 +18,9 @@ class QueryType(str, Enum):
 
 class Query(BaseModel):
     type: QueryType
-    subpath: str = Field(regex=regex.SUBPATH)
+    subpath: str = Field(...,regex=regex.SUBPATH)
     filter_types: list[ResourceType] | None = None
-    filter_shortnames: list[str] | None = Field(None, regex=regex.SHORTNAME)
+    filter_shortnames: list[str] | None = Field(regex=regex.SHORTNAME, default_factory=list)
     search: str | None = None
     from_date: datetime | None = None
     to_date: datetime | None = None
