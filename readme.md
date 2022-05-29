@@ -131,6 +131,14 @@ python tests.py
 # pytest
 pytest
 
+#Code coverage
+
+# Conduct coverage check 
+coverage run -m pytest
+
+# Print the report
+coverage report -m
+
 # To run:
 python main.py
 # or 
