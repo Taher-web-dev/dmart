@@ -12,6 +12,14 @@ from models.enums import ContentType, RequestType, ResourceType
 import utils.regex as regex
 
 
+class MoveModel(BaseModel):
+    resource_type: ResourceType
+    src_shortname: str = Field(regex=regex.SHORTNAME)
+    src_subpath: str = Field(regex=regex.SUBPATH)
+    dist_shortname: str = Field(default=None, regex=regex.SHORTNAME)
+    dist_subpath: str = Field(default=None, regex=regex.SUBPATH)
+
+
 class Resource(BaseModel):
     class Config:
         use_enum_values = True

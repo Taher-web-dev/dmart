@@ -231,10 +231,56 @@ def update(subpath: str, meta: core.Meta):
         file.write(meta.json(exclude_none=True))
 
 
-def move(subpath: str, newpath: str, meta: core.Meta):
-    path, filename = metapath(subpath, meta.shortname, meta.__class__)
-    # Fixme ... decide what to move depending on the type
-    os.rename(src=path / filename, dst=newpath)
+
+def move(src_subpath: str, src_shortname: str, dist_subpath : str | None, dist_shortname : str | None, meta: core.Meta):
+    src_path, src_filename = metapath(src_subpath, src_shortname, meta.__class__)
+
+    dist_path, dist_filename = metapath(dist_subpath if dist_subpath else src_subpath, dist_shortname if dist_shortname else src_shortname, meta.__class__)
+
+    # Create Dist dir if not exist
+    if(not os.path.isdir(dist_path)):
+            os.makedirs(dist_path)
+
+    meta_updated = False
+    # Incase of attachment, the shortname is a file so it should be moved
+    if issubclass(type(meta), core.Attachment):
+        # Move file
+        os.rename(src=src_path / src_filename, dst=dist_path / dist_filename)
+
+
+        # Move media files with the meta file
+        if issubclass(type(meta), core.Media):
+            media_name = src_filename.split(".")[-2]
+            files = os.listdir(src_path)
+            for file in files:
+                if media_name in file:
+                    renamed_file = dist_filename.split(".")[-2] + "." + file.split(".")[-1]
+                    os.rename(src=src_path / file, dst=dist_path / renamed_file)
+            
+                    # Update file name inside meta file
+                    meta.payload.body = renamed_file
+                    meta_updated = True
+                    break
+        
+    # Rename folder only if meta not Attachment type
+    else :
+        os.rename(src=src_path, dst=dist_path)
+
+
+    # Update meta shortname
+    if dist_shortname:
+        meta.shortname = dist_shortname
+        meta_updated = True
+    
+    # Store meta updates in the file
+    if meta_updated:
+        with open(dist_path / dist_filename, "w") as opened_file:
+            opened_file.write(meta.json(exclude_none=True))
+
+    # Delete Src path if empty
+    if src_path.is_dir() and len(os.listdir(src_path)) == 0:
+        os.rmdir(src_path)
+
 
 
 def delete(subpath: str, meta: core.Meta):

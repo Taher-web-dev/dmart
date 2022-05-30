@@ -49,21 +49,17 @@ async def delete_entry(record: core.Record) -> api.Response:
 
 
 @router.post("/move", response_model=api.Response, response_model_exclude_none=True)
-async def move_entry(record: core.Record) -> api.Response:
+async def move_entry(record: core.MoveModel) -> api.Response:
     cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
-    item = db.load(record.subpath, record.shortname, cls)
-    if "new_path" not in record.attributes or not record.attributes["new_path"]:
+    item = db.load(record.src_subpath, record.src_shortname, cls)
+    if not record.dist_subpath and not record.dist_shortname:
         raise api.Exception(
-            404,
-            api.Error(
-                type="move",
-                code=202,
-                message="Please provide the new_path at the attributes field",
-            ),
+            404, api.Error(type="move", code=202, message="Please provide a new path or a new shortname")
         )
-    newpath = record.attributes["new_path"]
-    db.move(record.subpath, newpath, item)
+
+    db.move(record.src_subpath, record.src_shortname, record.dist_subpath, record.dist_shortname, item)
     return api.Response(status=api.Status.success)
+
 
 
 @router.get("/media/{subpath:path}/{shortname}.{ext}")
