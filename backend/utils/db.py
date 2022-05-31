@@ -235,7 +235,7 @@ def update(subpath: str, meta: core.Meta):
 def move(src_subpath: str, src_shortname: str, dist_subpath : str | None, dist_shortname : str | None, meta: core.Meta):
     src_path, src_filename = metapath(src_subpath, src_shortname, meta.__class__)
 
-    dist_path, dist_filename = metapath(dist_subpath if dist_subpath else src_subpath, dist_shortname if dist_shortname else src_shortname, meta.__class__)
+    dist_path, dist_filename = metapath(dist_subpath or src_subpath, dist_shortname or src_shortname, meta.__class__)
 
     # Create Dist dir if not exist
     if(not os.path.isdir(dist_path)):
