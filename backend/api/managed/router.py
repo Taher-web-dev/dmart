@@ -68,7 +68,7 @@ async def move_entry(record: core.Record) -> api.Response:
 
 
 @router.get("/payload-file/{subpath:path}/{shortname}.{ext}")
-async def get_media(
+async def get_resource_payload(
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
@@ -79,16 +79,12 @@ async def get_media(
         meta_class_type = core.Media
     else: 
         meta_class_type = core.Content
-
     
-    path, filename = db.metapath(subpath, shortname, meta_class_type)
     meta = db.load(subpath, shortname, meta_class_type)
-    print("\n\n\n PATH: ", path, "\n\n\n FILENAME: ", filename, "\n meta: ", meta)
     if (
         meta.payload is None
         or meta.payload.body is None
         or meta.payload.body != f"{shortname}.{ext}"
-        or shortname != filename.split(".")[1]
     ):
         raise api.Exception(
             404,
@@ -98,9 +94,8 @@ async def get_media(
         )
 
     # TODO check security labels for pubblic access
-
-    media_file = path / str(meta.payload.body)
-    return FileResponse(media_file)
+    payload_path = db.payload_path(subpath, meta_class_type)
+    return FileResponse(payload_path / str(meta.payload.body))
 
 
 @router.post("/create-with-payload", response_model=api.Response, response_model_exclude_none=True)
