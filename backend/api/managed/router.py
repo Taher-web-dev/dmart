@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, Depends, UploadFile, Path
 from fastapi.responses import FileResponse
 
@@ -66,14 +67,23 @@ async def move_entry(record: core.Record) -> api.Response:
     return api.Response(status=api.Status.success)
 
 
-@router.get("/media/{subpath:path}/{shortname}.{ext}")
+@router.get("/payload-file/{subpath:path}/{shortname}.{ext}")
 async def get_media(
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
 ) -> FileResponse:
-    path, filename = db.metapath(subpath, shortname, core.Media)
-    meta = db.load(subpath, shortname, core.Media)
+
+     
+    if re.match(regex.IMG_EXT, ext): 
+        meta_class_type = core.Media
+    else: 
+        meta_class_type = core.Content
+
+    
+    path, filename = db.metapath(subpath, shortname, meta_class_type)
+    meta = db.load(subpath, shortname, meta_class_type)
+    print("\n\n\n PATH: ", path, "\n\n\n FILENAME: ", filename, "\n meta: ", meta)
     if (
         meta.payload is None
         or meta.payload.body is None
