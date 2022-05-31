@@ -308,4 +308,4 @@ def delete(subpath: str, meta: core.Meta):
 
     # Remove folder if empty
     if len(os.listdir(path)) == 0:
-        os.rmdir(path)
+        os.removedirs(path)
