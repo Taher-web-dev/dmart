@@ -14,8 +14,8 @@ total, locators = db.locators_query(
 for one in locators:
     myclass = getattr(sys.modules["models.core"], core.ResourceType("content").title())
     # myclass = db.resource_class(core.ResourceType(one.__class__.__name__.lower()))
-    one = db.load("myposts", "alibaba", myclass)
-    search.save_meta(subpath, one)
+    meta = db.load(one.subpath, one.shortname, myclass)
+    search.save_meta(subpath, meta)
 
 #ret = search.index.search("*")
 #if ret.docs:
