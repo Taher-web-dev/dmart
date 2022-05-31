@@ -163,6 +163,22 @@ def metapath(
         filename = "meta." + class_type.__name__.lower() + ".json"
     return path, filename
 
+def payloadPath(
+    subpath: str, shortname: str, class_type: Type[MetaChild]
+) -> tuple[Path, str]:
+    """Construct the full path of the meta file"""
+    path = settings.space_root
+    filename = ""
+    if issubclass(class_type, core.Attachment):
+        [parent_subpath, parent_name] = subpath.rsplit("/", 1)
+        attachment_folder = parent_name + "/attachments." + class_type.__name__.lower()
+        path = path / parent_subpath / ".dm" / attachment_folder
+        filename = shortname
+    else:
+        path = path / subpath
+        filename = shortname
+    return path, filename
+
 
 def load(subpath: str, shortname: str, class_type: Type[MetaChild]) -> MetaChild:
     """Load a Meta Json according to the reuqested Class type"""
@@ -204,6 +220,8 @@ def create(subpath: str, meta: core.Meta):
 
 async def save_payload(subpath: str, meta: core.Meta, attachment):
     path, filename = metapath(subpath, meta.shortname, meta.__class__)
+    payload_path, payload_filename = payloadPath(subpath, meta.shortname, meta.__class__)
+    payload_filename += Path(attachment.filename).suffix
 
     if not (path / filename).is_file():
         raise api.Exception(
@@ -211,10 +229,7 @@ async def save_payload(subpath: str, meta: core.Meta, attachment):
             error=api.Error(type="create", code=30, message="missing metadata"),
         )
 
-    payload_filename = filename.replace(".json", Path(attachment.filename).suffix)
-    payload_filename = payload_filename.replace("meta.", "")
-
-    with open(path / payload_filename, "wb") as file:
+    with open(payload_path / payload_filename, "wb") as file:
         while content := await attachment.read(1024):
             file.write(content)
 

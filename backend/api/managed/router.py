@@ -93,7 +93,7 @@ async def get_media(
     return FileResponse(media_file)
 
 
-@router.post("/media", response_model=api.Response, response_model_exclude_none=True)
+@router.post("/create-with-payload", response_model=api.Response, response_model_exclude_none=True)
 async def upload_attachment_with_payload(
     file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
 ):
@@ -109,11 +109,26 @@ async def upload_attachment_with_payload(
             ),
         )
     """
+    if file.content_type == "application/json":
+        resource_content_type = ContentType.json
+    elif file.content_type == "text/markdown":
+        resource_content_type = ContentType.markdown
+    elif "image/" in file.content_type:
+        resource_content_type = ContentType.image
+    else :
+        raise api.Exception(
+            406,
+            api.Error(
+                type="attachment",
+                code=217,
+                message="The file type is not supported",
+            ),
+        )
 
     record = core.Record.parse_raw(request_record.file.read())
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-    resource_obj.payload = core.Payload(
-        content_type=ContentType.image,
+    resource_obj.payload = core.Payload( # detect the resource type
+        content_type=resource_content_type,
         body=record.shortname + "." + file.filename.split(".")[1],
     )
 
@@ -128,5 +143,5 @@ async def upload_attachment_with_payload(
         )
 
     db.save(record.subpath, resource_obj)
-    await db.save_payload(record.subpath, resource_obj, file)
+    await db.save_payload(record.subpath, resource_obj, file) # save any type of entries
     return api.Response(status=api.Status.success)
