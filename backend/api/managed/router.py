@@ -74,26 +74,14 @@ async def move_entry(
 
 @router.get("/payload/{subpath:path}/{shortname}.{ext}")
 async def retrieve_entry_or_attachment_payload(
+    resource_type : api.ResourceType,
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
 ) -> FileResponse:
 
-     
-    if re.match(regex.IMG_EXT, ext): 
-        meta_class_type = core.Media
-    elif ext in ["json", "md"]: 
-        meta_class_type = core.Content
-    else:
-        raise api.Exception(
-            404,
-            error=api.Error(
-                type="media", code=220, message="Request object is not available"
-            ),
-        )
-
-    
-    meta = db.load(subpath, shortname, meta_class_type)
+    cls = getattr(sys.modules["models.core"], resource_type.capitalize())
+    meta = db.load(subpath, shortname, cls)
     if (
         meta.payload is None
         or meta.payload.body is None
@@ -107,7 +95,7 @@ async def retrieve_entry_or_attachment_payload(
         )
 
     # TODO check security labels for pubblic access
-    payload_path = db.payload_path(subpath, meta_class_type)
+    payload_path = db.payload_path(subpath, cls)
     return FileResponse(payload_path / str(meta.payload.body))
 
 
