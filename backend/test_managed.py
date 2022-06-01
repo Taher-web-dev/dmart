@@ -182,7 +182,9 @@ def test_delete_all():
     )
     assert_code_and_status_success(response=response)
 
-    shutil.rmtree(f"{settings.space_root}/{subpath}")
+    path = settings.space_root / subpath
+    if path.is_dir():
+        shutil.rmtree(path)
 
 
 def delete_user():
@@ -206,13 +208,13 @@ def delete_resource(resource: str, del_subpath: str, del_shortname: str):
 
 def test_upload_attachment_with_payload():
     headers = {"Authorization": f"Bearer {token}"}
-    endpoint = "managed/media"
+    endpoint = "managed/create_with_payload"
     request_file = open(attachment_record_path, "rb")
     media_file = open(attachment_media_path, "rb")
 
     data = [
         ("request_record", ("createmedia.json", request_file, "application/json")),
-        ("file", ("logo.jpeg", media_file, "application/octet-stream")),
+        ("file", ("logo.jpeg", media_file, "image/jpeg")),
     ]
 
     assert_code_and_status_success(client.post(endpoint, files=data, headers=headers))
@@ -229,8 +231,7 @@ def test_retrieve_attachment():
     file_name = (
         request_file_data["shortname"] + "." + attachment_media_path.split(".")[-1]
     )
-    endpoint = f"managed/media/{subpath}/{file_name}"
-
+    endpoint = f"managed/payload/{subpath}/{file_name}"
     response = client.get(endpoint, headers=headers)
     assert response.status_code == status.HTTP_200_OK
 
