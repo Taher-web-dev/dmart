@@ -102,9 +102,11 @@ class Meta(Resource):
 
         meta_fields = list(Meta.__fields__.keys())
         attributes = {}
-        for key, value in self.__dict__.items():
-            if (not include or key in include) and key not in meta_fields:
-                attributes[key] = value
+        # Get child class attributes only if the payload is in a separate file
+        if not self.payload or self.payload.content_type != ContentType.text:
+            for key, value in self.__dict__.items():
+                if (not include or key in include) and key not in meta_fields:
+                    attributes[key] = value
 
         if self.payload:
             attributes["payload"] = self.payload.body
