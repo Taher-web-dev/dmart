@@ -7,7 +7,7 @@ VOLUME ["/home"]
 ADD backend /home/backend/
 
 # Install required run-time packages
-RUN apk add --no-cach python3 py3-requests py3-redis py3-pydantic py3-pytest py3-jwt py3-jinja2
+RUN apk add --no-cach python3 py3-requests py3-redis py3-pydantic py3-pytest py3-jwt py3-jinja2 py3-jsonschema
 
 # Install required pips (from backend/requirments.txt) along with disposable build tools
 RUN apk add --no-cache --virtual devstuff py3-wheel py3-pip \
