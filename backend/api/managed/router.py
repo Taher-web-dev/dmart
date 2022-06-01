@@ -132,6 +132,8 @@ async def create_entry_or_attachment_with_payload(
         schema = json.loads(FSPath(payload_path / f"{resource_obj.payload.schema_shortname}.json").read_text()) 
         data = json.load(payload_file.file)
         validate(instance=data, schema=schema)
+        payload_file.file.seek(0)
+
         # TBD validate schema
 
     if not isinstance(resource_obj, core.Attachment) and not isinstance(resource_obj, core.Content) and not isinstance(resource_obj, core.Schema):
