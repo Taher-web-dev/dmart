@@ -255,7 +255,7 @@ async def save_payload(subpath: str, meta: core.Meta, attachment):
     if not (path / filename).is_file():
         raise api.Exception(
             status_code=401,
-            error=api.Error(type="create", code=30, message="missing metadata"),
+            error=api.Error(type="create", code=30, message="metadata is missing"),
         )
 
     with open(payload_file_path / payload_filename, "wb") as file:

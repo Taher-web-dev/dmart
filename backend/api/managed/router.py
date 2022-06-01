@@ -72,7 +72,7 @@ async def move_entry(
 
 
 
-@router.get("/payload/{subpath:path}/{shortname}.{ext}")
+@router.get("/payload/{subpath:path}/{shortname}.{ext}", response_model_exclude_none=True)
 async def retrieve_entry_or_attachment_payload(
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
@@ -138,14 +138,6 @@ async def create_entry_or_attachment_with_payload(
         body=record.shortname + "." + payload_file.filename.split(".")[1],
     )
 
-    if "schema_shortname" in record.attributes:
-        resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
-        payload_path = db.payload_path("schema", core.Schema)
-        schema = json.loads(FSPath(payload_path / f"{resource_obj.payload.schema_shortname}.json").read_text()) 
-        data = json.load(payload_file.file)
-        validate(instance=data, schema=schema)
-        # TBD validate schema
-
     if not isinstance(resource_obj, core.Attachment) and not isinstance(resource_obj, core.Content) and not isinstance(resource_obj, core.Schema):
         raise api.Exception(
             406,
@@ -156,6 +148,14 @@ async def create_entry_or_attachment_with_payload(
             ),
         )
 
+    if resource_content_type == ContentType.json and "schema_shortname" in record.attributes:
+        resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
+        schema_payload_path = db.payload_path("schema", core.Schema)
+        schema = json.loads(FSPath(schema_payload_path / f"{resource_obj.payload.schema_shortname}.json").read_text()) 
+        data = json.load(payload_file.file)
+        validate(instance=data, schema=schema)
+        await payload_file.seek(0)
+    
     db.save(record.subpath, resource_obj)
     await db.save_payload(record.subpath, resource_obj, payload_file) # save any type of entries
     return api.Response(status=api.Status.success)
