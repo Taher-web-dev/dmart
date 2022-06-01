@@ -108,6 +108,8 @@ class Meta(Resource):
 
         if self.payload:
             attributes["payload"] = self.payload.body
+        if self.tags:
+            attributes["tags"] = self.tags
 
         fields["attributes"] = attributes
 
