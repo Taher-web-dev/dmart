@@ -110,13 +110,13 @@ async def get_payload(
 
 @router.post("/create_with_payload", response_model=api.Response, response_model_exclude_none=True)
 async def create_with_payload(
-    file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
+    payload_file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
 ):
-    if file.content_type == "application/json":
+    if payload_file.content_type == "application/json":
         resource_content_type = ContentType.json
-    elif file.content_type == "text/markdown":
+    elif payload_file.content_type == "text/markdown":
         resource_content_type = ContentType.markdown
-    elif "image/" in file.content_type:
+    elif "image/" in payload_file.content_type:
         resource_content_type = ContentType.image
     else :
         raise api.Exception(
@@ -132,7 +132,7 @@ async def create_with_payload(
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
     resource_obj.payload = core.Payload( # detect the resource type
         content_type=resource_content_type,
-        body=record.shortname + "." + file.filename.split(".")[1],
+        body=record.shortname + "." + payload_file.filename.split(".")[1],
     )
 
     if not isinstance(resource_obj, core.Attachment) and not isinstance(resource_obj, core.Content):
@@ -146,5 +146,5 @@ async def create_with_payload(
         )
 
     db.save(record.subpath, resource_obj)
-    await db.save_payload(record.subpath, resource_obj, file) # save any type of entries
+    await db.save_payload(record.subpath, resource_obj, payload_file) # save any type of entries
     return api.Response(status=api.Status.success)
