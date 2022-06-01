@@ -13,7 +13,7 @@ from utils.logger import logger
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
 FILE_PATTERN = re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
-ATTACHMENT_PATTERN = re.compile("attachments.([a-zA-Z0-9_]*)\/meta\.([a-zA-z]*)\.json$")
+ATTACHMENT_PATTERN = re.compile("attachments.([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
 FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 
 
