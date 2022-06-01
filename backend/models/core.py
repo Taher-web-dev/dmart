@@ -12,7 +12,7 @@ from models.enums import ContentType, RequestType, ResourceType
 import utils.regex as regex
 
 
-#class MoveModel(BaseModel):
+# class MoveModel(BaseModel):
 #    resource_type: ResourceType
 #    src_shortname: str = Field(regex=regex.SHORTNAME)
 #    src_subpath: str = Field(regex=regex.SUBPATH)
@@ -40,7 +40,7 @@ class Record(BaseModel):
     shortname: str = Field(regex=regex.SHORTNAME)
     subpath: str = Field(regex=regex.SUBPATH)
     attributes: dict[str, Any]
-    attachments: dict[ResourceType, list[Any]] | None
+    attachments: dict[ResourceType, list[Any]] | None = None
 
 
 class Meta(Resource):
@@ -75,20 +75,17 @@ class Meta(Resource):
 
     def parse_resource_payload(self, record: Record):
         """
-            get record.attributes items that is not defined in the resource class,
-            and add them to a Payload object body with content_type = text
+        get record.attributes items that is not defined in the resource class,
+        and add them to a Payload object body with content_type = text
         """
         meta_fields = list(Meta.__fields__.keys())
         payload_body = {}
         for key, value in record.attributes.items():
             if key not in meta_fields:
                 payload_body[key] = value
-                
+
         if len(payload_body) > 0:
-            self.payload = Payload(
-                content_type=ContentType.text,
-                body=payload_body
-            )
+            self.payload = Payload(content_type=ContentType.text, body=payload_body)
 
     def to_record(self, subpath: str, shortname: str, include: list[str]):
         # Sanity check
@@ -97,7 +94,7 @@ class Meta(Resource):
             "resource_type": type(self).__name__.lower(),
             "uuid": self.uuid,
             "shortname": self.shortname,
-            "subpath": subpath
+            "subpath": subpath,
         }
 
         meta_fields = list(Meta.__fields__.keys())
@@ -178,7 +175,7 @@ class Schema(Meta):
 
 
 class Content(Meta):
-    pass        
+    pass
 
 
 class Folder(Meta):

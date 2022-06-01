@@ -54,25 +54,31 @@ async def delete_entry(record: core.Record) -> api.Response:
 
 @router.post("/move", response_model=api.Response, response_model_exclude_none=True)
 async def move_entry(
-        src_subpath : str, 
-        src_shortname : str, 
-        dest_subpath, 
-        dest_shortname : str, 
-        resource_type : api.ResourceType
-    ) -> api.Response:
+    src_subpath: str,
+    src_shortname: str,
+    dest_subpath,
+    dest_shortname: str,
+    resource_type: api.ResourceType,
+) -> api.Response:
     cls = getattr(sys.modules["models.core"], resource_type.capitalize())
     item = db.load(src_subpath, src_shortname, cls)
     if not dest_subpath and not dest_shortname:
         raise api.Exception(
-            404, api.Error(type="move", code=202, message="Please provide a new path or a new shortname")
+            404,
+            api.Error(
+                type="move",
+                code=202,
+                message="Please provide a new path or a new shortname",
+            ),
         )
 
     db.move(src_subpath, src_shortname, dest_subpath, dest_shortname, item)
     return api.Response(status=api.Status.success)
 
 
-
-@router.get("/payload/{subpath:path}/{shortname}.{ext}")
+@router.get(
+    "/payload/{subpath:path}/{shortname}.{ext}", response_model_exclude_none=True
+)
 async def retrieve_entry_or_attachment_payload(
     resource_type : api.ResourceType,
     subpath: str = Path(..., regex=regex.SUBPATH),
@@ -99,7 +105,11 @@ async def retrieve_entry_or_attachment_payload(
     return FileResponse(payload_path / str(meta.payload.body))
 
 
-@router.post("/create_with_payload", response_model=api.Response, response_model_exclude_none=True)
+@router.post(
+    "/create_with_payload",
+    response_model=api.Response,
+    response_model_exclude_none=True,
+)
 async def create_entry_or_attachment_with_payload(
     payload_file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
 ):
@@ -121,7 +131,7 @@ async def create_entry_or_attachment_with_payload(
 
     record = core.Record.parse_raw(request_record.file.read())
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-    resource_obj.payload = core.Payload( # detect the resource type
+    resource_obj.payload = core.Payload(  # detect the resource type
         content_type=resource_content_type,
         body=record.shortname + "." + payload_file.filename.split(".")[1],
     )
@@ -136,7 +146,11 @@ async def create_entry_or_attachment_with_payload(
 
         # TBD validate schema
 
-    if not isinstance(resource_obj, core.Attachment) and not isinstance(resource_obj, core.Content) and not isinstance(resource_obj, core.Schema):
+    if (
+        not isinstance(resource_obj, core.Attachment)
+        and not isinstance(resource_obj, core.Content)
+        and not isinstance(resource_obj, core.Schema)
+    ):
         raise api.Exception(
             406,
             api.Error(
@@ -146,6 +160,23 @@ async def create_entry_or_attachment_with_payload(
             ),
         )
 
+    if (
+        resource_content_type == ContentType.json
+        and "schema_shortname" in record.attributes
+    ):
+        resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
+        schema_payload_path = db.payload_path("schema", core.Schema)
+        schema = json.loads(
+            FSPath(
+                schema_payload_path / f"{resource_obj.payload.schema_shortname}.json"
+            ).read_text()
+        )
+        data = json.load(payload_file.file)
+        validate(instance=data, schema=schema)
+        await payload_file.seek(0)
+
     db.save(record.subpath, resource_obj)
-    await db.save_payload(record.subpath, resource_obj, payload_file) # save any type of entries
+    await db.save_payload(
+        record.subpath, resource_obj, payload_file
+    )  # save any type of entries
     return api.Response(status=api.Status.success)

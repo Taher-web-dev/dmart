@@ -13,7 +13,9 @@ from utils.logger import logger
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
 FILE_PATTERN = re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
-ATTACHMENT_PATTERN = re.compile("attachments.([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
+ATTACHMENT_PATTERN = re.compile(
+    "attachments.([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$"
+)
 FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 
 
@@ -155,7 +157,7 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
             
             resource_base_record.attachments = attachments_dict
             records.append(resource_base_record)
-        
+
         # Get all matching sub folders
         subfolders_glob = "*/.dm/meta.folder.json"
         for one in path.glob(subfolders_glob):
@@ -177,6 +179,7 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
             )
     return total, records
 
+
 def metapath(
     subpath: str, shortname: str, class_type: Type[MetaChild]
 ) -> tuple[Path, str]:
@@ -196,9 +199,8 @@ def metapath(
         filename = "meta." + class_type.__name__.lower() + ".json"
     return path, filename
 
-def payload_path(
-    subpath: str, class_type: Type[MetaChild]
-) -> Path:
+
+def payload_path(subpath: str, class_type: Type[MetaChild]) -> Path:
     """Construct the full path of the meta file"""
     path = settings.space_root
     if issubclass(class_type, core.Attachment):
@@ -256,7 +258,7 @@ async def save_payload(subpath: str, meta: core.Meta, attachment):
     if not (path / filename).is_file():
         raise api.Exception(
             status_code=401,
-            error=api.Error(type="create", code=30, message="missing metadata"),
+            error=api.Error(type="create", code=30, message="metadata is missing"),
         )
 
     with open(payload_file_path / payload_filename, "wb") as file:

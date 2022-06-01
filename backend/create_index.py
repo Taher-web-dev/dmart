@@ -3,6 +3,7 @@ import models.core as core
 import models.api as api
 import utils.db as db
 import sys
+
 # import json
 
 search.create_index()
@@ -17,8 +18,8 @@ for one in locators:
     meta = db.load(one.subpath, one.shortname, myclass)
     search.save_meta(subpath, meta)
 
-#ret = search.index.search("*")
-#if ret.docs:
+# ret = search.index.search("*")
+# if ret.docs:
 #    for one in ret.docs:
 #        print(json.dumps(json.loads(json.loads(one.json)), indent=4))
 

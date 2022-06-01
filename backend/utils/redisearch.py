@@ -33,7 +33,9 @@ META_SCHEMA = (
         "$.meta.payload.content_type", no_stem=True, as_name="payload_content_type"
     ),
     TextField("$.meta.payload.body", as_name="payload_body"),
-    TextField("$.meta.payload.schema_shortname", no_stem=True, as_name="schema_shortname"),
+    TextField(
+        "$.meta.payload.schema_shortname", no_stem=True, as_name="schema_shortname"
+    ),
 )
 
 META_INDEX = IndexDefinition(prefix=["meta:"], index_type=IndexType.JSON)
@@ -50,9 +52,7 @@ def create_index():
 
 def save_meta(subpath: str, meta: core.Meta):
     resource_type = meta.__class__.__name__.lower()
-    docid = (
-        f"meta:{subpath}/{meta.shortname}/{meta.uuid}/{resource_type}"
-    )
+    docid = f"meta:{subpath}/{meta.shortname}/{meta.uuid}/{resource_type}"
     meta_json = json.loads(meta.json(exclude_none=True))
 
     # Inject resource_type

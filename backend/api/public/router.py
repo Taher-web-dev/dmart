@@ -23,15 +23,17 @@ async def query_entries(query: api.Query) -> api.Response:
     )
 
 
-@router.get("/meta/{resource_type}/{subpath:path}/{shortname}")
+@router.get(
+    "/meta/{resource_type}/{subpath:path}/{shortname}", response_model_exclude_none=True
+)
 async def retrieve_entry_meta(
-    resource_type : core.ResourceType, 
+    resource_type: core.ResourceType,
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
 ) -> dict[str, Any]:
     resource_class = getattr(sys.modules["models.core"], resource_type.title())
     meta = db.load(subpath, shortname, resource_class)
-    if meta is None :
+    if meta is None:
         raise api.Exception(
             404,
             error=api.Error(
@@ -45,9 +47,12 @@ async def retrieve_entry_meta(
 
 
 # Public payload retrieval; can be used in "src=" in html pages
-@router.get("/payload/{resource_type}/{subpath:path}/{shortname}.{ext}")
+@router.get(
+    "/payload/{resource_type}/{subpath:path}/{shortname}.{ext}",
+    response_model_exclude_none=True,
+)
 async def retrieve_entry_or_attachment_payload(
-    resource_type : core.ResourceType, 
+    resource_type: core.ResourceType,
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
@@ -73,6 +78,6 @@ async def retrieve_entry_or_attachment_payload(
     return FileResponse(media_file)
 
 
-@router.post("/submit")
+@router.post("/submit", response_model_exclude_none=True)
 async def submit() -> api.Response:
     return api.Response(status=api.Status.success)
