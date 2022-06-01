@@ -132,26 +132,26 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 if not match or not one.is_file:
                     logger.error("Invalid file pattern")
                     continue
-                shortname = match.group(2)
-                resource_name = match.group(1).lower()
+                attach_shortname = match.group(2)
+                attach_resource_name = match.group(1).lower()
                 if (
                     query.filter_types
-                    and not ResourceType(resource_name) in query.filter_types
+                    and not ResourceType(attach_resource_name) in query.filter_types
                 ):
-                    logger.info(resource_name + " resource is not listed in filter types")
+                    logger.info(attach_resource_name + " resource is not listed in filter types")
                     continue
 
-                if query.filter_shortnames and shortname not in query.filter_shortnames:
+                if query.filter_shortnames and attach_shortname not in query.filter_shortnames:
                     continue
 
-                resource_class = getattr(sys.modules["models.core"], resource_name.title())
+                resource_class = getattr(sys.modules["models.core"], attach_resource_name.title())
                 resource_record_obj = resource_class.parse_raw(one.read_text()).to_record(
-                    query.subpath, shortname, query.include_fields
+                   query.subpath + "/" + shortname, attach_shortname, query.include_fields
                 )
-                if(resource_name in attachments_dict):
-                    attachments_dict[resource_name].append(resource_record_obj)
+                if(attach_resource_name in attachments_dict):
+                    attachments_dict[attach_resource_name].append(resource_record_obj)
                 else:
-                    attachments_dict[resource_name] = [resource_record_obj]
+                    attachments_dict[attach_resource_name] = [resource_record_obj]
             
             resource_base_record.attachments = attachments_dict
             records.append(resource_base_record)
