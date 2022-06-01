@@ -1,0 +1,6 @@
+{
+  "resource_type": "schema",
+  "subpath": "schema",
+  "shortname": "mytestsc",
+  "attributes": { "tags": ["fun", "personal"] }
+}

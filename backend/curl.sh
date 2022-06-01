@@ -54,8 +54,14 @@ COMMENT_SUBPATH="$SUBPATH/$SHORTNAME"
 RECORD=$(jq -c -n --arg subpath "$COMMENT_SUBPATH" --arg shortname "$COMMENT_SHORTNAME"  '{resource_type: "comment", subpath: $subpath, shortname: $shortname, attributes:{body: "A comment insdie the content resource"}}')
 curl -s -H "$AUTH" -H "$CT" -d "$RECORD" ${API_URL}/managed/create | jq .status 
 
+echo -n "Create Schema: "
+curl -s -H "$AUTH" -F 'request_record=@"../space/test/createschema.json"' -F 'payload_file=@"../space/test/schema.json"' ${API_URL}/managed/create_with_payload | jq .status
+
+echo -n "Create content: "
+curl -s -H "$AUTH" -F 'request_record=@"../space/test/createcontent.json"' -F 'payload_file=@"../space/test/data.json"' ${API_URL}/managed/create_with_payload  | jq  .status
+
 echo -n "Upload attachment: "
-curl -s -H "$AUTH" -F 'request_record=@"../space/test/createmedia.json"' -F 'file=@"../space/test/logo.jpeg"' ${API_URL}/managed/media  | jq .status
+curl -s -H "$AUTH" -F 'request_record=@"../space/test/createmedia.json"' -F 'payload_file=@"../space/test/logo.jpeg"' ${API_URL}/managed/create_with_payload  | jq .status
 
 echo -n "Query content"
 RECORD=$(jq -c -n --arg subpath "$SUBPATH" '{type: "subpath", subpath: $subpath}')
