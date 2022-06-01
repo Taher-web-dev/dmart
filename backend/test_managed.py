@@ -231,7 +231,7 @@ def test_retrieve_attachment():
     file_name = (
         request_file_data["shortname"] + "." + attachment_media_path.split(".")[-1]
     )
-    endpoint = f"managed/payload/{subpath}/{file_name}"
+    endpoint = f"managed/payload/{subpath}/{file_name}?resource_type=media"
     response = client.get(endpoint, headers=headers)
     assert response.status_code == status.HTTP_200_OK
 
@@ -239,6 +239,8 @@ def test_retrieve_attachment():
 
 
 def assert_code_and_status_success(response):
+    if response.status_code != status.HTTP_200_OK:
+        print("\n\n\n\n\n========================= ERROR RESPONSE: =========================n:", response.json(), "\n\n\n\n\n")
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"
