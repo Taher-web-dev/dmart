@@ -114,13 +114,14 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
             if query.filter_shortnames and shortname not in query.filter_shortnames:
                 continue
 
+            resource_class = getattr(sys.modules["models.core"], resource_name.title())
+            resource_obj = resource_class.parse_raw(one.read_text())
+            if query.tags and (not resource_obj.tags or not any(item in resource_obj.tags for item in query.tags)):
+                continue
             total += 1
             if len(records) >= query.limit or total < query.offset:
                 continue
-            resource_class = getattr(sys.modules["models.core"], resource_name.title())
-            resource_base_record = resource_class.parse_raw(one.read_text()).to_record(
-                    query.subpath, shortname, query.include_fields
-                )
+            resource_base_record = resource_obj.to_record(query.subpath, shortname, query.include_fields)
 
             # Get all matching attachments
             attachments_path = path / ".dm" / shortname
