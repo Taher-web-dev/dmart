@@ -214,7 +214,7 @@ def test_upload_attachment_with_payload():
 
     data = [
         ("request_record", ("createmedia.json", request_file, "application/json")),
-        ("file", ("logo.jpeg", media_file, "image/jpeg")),
+        ("payload_file", ("logo.jpeg", media_file, "image/jpeg")),
     ]
 
     assert_code_and_status_success(client.post(endpoint, files=data, headers=headers))
