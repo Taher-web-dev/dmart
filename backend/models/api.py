@@ -18,9 +18,11 @@ class QueryType(str, Enum):
 
 class Query(BaseModel):
     type: QueryType
-    subpath: str = Field(...,regex=regex.SUBPATH)
+    subpath: str = Field(..., regex=regex.SUBPATH)
     filter_types: list[ResourceType] | None = None
-    filter_shortnames: list[str] | None = Field(regex=regex.SHORTNAME, default_factory=list)
+    filter_shortnames: list[str] | None = Field(
+        regex=regex.SHORTNAME, default_factory=list
+    )
     search: str | None = None
     from_date: datetime | None = None
     to_date: datetime | None = None

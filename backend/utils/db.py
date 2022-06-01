@@ -13,7 +13,9 @@ from utils.logger import logger
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
 FILE_PATTERN = re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
-ATTACHMENT_PATTERN = re.compile("attachments.([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
+ATTACHMENT_PATTERN = re.compile(
+    "attachments.([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$"
+)
 FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 
 
@@ -119,8 +121,8 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 continue
             resource_class = getattr(sys.modules["models.core"], resource_name.title())
             resource_base_record = resource_class.parse_raw(one.read_text()).to_record(
-                    query.subpath, shortname, query.include_fields
-                )
+                query.subpath, shortname, query.include_fields
+            )
 
             # Get all matching attachments
             attachments_path = path / ".dm" / shortname
@@ -137,24 +139,28 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                     query.filter_types
                     and not ResourceType(resource_name) in query.filter_types
                 ):
-                    logger.info(resource_name + " resource is not listed in filter types")
+                    logger.info(
+                        resource_name + " resource is not listed in filter types"
+                    )
                     continue
 
                 if query.filter_shortnames and shortname not in query.filter_shortnames:
                     continue
 
-                resource_class = getattr(sys.modules["models.core"], resource_name.title())
-                resource_record_obj = resource_class.parse_raw(one.read_text()).to_record(
-                    query.subpath, shortname, query.include_fields
+                resource_class = getattr(
+                    sys.modules["models.core"], resource_name.title()
                 )
-                if(resource_name in attachments_dict):
+                resource_record_obj = resource_class.parse_raw(
+                    one.read_text()
+                ).to_record(query.subpath, shortname, query.include_fields)
+                if resource_name in attachments_dict:
                     attachments_dict[resource_name].append(resource_record_obj)
                 else:
                     attachments_dict[resource_name] = [resource_record_obj]
-            
+
             resource_base_record.attachments = attachments_dict
             records.append(resource_base_record)
-        
+
         # Get all matching sub folders
         subfolders_glob = "*/.dm/meta.folder.json"
         for one in path.glob(subfolders_glob):
@@ -176,6 +182,7 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
             )
     return total, records
 
+
 def metapath(
     subpath: str, shortname: str, class_type: Type[MetaChild]
 ) -> tuple[Path, str]:
@@ -195,9 +202,8 @@ def metapath(
         filename = "meta." + class_type.__name__.lower() + ".json"
     return path, filename
 
-def payload_path(
-    subpath: str, class_type: Type[MetaChild]
-) -> Path:
+
+def payload_path(subpath: str, class_type: Type[MetaChild]) -> Path:
     """Construct the full path of the meta file"""
     path = settings.space_root
     if issubclass(class_type, core.Attachment):
