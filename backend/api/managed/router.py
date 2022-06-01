@@ -73,7 +73,7 @@ async def move_entry(
 
 
 @router.get("/payload/{subpath:path}/{shortname}.{ext}")
-async def get_payload(
+async def retrieve_entry_or_attachment_payload(
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
@@ -112,7 +112,7 @@ async def get_payload(
 
 
 @router.post("/create_with_payload", response_model=api.Response, response_model_exclude_none=True)
-async def create_with_payload(
+async def create_entry_or_attachment_with_payload(
     payload_file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
 ):
     if payload_file.filename.endswith(".json"):
