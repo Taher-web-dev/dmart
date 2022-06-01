@@ -25,11 +25,11 @@ async def query_entries(query: api.Query) -> api.Response:
 
 @router.get("/meta/{resource_type}/{subpath:path}/{shortname}")
 async def get_body(
-    resource_name : core.ResourceType, 
+    resource_type : core.ResourceType, 
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
 ) -> dict[str, Any]:
-    resource_class = getattr(sys.modules["models.core"], resource_name.title())
+    resource_class = getattr(sys.modules["models.core"], resource_type.title())
     meta = db.load(subpath, shortname, resource_class)
     if meta is None :
         raise api.Exception(
@@ -47,12 +47,12 @@ async def get_body(
 # Public payload retrieval; can be used in "src=" in html pages
 @router.get("/payload/{resource_type}/{subpath:path}/{shortname}.{ext}")
 async def get_payload(
-    resource_name : core.ResourceType, 
+    resource_type : core.ResourceType, 
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
 ) -> FileResponse:
-    resource_class = getattr(sys.modules["models.core"], resource_name.title())
+    resource_class = getattr(sys.modules["models.core"], resource_type.title())
     meta = db.load(subpath, shortname, resource_class)
     if (
         meta.payload is None
