@@ -6,6 +6,7 @@ import utils.regex as regex
 import models.core as core
 from fastapi.responses import FileResponse
 from typing import Any
+import sys
 
 router = APIRouter()
 
@@ -22,14 +23,15 @@ async def query_entries(query: api.Query) -> api.Response:
     )
 
 
-"""
-@router.get("/body/{subpath:path}/{shortname}")
+@router.get("/meta/{resource_type}/{subpath:path}/{shortname}")
 async def get_body(
+    resource_name : core.ResourceType, 
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
 ) -> dict[str, Any]:
-    meta = db.load(subpath, shortname, core.Media)
-    if meta.payload is None or not isinstance(meta.payload.body, dict):
+    resource_class = getattr(sys.modules["models.core"], resource_name.title())
+    meta = db.load(subpath, shortname, resource_class)
+    if meta is None :
         raise api.Exception(
             404,
             error=api.Error(
@@ -39,30 +41,19 @@ async def get_body(
 
     # TODO check security labels for pubblic access
     # assert meta.is_active
-    return meta.payload.body
-"""
+    return meta.dict(exclude_none=True)
 
 
 # Public payload retrieval; can be used in "src=" in html pages
-@router.get("/payload/{subpath:path}/{shortname}.{ext}")
+@router.get("/payload/{resource_type}/{subpath:path}/{shortname}.{ext}")
 async def get_payload(
+    resource_name : core.ResourceType, 
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
 ) -> FileResponse:
-    if re.match(regex.IMG_EXT, ext): 
-        meta_class_type = core.Media
-    elif ext in ["json", "md"]: 
-        meta_class_type = core.Content
-    else:
-        raise api.Exception(
-            404,
-            error=api.Error(
-                type="media", code=220, message="Request object is not available"
-            ),
-        )
-    #path, filename = db.metapath(subpath, shortname, core.Media)
-    meta = db.load(subpath, shortname, meta_class_type)
+    resource_class = getattr(sys.modules["models.core"], resource_name.title())
+    meta = db.load(subpath, shortname, resource_class)
     if (
         meta.payload is None
         or meta.payload.body is None
@@ -77,7 +68,7 @@ async def get_payload(
 
     # TODO check security labels for pubblic access
     # assert meta.is_active
-    payload_path = db.payload_path(subpath, meta_class_type)
+    payload_path = db.payload_path(subpath, resource_class)
     media_file = payload_path / str(meta.payload.body)
     return FileResponse(media_file)
 
