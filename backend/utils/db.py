@@ -163,6 +163,19 @@ def metapath(
         filename = "meta." + class_type.__name__.lower() + ".json"
     return path, filename
 
+def payload_path(
+    subpath: str, class_type: Type[MetaChild]
+) -> Path:
+    """Construct the full path of the meta file"""
+    path = settings.space_root
+    if issubclass(class_type, core.Attachment):
+        [parent_subpath, parent_name] = subpath.rsplit("/", 1)
+        attachment_folder = parent_name + "/attachments." + class_type.__name__.lower()
+        path = path / parent_subpath / ".dm" / attachment_folder
+    else:
+        path = path / subpath
+    return path
+
 
 def load(subpath: str, shortname: str, class_type: Type[MetaChild]) -> MetaChild:
     """Load a Meta Json according to the reuqested Class type"""
@@ -204,6 +217,8 @@ def create(subpath: str, meta: core.Meta):
 
 async def save_payload(subpath: str, meta: core.Meta, attachment):
     path, filename = metapath(subpath, meta.shortname, meta.__class__)
+    payload_file_path = payload_path(subpath, meta.__class__)
+    payload_filename = meta.shortname + Path(attachment.filename).suffix
 
     if not (path / filename).is_file():
         raise api.Exception(
@@ -211,10 +226,7 @@ async def save_payload(subpath: str, meta: core.Meta, attachment):
             error=api.Error(type="create", code=30, message="missing metadata"),
         )
 
-    payload_filename = filename.replace(".json", Path(attachment.filename).suffix)
-    payload_filename = payload_filename.replace("meta.", "")
-
-    with open(path / payload_filename, "wb") as file:
+    with open(payload_file_path / payload_filename, "wb") as file:
         while content := await attachment.read(1024):
             file.write(content)
 
@@ -231,10 +243,64 @@ def update(subpath: str, meta: core.Meta):
         file.write(meta.json(exclude_none=True))
 
 
-def move(subpath: str, newpath: str, meta: core.Meta):
-    path, filename = metapath(subpath, meta.shortname, meta.__class__)
-    # Fixme ... decide what to move depending on the type
-    os.rename(src=path / filename, dst=newpath)
+def move(
+    src_subpath: str,
+    src_shortname: str,
+    dest_subpath: str | None,
+    dest_shortname: str | None,
+    meta: core.Meta,
+):
+    src_path, src_filename = metapath(src_subpath, src_shortname, meta.__class__)
+    dest_path, dest_filename = metapath(
+        dest_subpath or src_subpath, dest_shortname or src_shortname, meta.__class__
+    )
+    # Create dest dir if not exist
+    if not os.path.isdir(dest_path):
+        os.makedirs(dest_path)
+
+    meta_updated = False
+    # Incase of attachment, the shortname is a file so it should be moved
+    # use is instance instead
+    if isinstance(meta, core.Attachment):
+        # Move file
+        os.rename(src=src_path / src_filename, dst=dest_path / dest_filename)
+
+        # Move media files with the meta file
+        if isinstance(meta, core.Media):
+            media_name = src_filename.split(".")[-2]
+            files = os.listdir(src_path)
+            for file in files:
+                if media_name in file:
+                    file_name = dest_filename.split(".")[-2]
+                    file_ext = file.split(".")[-1]
+                    renamed_file = f"{file_name}.{file_ext}"
+                    os.rename(src=src_path / file, dst=dest_path / renamed_file)
+
+                    # Don't handle if payload doesn't exist
+                    if not meta.payload or not meta.payload.body:
+                        break
+                    # Update file name inside meta file
+                    meta.payload.body = renamed_file
+                    meta_updated = True
+                    break
+
+    # Rename folder only if meta not Attachment type
+    else:
+        os.rename(src=src_path, dst=dest_path)
+
+    # Update meta shortname
+    if dest_shortname:
+        meta.shortname = dest_shortname
+        meta_updated = True
+
+    # Store meta updates in the file
+    if meta_updated:
+        with open(dest_path / dest_filename, "w") as opened_file:
+            opened_file.write(meta.json(exclude_none=True))
+
+    # Delete Src path if empty
+    if src_path.is_dir() and len(os.listdir(src_path)) == 0:
+        os.removedirs(src_path)
 
 
 def delete(subpath: str, meta: core.Meta):
@@ -257,4 +323,4 @@ def delete(subpath: str, meta: core.Meta):
 
     # Remove folder if empty
     if len(os.listdir(path)) == 0:
-        os.rmdir(path)
+        os.removedirs(path)

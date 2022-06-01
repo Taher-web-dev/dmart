@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, Depends, UploadFile, Path
 from fastapi.responses import FileResponse
 
@@ -49,36 +50,51 @@ async def delete_entry(record: core.Record) -> api.Response:
 
 
 @router.post("/move", response_model=api.Response, response_model_exclude_none=True)
-async def move_entry(record: core.Record) -> api.Response:
-    cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
-    item = db.load(record.subpath, record.shortname, cls)
-    if "new_path" not in record.attributes or not record.attributes["new_path"]:
+async def move_entry(
+        src_subpath : str, 
+        src_shortname : str, 
+        dest_subpath, 
+        dest_shortname : str, 
+        resource_type : api.ResourceType
+    ) -> api.Response:
+    cls = getattr(sys.modules["models.core"], resource_type.capitalize())
+    item = db.load(src_subpath, src_shortname, cls)
+    if not dest_subpath and not dest_shortname:
         raise api.Exception(
-            404,
-            api.Error(
-                type="move",
-                code=202,
-                message="Please provide the new_path at the attributes field",
-            ),
+            404, api.Error(type="move", code=202, message="Please provide a new path or a new shortname")
         )
-    newpath = record.attributes["new_path"]
-    db.move(record.subpath, newpath, item)
+
+    db.move(src_subpath, src_shortname, dest_subpath, dest_shortname, item)
     return api.Response(status=api.Status.success)
 
 
-@router.get("/media/{subpath:path}/{shortname}.{ext}")
-async def get_media(
+
+@router.get("/payload/{subpath:path}/{shortname}.{ext}")
+async def get_payload(
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
 ) -> FileResponse:
-    path, filename = db.metapath(subpath, shortname, core.Media)
-    meta = db.load(subpath, shortname, core.Media)
+
+     
+    if re.match(regex.IMG_EXT, ext): 
+        meta_class_type = core.Media
+    elif ext in ["json", "md"]: 
+        meta_class_type = core.Content
+    else:
+        raise api.Exception(
+            404,
+            error=api.Error(
+                type="media", code=220, message="Request object is not available"
+            ),
+        )
+
+    
+    meta = db.load(subpath, shortname, meta_class_type)
     if (
         meta.payload is None
         or meta.payload.body is None
         or meta.payload.body != f"{shortname}.{ext}"
-        or shortname != filename.split(".")[1]
     ):
         raise api.Exception(
             404,
@@ -88,45 +104,47 @@ async def get_media(
         )
 
     # TODO check security labels for pubblic access
+    payload_path = db.payload_path(subpath, meta_class_type)
+    return FileResponse(payload_path / str(meta.payload.body))
 
-    media_file = path / str(meta.payload.body)
-    return FileResponse(media_file)
 
-
-@router.post("/media", response_model=api.Response, response_model_exclude_none=True)
-async def upload_attachment_with_payload(
+@router.post("/create_with_payload", response_model=api.Response, response_model_exclude_none=True)
+async def create_with_payload(
     file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
 ):
-
-    """
-    if request_record.content_type != "application/json":
+    if file.content_type == "application/json":
+        resource_content_type = ContentType.json
+    elif file.content_type == "text/markdown":
+        resource_content_type = ContentType.markdown
+    elif "image/" in file.content_type:
+        resource_content_type = ContentType.image
+    else :
         raise api.Exception(
             406,
             api.Error(
                 type="attachment",
                 code=217,
-                message="Only json files allowed in the request file",
+                message="The file type is not supported",
             ),
         )
-    """
 
     record = core.Record.parse_raw(request_record.file.read())
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-    resource_obj.payload = core.Payload(
-        content_type=ContentType.image,
+    resource_obj.payload = core.Payload( # detect the resource type
+        content_type=resource_content_type,
         body=record.shortname + "." + file.filename.split(".")[1],
     )
 
-    if not isinstance(resource_obj, core.Attachment):
+    if not isinstance(resource_obj, core.Attachment) and not isinstance(resource_obj, core.Content):
         raise api.Exception(
             406,
             api.Error(
                 type="attachment",
                 code=217,
-                message="Only resources of type 'attachment' are allowed",
+                message="Only resources of type 'attachment' or 'content' are allowed",
             ),
         )
 
     db.save(record.subpath, resource_obj)
-    await db.save_payload(record.subpath, resource_obj, file)
+    await db.save_payload(record.subpath, resource_obj, file) # save any type of entries
     return api.Response(status=api.Status.success)
