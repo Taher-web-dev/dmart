@@ -9,6 +9,9 @@ import utils.db as db
 import utils.regex as regex
 from utils.jwt import JWTBearer
 import sys
+from jsonschema import validate
+import json
+from pathlib import Path as FSPath
 
 router = APIRouter()
 
@@ -70,7 +73,7 @@ async def move_entry(
 
 
 @router.get("/payload/{subpath:path}/{shortname}.{ext}")
-async def get_payload(
+async def retrieve_entry_or_attachment_payload(
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
@@ -109,16 +112,16 @@ async def get_payload(
 
 
 @router.post("/create_with_payload", response_model=api.Response, response_model_exclude_none=True)
-async def create_with_payload(
+async def create_entry_or_attachment_with_payload(
     payload_file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
 ):
-    if payload_file.content_type == "application/json":
+    if payload_file.filename.endswith(".json"):
         resource_content_type = ContentType.json
     elif payload_file.content_type == "text/markdown":
         resource_content_type = ContentType.markdown
     elif "image/" in payload_file.content_type:
         resource_content_type = ContentType.image
-    else :
+    else:
         raise api.Exception(
             406,
             api.Error(
@@ -135,7 +138,15 @@ async def create_with_payload(
         body=record.shortname + "." + payload_file.filename.split(".")[1],
     )
 
-    if not isinstance(resource_obj, core.Attachment) and not isinstance(resource_obj, core.Content):
+    if "schema_shortname" in record.attributes:
+        resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
+        payload_path = db.payload_path("schema", core.Schema)
+        schema = json.loads(FSPath(payload_path / f"{resource_obj.payload.schema_shortname}.json").read_text()) 
+        data = json.load(payload_file.file)
+        validate(instance=data, schema=schema)
+        # TBD validate schema
+
+    if not isinstance(resource_obj, core.Attachment) and not isinstance(resource_obj, core.Content) and not isinstance(resource_obj, core.Schema):
         raise api.Exception(
             406,
             api.Error(

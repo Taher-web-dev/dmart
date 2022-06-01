@@ -24,7 +24,7 @@ async def query_entries(query: api.Query) -> api.Response:
 
 
 @router.get("/meta/{resource_type}/{subpath:path}/{shortname}")
-async def get_body(
+async def retrieve_entry_meta(
     resource_type : core.ResourceType, 
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
@@ -46,7 +46,7 @@ async def get_body(
 
 # Public payload retrieval; can be used in "src=" in html pages
 @router.get("/payload/{resource_type}/{subpath:path}/{shortname}.{ext}")
-async def get_payload(
+async def retrieve_entry_or_attachment_payload(
     resource_type : core.ResourceType, 
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),

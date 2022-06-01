@@ -2,6 +2,7 @@ uvicorn
 json_logging
 fastapi
 python-multipart
+jsonschema
 
 pydantic
 jinja2
