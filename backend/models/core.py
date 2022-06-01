@@ -40,6 +40,7 @@ class Record(BaseModel):
     shortname: str = Field(regex=regex.SHORTNAME)
     subpath: str = Field(regex=regex.SUBPATH)
     attributes: dict[str, Any]
+    attachments: dict[ResourceType, list[Any]] | None
 
 
 class Meta(Resource):
