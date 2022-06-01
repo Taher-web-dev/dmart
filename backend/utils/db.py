@@ -2,7 +2,7 @@ import sys
 from models.enums import ResourceType
 from utils.settings import settings
 import models.core as core
-from typing import TypeVar, Type, Generic
+from typing import Any, TypeVar, Type, Generic
 import models.api as api
 import os
 import re
@@ -118,17 +118,14 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
             if len(records) >= query.limit or total < query.offset:
                 continue
             resource_class = getattr(sys.modules["models.core"], resource_name.title())
-            records.append(
-                resource_class.parse_raw(one.read_text()).to_record(
+            resource_base_record = resource_class.parse_raw(one.read_text()).to_record(
                     query.subpath, shortname, query.include_fields
                 )
-            )
-        # Get all matching attachments
-        split_path = query.subpath.rsplit("/", 1)
-        if len(split_path) > 1:
-            attachments_path = settings.space_root / split_path[0] / ".dm" / split_path[1] # / "attachments.*"
 
+            # Get all matching attachments
+            attachments_path = path / ".dm" / shortname
             attachments_glob = "attachments.*/meta.*.json"
+            attachments_dict: dict[ResourceType, list[Any]] = {}
             for one in attachments_path.glob(attachments_glob):
                 match = ATTACHMENT_PATTERN.search(str(one))
                 if not match or not one.is_file:
@@ -146,15 +143,18 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 if query.filter_shortnames and shortname not in query.filter_shortnames:
                     continue
 
-                total += 1
-                if len(records) >= query.limit or total < query.offset:
-                    continue
                 resource_class = getattr(sys.modules["models.core"], resource_name.title())
-                records.append(
-                    resource_class.parse_raw(one.read_text()).to_record(
-                        query.subpath, shortname, query.include_fields
-                    )
+                resource_record_obj = resource_class.parse_raw(one.read_text()).to_record(
+                    query.subpath, shortname, query.include_fields
                 )
+                if(resource_name in attachments_dict):
+                    attachments_dict[resource_name].append(resource_record_obj)
+                else:
+                    attachments_dict[resource_name] = [resource_record_obj]
+            
+            resource_base_record.attachments = attachments_dict
+            records.append(resource_base_record)
+        
         # Get all matching sub folders
         subfolders_glob = "*/.dm/meta.folder.json"
         for one in path.glob(subfolders_glob):
