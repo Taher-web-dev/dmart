@@ -1,0 +1,52 @@
+{
+  "title": "Subaccounts",
+  "description": "subaccounts description",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "The unique identifier for a subaccount",
+      "type": "integer"
+    },
+    "name": {
+      "description": "Name of the subaccount",
+      "type": "string"
+    },
+    "type": {
+      "description": "type of the subaccount",
+      "type": "string"
+    },
+    "subtype": {
+      "description": "subtype of the subaccount",
+      "type": "string"
+    },
+    "local_data_specific": {
+        "unlimited_data": {
+            "description": "whether the data is unlimited or capped of the subaccount",
+            "type": "string"
+        },
+        "low_speed/throttled": {
+            "description": "whether it is low speed or throttled",
+            "type": "string"
+        },
+        "3g/legacy": {
+            "description": "whether it is a 3g or a legacy",
+            "type": "string"
+        },
+        "restricted_traffic": {
+            "description": "whether it is a restricted traffic",
+            "type": "string"
+        }
+    },
+    "international_roaming_specific": {
+        "country_specific": {
+            "description": "name of the specific country",
+            "type": "string"
+        },
+        "country_restriction": {
+            "description": "whether it is restricted to the country or not",
+            "type": "string"
+        }
+    }
+  },
+  "required": [ "id", "name", "type" ]
+} 
