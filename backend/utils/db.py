@@ -13,6 +13,7 @@ from utils.logger import logger
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
 FILE_PATTERN = re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
+ATTACHMENT_PATTERN = re.compile("attachments.([a-zA-Z0-9_]*)\/meta\.([a-zA-z]*)\.json$")
 FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 
 
@@ -122,6 +123,38 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                     query.subpath, shortname, query.include_fields
                 )
             )
+        # Get all matching attachments
+        split_path = query.subpath.rsplit("/", 1)
+        if len(split_path) > 1:
+            attachments_path = settings.space_root / split_path[0] / ".dm" / split_path[1] # / "attachments.*"
+
+            attachments_glob = "attachments.*/meta.*.json"
+            for one in attachments_path.glob(attachments_glob):
+                match = ATTACHMENT_PATTERN.search(str(one))
+                if not match or not one.is_file:
+                    logger.error("Invalid file pattern")
+                    continue
+                shortname = match.group(2)
+                resource_name = match.group(1).lower()
+                if (
+                    query.filter_types
+                    and not ResourceType(resource_name) in query.filter_types
+                ):
+                    logger.info(resource_name + " resource is not listed in filter types")
+                    continue
+
+                if query.filter_shortnames and shortname not in query.filter_shortnames:
+                    continue
+
+                total += 1
+                if len(records) >= query.limit or total < query.offset:
+                    continue
+                resource_class = getattr(sys.modules["models.core"], resource_name.title())
+                records.append(
+                    resource_class.parse_raw(one.read_text()).to_record(
+                        query.subpath, shortname, query.include_fields
+                    )
+                )
         # Get all matching sub folders
         subfolders_glob = "*/.dm/meta.folder.json"
         for one in path.glob(subfolders_glob):
@@ -142,7 +175,6 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 )
             )
     return total, records
-
 
 def metapath(
     subpath: str, shortname: str, class_type: Type[MetaChild]
