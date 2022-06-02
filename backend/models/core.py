@@ -31,6 +31,7 @@ class Payload(Resource):
         None  # FIXME change to proper content type static hashmap
     )
     schema_shortname: str | None = None
+    checksum: str | None
     body: str | dict[str, Any] | Path
 
 
@@ -105,6 +106,7 @@ class Meta(Resource):
 
         if self.payload:
             attributes["payload"] = self.payload.body
+            attributes["checksum"] = self.payload.checksum
         if self.tags:
             attributes["tags"] = self.tags
 
