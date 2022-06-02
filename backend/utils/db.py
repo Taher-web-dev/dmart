@@ -127,10 +127,9 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
 
             resource_base_record = resource_obj.to_record(query.subpath, shortname, query.include_fields)
             if (
-                query.retrieve_non_binary_payload and
+                query.retrieve_json_payload and
                 resource_obj.payload.content_type and 
-                resource_obj.payload.content_type != ContentType.text and 
-                resource_obj.payload.content_type != ContentType.image
+                resource_obj.payload.content_type == ContentType.json
             ):
                 resource_base_record.attributes["payload"] = json.loads(resource_content)
 
