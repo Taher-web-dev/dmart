@@ -77,7 +77,7 @@ async def move_entry(
 
 
 @router.get(
-    "/payload/{subpath:path}/{shortname}.{ext}", response_model_exclude_none=True
+    "/payload/{resource_type}/{subpath:path}/{shortname}.{ext}", response_model_exclude_none=True
 )
 async def retrieve_entry_or_attachment_payload(
     resource_type : api.ResourceType,
