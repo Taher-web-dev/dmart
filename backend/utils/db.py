@@ -1,5 +1,5 @@
 import sys
-from models.enums import ResourceType
+from models.enums import ContentType, ResourceType
 from utils.settings import settings
 import models.core as core
 from typing import Any, TypeVar, Type, Generic
@@ -117,13 +117,22 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 continue
 
             resource_class = getattr(sys.modules["models.core"], resource_name.title())
-            resource_obj = resource_class.parse_raw(one.read_text())
+            resource_content = one.read_text()
+            resource_obj = resource_class.parse_raw(resource_content)
             if query.tags and (not resource_obj.tags or not any(item in resource_obj.tags for item in query.tags)):
                 continue
             total += 1
             if len(records) >= query.limit or total < query.offset:
                 continue
+
             resource_base_record = resource_obj.to_record(query.subpath, shortname, query.include_fields)
+            if (
+                query.retrieve_non_binary_payload and
+                resource_obj.payload.content_type and 
+                resource_obj.payload.content_type != ContentType.text and 
+                resource_obj.payload.content_type != ContentType.image
+            ):
+                resource_base_record.attributes["payload"] = json.loads(resource_content)
 
             # Get all matching attachments
             attachments_path = path / ".dm" / shortname
