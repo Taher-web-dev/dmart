@@ -78,7 +78,7 @@ class Meta(Resource):
         get record.attributes items that is not defined in the resource class,
         and add them to a Payload object body with content_type = text
         """
-        meta_fields = list(Meta.__fields__.keys())
+        meta_fields = list(self.__fields__.keys())
         payload_body = {}
         for key, value in record.attributes.items():
             if key not in meta_fields:
@@ -99,11 +99,9 @@ class Meta(Resource):
 
         meta_fields = list(Meta.__fields__.keys())
         attributes = {}
-        # Get child class attributes only if the payload is in a separate file
-        if not self.payload or self.payload.content_type != ContentType.text:
-            for key, value in self.__dict__.items():
-                if (not include or key in include) and key not in meta_fields:
-                    attributes[key] = value
+        for key, value in self.__dict__.items():
+            if (not include or key in include) and key not in meta_fields:
+                attributes[key] = value
 
         if self.payload:
             attributes["payload"] = self.payload.body
@@ -132,6 +130,7 @@ class Actor(Meta):
 class User(Actor):
     password: str
     email: str | None = None
+    display_name: str | None = None
 
 
 class Group(Actor):
