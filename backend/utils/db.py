@@ -14,7 +14,7 @@ MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
 FILE_PATTERN = re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
 ATTACHMENT_PATTERN = re.compile(
-    "attachments.([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$"
+    "attachments.(\w*)\/meta\.(\w*)\.json$"
 )
 FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 
@@ -142,10 +142,6 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 ):
                     logger.info(attach_resource_name + " resource is not listed in filter types")
                     continue
-
-                if query.filter_shortnames and attach_shortname not in query.filter_shortnames:
-                    continue
-
                 resource_class = getattr(sys.modules["models.core"], attach_resource_name.title())
                 resource_record_obj = resource_class.parse_raw(one.read_text()).to_record(
                    query.subpath + "/" + shortname, attach_shortname, query.include_fields
