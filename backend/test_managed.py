@@ -231,7 +231,7 @@ def test_retrieve_attachment():
     file_name = (
         request_file_data["shortname"] + "." + attachment_media_path.split(".")[-1]
     )
-    endpoint = f"managed/payload/{subpath}/{file_name}?resource_type=media"
+    endpoint = f"managed/payload/media/{subpath}/{file_name}"
     response = client.get(endpoint, headers=headers)
     assert response.status_code == status.HTTP_200_OK
 
