@@ -135,7 +135,6 @@ async def create_entry_or_attachment_with_payload(
     sha1.update(payload_file.file.read())
     checksum = sha1.hexdigest()
     await payload_file.seek(0)
-    record.attributes["checksum"] = checksum
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
     resource_obj.payload = core.Payload(  # detect the resource type
         content_type=resource_content_type,
