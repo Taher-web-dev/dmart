@@ -29,6 +29,7 @@ class Query(BaseModel):
     exclude_fields: list[str] | None = None
     include_fields: list[str] | None = None
     sort_by: str | None = None
+    retrieve_json_payload: bool = False
     limit: int = 10
     offset: int = 0
     tags: list[str] | None = None

@@ -1,4 +1,4 @@
-import re
+import hashlib
 from fastapi import APIRouter, Depends, UploadFile, Path
 from fastapi.responses import FileResponse
 
@@ -129,20 +129,18 @@ async def create_entry_or_attachment_with_payload(
             ),
         )
 
+
     record = core.Record.parse_raw(request_record.file.read())
+    sha1 = hashlib.sha1()
+    sha1.update(payload_file.file.read())
+    checksum = sha1.hexdigest()
+    await payload_file.seek(0)
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
     resource_obj.payload = core.Payload(  # detect the resource type
         content_type=resource_content_type,
+        checksum=checksum,
         body=record.shortname + "." + payload_file.filename.split(".")[1],
     )
-
-    if "schema_shortname" in record.attributes:
-        resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
-        payload_path = db.payload_path("schema", core.Schema)
-        schema = json.loads(FSPath(payload_path / f"{resource_obj.payload.schema_shortname}.json").read_text()) 
-        data = json.load(payload_file.file)
-        validate(instance=data, schema=schema)
-        payload_file.file.seek(0)
 
     if (
         not isinstance(resource_obj, core.Attachment)

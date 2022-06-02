@@ -1,5 +1,5 @@
 import sys
-from models.enums import ResourceType
+from models.enums import ContentType, ResourceType
 from utils.settings import settings
 import models.core as core
 from typing import Any, TypeVar, Type, Generic
@@ -14,7 +14,7 @@ MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
 FILE_PATTERN = re.compile("\\.dm\\/([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$")
 ATTACHMENT_PATTERN = re.compile(
-    "attachments.([a-zA-Z0-9_]*)\\/meta\\.([a-zA-z]*)\\.json$"
+    "attachments.(\w*)\/meta\.(\w*)\.json$"
 )
 FOLDER_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.folder.json$")
 
@@ -117,13 +117,21 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 continue
 
             resource_class = getattr(sys.modules["models.core"], resource_name.title())
-            resource_obj = resource_class.parse_raw(one.read_text())
+            resource_content = one.read_text()
+            resource_obj = resource_class.parse_raw(resource_content)
             if query.tags and (not resource_obj.tags or not any(item in resource_obj.tags for item in query.tags)):
                 continue
             total += 1
             if len(records) >= query.limit or total < query.offset:
                 continue
+
             resource_base_record = resource_obj.to_record(query.subpath, shortname, query.include_fields)
+            if (
+                query.retrieve_json_payload and
+                resource_obj.payload.content_type and 
+                resource_obj.payload.content_type == ContentType.json
+            ):
+                resource_base_record.attributes["payload"] = json.loads(resource_content)
 
             # Get all matching attachments
             attachments_path = path / ".dm" / shortname
@@ -142,10 +150,6 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 ):
                     logger.info(attach_resource_name + " resource is not listed in filter types")
                     continue
-
-                if query.filter_shortnames and attach_shortname not in query.filter_shortnames:
-                    continue
-
                 resource_class = getattr(sys.modules["models.core"], attach_resource_name.title())
                 resource_record_obj = resource_class.parse_raw(one.read_text()).to_record(
                    query.subpath + "/" + shortname, attach_shortname, query.include_fields
