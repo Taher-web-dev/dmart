@@ -144,8 +144,6 @@ async def create_entry_or_attachment_with_payload(
         validate(instance=data, schema=schema)
         payload_file.file.seek(0)
 
-        # TBD validate schema
-
     if (
         not isinstance(resource_obj, core.Attachment)
         and not isinstance(resource_obj, core.Content)
