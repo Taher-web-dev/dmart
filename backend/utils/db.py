@@ -117,8 +117,7 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 continue
 
             resource_class = getattr(sys.modules["models.core"], resource_name.title())
-            resource_content = one.read_text()
-            resource_obj = resource_class.parse_raw(resource_content)
+            resource_obj = resource_class.parse_raw(one.read_text())
             if query.tags and (not resource_obj.tags or not any(item in resource_obj.tags for item in query.tags)):
                 continue
             total += 1
@@ -129,9 +128,11 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
             if (
                 query.retrieve_json_payload and
                 resource_obj.payload.content_type and 
-                resource_obj.payload.content_type == ContentType.json
+                resource_obj.payload.content_type == ContentType.json and
+                (path / resource_obj.payload.body).is_file()
             ):
-                resource_base_record.attributes["payload"] = json.loads(resource_content)
+                with open(path / resource_obj.payload.body, 'r') as payload_file_content: 
+                    resource_base_record.attributes["payload"] = json.loads(payload_file_content.read())
 
             # Get all matching attachments
             attachments_path = path / ".dm" / shortname
