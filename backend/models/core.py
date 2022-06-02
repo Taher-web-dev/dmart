@@ -130,7 +130,6 @@ class Actor(Meta):
 class User(Actor):
     password: str
     email: str | None = None
-    display_name: str | None = None
 
 
 class Group(Actor):
