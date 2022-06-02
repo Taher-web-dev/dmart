@@ -29,11 +29,7 @@ async def create_user(record: core.Record, invitation: str) -> api.Response:
             error=api.Error(type="create", code=50, message="empty password"),
         )
 
-    user = core.User(
-        owner_shortname=record.shortname,
-        shortname=record.shortname,
-        password=record.attributes["password"],
-    )
+    user = core.User.from_record(record=record, shortname="Guest register")
 
     if "display_name" in record.attributes:
         user.display_name = record.attributes["display_name"]
