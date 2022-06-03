@@ -57,7 +57,7 @@ def save_meta(subpath: str, meta: core.Meta):
 
     # Inject resource_type
     meta_json["resource_type"] = resource_type
-    client.json().set(docid, Path.root_path(), json.dumps(meta_json))
+    client.json().set(docid, Path.root_path(), meta_json)
 
 
 """
