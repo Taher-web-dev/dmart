@@ -24,6 +24,15 @@ app = FastAPI(
     description="Structured Content Management System",
     version="0.0.1",
     redoc_url=None,
+    contact={
+        "name": "Kefah T. Issa",
+        "url": "https://dmart.cc",
+        "email": "kefah.issa@gmail.com",
+    },
+    license_info={
+        "name": "GNU Affero General Public License v3+",
+        "url": "https://www.gnu.org/licenses/agpl-3.0.en.html",
+    },
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     openapi_tags=[
         {"name": "user", "description": "User registration, login, profile and delete"},
