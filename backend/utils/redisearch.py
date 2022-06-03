@@ -14,32 +14,36 @@ client = redis.Redis(host=settings.redis_host, port=6379)
 index = client.ft(settings.space_name)
 
 META_SCHEMA = (
-    TextField("$.meta.uuid", no_stem=True, as_name="uuid"),
-    TextField("$.meta.shortname", sortable=True, no_stem=True, as_name="shortname"),
-    TextField("$.meta.subpath", sortable=True, no_stem=True, as_name="subpath"),
+    TextField("$.uuid", no_stem=True, as_name="uuid"),
+    TextField("$.shortname", sortable=True, no_stem=True, as_name="shortname"),
+    TextField("$.subpath", sortable=True, no_stem=True, as_name="subpath"),
     TextField(
-        "$.meta.resource_type", sortable=True, no_stem=True, as_name="resource_type"
+        "$.resource_type", sortable=True, no_stem=True, as_name="resource_type"
     ),
-    TextField("$.meta.displayname", sortable=True, as_name="displayname"),
-    TextField("$.meta.description", sortable=True, as_name="description"),
-    NumericField("$.meta.is_active", sortable=True, as_name="is_active"),
-    NumericField("$.meta.created_at", sortable=True, as_name="created_at"),
-    NumericField("$.meta.updated_at", sortable=True, as_name="updated_at"),
-    TagField("$.meta.tags", as_name="tags"),
+    TextField("$.displayname", sortable=True, as_name="displayname"),
+    TextField("$.description", sortable=True, as_name="description"),
     TextField(
-        "$.meta.owner_shortname", sortable=True, no_stem=True, as_name="owner_shortname"
+        "$.payload.content_type", no_stem=True, as_name="payload_content_type"
     ),
     TextField(
-        "$.meta.payload.content_type", no_stem=True, as_name="payload_content_type"
+        "$.payload.schema_shortname", no_stem=True, as_name="schema_shortname"
     ),
-    TextField("$.meta.payload.body", as_name="payload_body"),
-    TextField(
-        "$.meta.payload.schema_shortname", no_stem=True, as_name="schema_shortname"
-    ),
+    NumericField("$.created_at", sortable=True, as_name="created_at"),
+    NumericField("$.updated_at", sortable=True, as_name="updated_at"),
 )
 
-META_INDEX = IndexDefinition(prefix=["meta:"], index_type=IndexType.JSON)
+"""
 
+    NumericField("$.is_active", sortable=True, as_name="is_active"),
+    TagField("$.tags", as_name="tags"),
+    TextField(
+        "$.owner_shortname", sortable=True, no_stem=True, as_name="owner_shortname"
+    ),
+    TextField(
+        "$.payload.content_type", no_stem=True, as_name="payload_content_type"
+    ),
+    TextField("$.payload.body", as_name="payload_body"),
+"""
 
 def create_index():
     try:
@@ -47,7 +51,8 @@ def create_index():
     except:
         pass
 
-    index.create_index(META_SCHEMA, definition=META_INDEX)
+    ret = index.create_index(META_SCHEMA, definition=IndexDefinition(prefix=["meta:"], index_type=IndexType.JSON))
+    print("Creat index ret: ", ret)
 
 
 def save_meta(subpath: str, meta: core.Meta):
@@ -57,7 +62,11 @@ def save_meta(subpath: str, meta: core.Meta):
 
     # Inject resource_type
     meta_json["resource_type"] = resource_type
-    client.json().set(docid, Path.root_path(), meta_json)
+    meta_json["created_at"] = meta.created_at.timestamp()
+    meta_json["updated_at"] = meta.created_at.timestamp()
+    print("BODY: ", meta.payload.body)
+    ret = client.json().set(docid, Path.root_path(), meta_json)
+    print("Json set ret: ", ret)
 
 
 """

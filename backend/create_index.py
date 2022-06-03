@@ -18,7 +18,8 @@ for one in locators:
     meta = db.load(one.subpath, one.shortname, myclass)
     search.save_meta(subpath, meta)
 
-ret = search.index.search("*")
+ret = search.index.search("alibaba")
+print("Returned : ", len(ret.docs))
 if ret.docs:
    for one in ret.docs:
       #print(json.dumps(json.loads(json.loads(one.json)), indent=4))
