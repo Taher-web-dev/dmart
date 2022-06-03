@@ -6,8 +6,8 @@
 - [x] move api: if attachment, should include the payload. if entry should include all attachments
 - [x] Include attachments in the query response
 - [x] Implement support for structured content : both schemaful and schemaless
-- redis index, search, load, save
-- redis index schma-content separelty to support admin UI
+- redis index, search, load, save of entries (meta)
+- redis index, seach of schma-content separelty to support admin UI
 - security labels and acl rules
 - Support is_active (published/draft) 
 - implement history (alteration) creation
