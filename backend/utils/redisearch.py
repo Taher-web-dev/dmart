@@ -30,20 +30,14 @@ META_SCHEMA = (
     ),
     NumericField("$.created_at", sortable=True, as_name="created_at"),
     NumericField("$.updated_at", sortable=True, as_name="updated_at"),
-)
-
-"""
-
-    NumericField("$.is_active", sortable=True, as_name="is_active"),
-    TagField("$.tags", as_name="tags"),
     TextField(
         "$.owner_shortname", sortable=True, no_stem=True, as_name="owner_shortname"
     ),
-    TextField(
-        "$.payload.content_type", no_stem=True, as_name="payload_content_type"
-    ),
-    TextField("$.payload.body", as_name="payload_body"),
-"""
+    # NumericField("$.is_active", sortable=True, as_name="is_active"),
+    TagField("$.tags", as_name="tags"),
+    #TextField("$.payload.body", as_name="payload_body"),
+)
+
 
 def create_index():
     try:
@@ -64,9 +58,8 @@ def save_meta(subpath: str, meta: core.Meta):
     meta_json["resource_type"] = resource_type
     meta_json["created_at"] = meta.created_at.timestamp()
     meta_json["updated_at"] = meta.created_at.timestamp()
-    print("BODY: ", meta.payload.body)
-    ret = client.json().set(docid, Path.root_path(), meta_json)
-    print("Json set ret: ", ret)
+    meta_json["tags"] = "none" if not meta.tags else "|".join(meta.tags)
+    client.json().set(docid, Path.root_path(), meta_json)
 
 
 """
