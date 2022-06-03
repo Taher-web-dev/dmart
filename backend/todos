@@ -4,9 +4,11 @@
 - [x] Log events, errors and exceptions into jsonl log file
 - [x] shortnames/subpaths/filenames should only be alphanumeric with _ 1..32 chars # this is for security: [a-zA-Z0-9_]{1,32}
 - [x] move api: if attachment, should include the payload. if entry should include all attachments
-- Include attachments (location) in the query response
-- Implement support for structured content : both schemaful and schemaless
+- [x] Include attachments in the query response
+- [x] Implement support for structured content : both schemaful and schemaless
 - redis index, search, load, save
+- redis index schma-content separelty to support admin UI
 - security labels and acl rules
+- Support is_active (published/draft) 
 - implement history (alteration) creation
 - implement history and events query
