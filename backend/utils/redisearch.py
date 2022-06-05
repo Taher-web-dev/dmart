@@ -5,13 +5,16 @@ from redis.commands.json.path import Path
 from redis.commands.search.field import TextField, NumericField, TagField
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.query import NumericFilter, Query
+from typing import Any
 
 
 from utils.settings import settings
 
 
 client = redis.Redis(host=settings.redis_host, port=6379)
-index = client.ft(settings.space_name)
+index : dict[str, Any] = {} 
+for space_name in settings.space_names:
+    index[space_name] = client.ft(space_name)
 
 META_SCHEMA = (
     TextField("$.uuid", no_stem=True, as_name="uuid"),
@@ -39,19 +42,21 @@ META_SCHEMA = (
 )
 
 
-def create_index():
+def create_index(space_name : str):
     try:
-        index.dropindex(delete_documents=True)
+        index[space_name].dropindex(delete_documents=True)
     except:
         pass
 
-    ret = index.create_index(META_SCHEMA, definition=IndexDefinition(prefix=["meta:"], index_type=IndexType.JSON))
+    ret = index[space_name].create_index(META_SCHEMA, definition=IndexDefinition(prefix=[f"{space_name}:meta:"], index_type=IndexType.JSON))
     print("Creat index ret: ", ret)
 
+    # TBD : Create schema indexes. i.e. for each space name, there should be schema indexes for all available schema_shortnames 
 
-def save_meta(subpath: str, meta: core.Meta):
+
+def save_entry(space_name: str, subpath: str, meta: core.Meta):
     resource_type = meta.__class__.__name__.lower()
-    docid = f"meta:{subpath}/{meta.shortname}/{meta.uuid}/{resource_type}"
+    docid = f"{space_name}:meta:{subpath}/{meta.shortname}/{meta.uuid}/{resource_type}"
     meta_json = json.loads(meta.json(exclude_none=True))
 
     # Inject resource_type
@@ -60,6 +65,8 @@ def save_meta(subpath: str, meta: core.Meta):
     meta_json["updated_at"] = meta.created_at.timestamp()
     meta_json["tags"] = "none" if not meta.tags else "|".join(meta.tags)
     client.json().set(docid, Path.root_path(), meta_json)
+
+    # TBD : If entry of type content and json payload, save the json document under the respective schema index
 
 
 """

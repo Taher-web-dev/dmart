@@ -24,7 +24,6 @@ class Resource(BaseModel):
     class Config:
         use_enum_values = True
 
-
 class Payload(Resource):
     content_type: ContentType
     content_sub_type: str | None = (
@@ -48,7 +47,7 @@ class Meta(Resource):
     uuid: UUID = Field(default_factory=uuid4)
     shortname: str
     is_active: bool = False
-    display_name: str | None = None
+    displayname: str | None = None
     description: str | None = None
     tags: list[str] | None = None
     created_at: datetime = datetime.now()
@@ -118,12 +117,16 @@ class Meta(Resource):
 class Locator(Resource):
     uuid: UUID | None = None
     type: ResourceType
+    space_name: str
     subpath: str
     shortname: str
-    display_name: str | None = None
+    displayname: str | None = None
     description: str | None = None
     tags: list[str] | None = None
 
+
+class Space(Meta):
+    root_registration_signature : str = ""
 
 class Actor(Meta):
     pass

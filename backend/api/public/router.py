@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Path
-import re
 import utils.db as db
 import models.api as api
 import utils.regex as regex
@@ -24,15 +23,16 @@ async def query_entries(query: api.Query) -> api.Response:
 
 
 @router.get(
-    "/meta/{resource_type}/{subpath:path}/{shortname}", response_model_exclude_none=True
+    "/meta/{resource_type}/{space_name}/{subpath:path}/{shortname}", response_model_exclude_none=True
 )
 async def retrieve_entry_meta(
     resource_type: core.ResourceType,
+    space_name: str = Path(..., regex=regex.SPACENAME),
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
 ) -> dict[str, Any]:
     resource_class = getattr(sys.modules["models.core"], resource_type.title())
-    meta = db.load(subpath, shortname, resource_class)
+    meta = db.load(space_name, subpath, shortname, resource_class)
     if meta is None:
         raise api.Exception(
             404,
@@ -45,20 +45,20 @@ async def retrieve_entry_meta(
     # assert meta.is_active
     return meta.dict(exclude_none=True)
 
-
 # Public payload retrieval; can be used in "src=" in html pages
 @router.get(
-    "/payload/{resource_type}/{subpath:path}/{shortname}.{ext}",
+    "/payload/{resource_type}/{space_name}/{subpath:path}/{shortname}.{ext}",
     response_model_exclude_none=True,
 )
 async def retrieve_entry_or_attachment_payload(
     resource_type: core.ResourceType,
+    space_name: str = Path(..., regex=regex.SPACENAME),
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
 ) -> FileResponse:
     resource_class = getattr(sys.modules["models.core"], resource_type.title())
-    meta = db.load(subpath, shortname, resource_class)
+    meta = db.load(space_name, subpath, shortname, resource_class)
     if (
         meta.payload is None
         or meta.payload.body is None
@@ -73,11 +73,12 @@ async def retrieve_entry_or_attachment_payload(
 
     # TODO check security labels for pubblic access
     # assert meta.is_active
-    payload_path = db.payload_path(subpath, resource_class)
+    payload_path = db.payload_path(space_name, subpath, resource_class)
     media_file = payload_path / str(meta.payload.body)
     return FileResponse(media_file)
 
-
+"""
 @router.post("/submit", response_model_exclude_none=True)
 async def submit() -> api.Response:
     return api.Response(status=api.Status.success)
+"""

@@ -2,13 +2,9 @@ from enum import Enum
 
 
 class RequestType(str, Enum):
-    login = "login"
-    logout = "logout"
-    query = "query"
     create = "create"
     update = "update"
     delete = "delete"
-    copy = "copy"
     move = "move"
 
 
@@ -32,6 +28,7 @@ class ResourceType(str, Enum):
     locator = "locator"
     relationship = "relationship"
     alteration = "alteration"
+    space = "space"
 
 
 class ContentType(str, Enum):

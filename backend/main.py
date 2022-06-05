@@ -157,10 +157,10 @@ async def middle(request: Request, call_next):
                 "request": {
                     "url": request.url._url,
                     "query_params": dict(request.query_params.items()),
-                    "headers": dict(request.headers.items()),
+                    # "headers": dict(request.headers.items()),
                 },
                 "response": {
-                    "headers": dict(response.headers.items()),
+                    # "headers": dict(response.headers.items()),
                 },
                 "http_status": response.status_code,
             }

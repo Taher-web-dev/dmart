@@ -9,21 +9,31 @@ from utils.jwt import JWTBearer, sign_jwt
 from typing import Any
 import utils.regex as regex
 
-
 router = APIRouter()
 
+MANAGEMENT_SPACE : str ="management"
+USERS_SUBPATH : str ="users"
 
 @router.post("/create", response_model=api.Response, response_model_exclude_none=True)
-async def create_user(record: core.Record, invitation: str) -> api.Response:
+async def create_user(record: core.Record) -> api.Response:
     """Register a new user by invitation"""
-    if not invitation:
-        # TBD validate invitation.
+    if not record.attributes:
+        raise api.Exception(
+            status_code=400,
+            error=api.Error(type="create", code=50, message="Empty attributes"),
+        )
+
+    if "invitation" not in record.attributes:
+        # TBD validate invitation (simply it is a jwt signed token )
         # jwt-signed shortname, email and expiration time
         raise api.Exception(
             status_code=400,
-            error=api.Error(type="create", code=50, message="bad invitation"),
+            error=api.Error(type="create", code=50, message="bad or missign invitation token"),
         )
-    if not record.attributes or "password" not in record.attributes:
+    
+    # TBD : Raise error if user already eists.
+
+    if "password" not in record.attributes:
         raise api.Exception(
             status_code=400,
             error=api.Error(type="create", code=50, message="empty password"),
@@ -31,26 +41,26 @@ async def create_user(record: core.Record, invitation: str) -> api.Response:
 
     user = core.User.from_record(record=record, shortname="Guest register")
 
-    if "display_name" in record.attributes:
-        user.display_name = record.attributes["display_name"]
+    if "displayname" in record.attributes:
+        user.displayname = record.attributes["displayname"]
 
     if "email" in record.attributes:
         user.email = record.attributes["email"]
 
-    db.create("users", user)
+    db.create(MANAGEMENT_SPACE, USERS_SUBPATH, user)
     return api.Response(status=api.Status.success)
 
 
 @router.get("/profile", response_model=api.Response, response_model_exclude_none=True)
 async def get_profile(shortname=Depends(JWTBearer())) -> api.Response:
-    user = db.load("users", shortname, core.User)
+    user = db.load(MANAGEMENT_SPACE, USERS_SUBPATH, shortname, core.User)
     attributes: dict[str, Any] = {}
     if user.email:
         attributes["email"] = user.email
-    if user.display_name:
-        attributes["display_name"] = user.display_name
+    if user.displayname:
+        attributes["displayname"] = user.displayname
     record = core.Record(
-        subpath="users",
+        subpath=USERS_SUBPATH,
         shortname=user.shortname,
         resource_type=core.ResourceType.user,
         attributes=attributes,
@@ -63,18 +73,18 @@ async def update_profile(
     profile: core.Record, shortname=Depends(JWTBearer())
 ) -> api.Response:
     """Update user profile"""
-    user = db.load("users", shortname, core.User)
+    user = db.load(MANAGEMENT_SPACE, USERS_SUBPATH, shortname, core.User)
 
     if "password" in profile.attributes:
         user.password = profile.attributes["password"]
 
-    if "display_name" in profile.attributes:
-        user.display_name = profile.attributes["display_name"]
+    if "displayname" in profile.attributes:
+        user.displayname = profile.attributes["displayname"]
 
     if "email" in profile.attributes:
         user.email = profile.attributes["email"]
 
-    db.update("users", user)
+    db.update(MANAGEMENT_SPACE, USERS_SUBPATH, user)
     return api.Response(status=api.Status.success)
 
 
@@ -88,7 +98,7 @@ async def login(
     password: str = Body(...),  # , regex=regex.PASSWORD),
 ) -> api.Response:
     """Login and generate refresh token"""
-    user = db.load("users", shortname, core.User)
+    user = db.load(MANAGEMENT_SPACE, USERS_SUBPATH, shortname, core.User)
     if user and user.password == password:
         access_token = sign_jwt({"username": shortname})
         return api.Response(status=api.Status.success, auth_token=access_token)
@@ -101,6 +111,6 @@ async def login(
 @router.post("/delete", response_model=api.Response, response_model_exclude_none=True)
 async def delete_account(shortname=Depends(JWTBearer())) -> api.Response:
     """Delete own user"""
-    user = db.load("users", shortname, core.User)
-    db.delete("users", user)
+    user = db.load(MANAGEMENT_SPACE, USERS_SUBPATH, shortname, core.User)
+    db.delete(MANAGEMENT_SPACE, USERS_SUBPATH, user)
     return api.Response(status=api.Status.success)

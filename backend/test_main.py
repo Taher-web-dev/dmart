@@ -9,7 +9,7 @@ from main import app
 client = TestClient(app)
 
 shortname: str = "alibaba"
-display_name: str = "Ali Baba"
+displayname: str = "Ali Baba"
 email: str = "ali@baba.com"
 password: str = "hello"
 invitation: str = "A1B2C3"
@@ -38,7 +38,7 @@ def test_create_user():
         "subpath": "users",
         "shortname": shortname,
         "attributes": {
-            "display_name": display_name,
+            "displayname": displayname,
             "email": email,
             "password": password,
         },
@@ -80,7 +80,7 @@ def test_update_profile():
         "subpath": "users",
         "shortname": shortname,
         "attributes": {
-            "display_name": display_name,
+            "displayname": displayname,
             "email": email,
         },
     }

@@ -2,11 +2,16 @@ from models.enums import ResourceType
 import models.core as core
 from enum import Enum
 from pydantic import BaseModel, Field
-from pydantic.types import UUID4 as UUID
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from builtins import Exception as PyException
+from models.enums import RequestType
 import utils.regex as regex
+
+class Request(BaseModel):
+    space_name : str = Field(..., regex=regex.SPACENAME)
+    request_type : RequestType
+    records : list[core.Record]
 
 
 class QueryType(str, Enum):
@@ -14,15 +19,19 @@ class QueryType(str, Enum):
     subpath = "subpath"
     events = "events"
     history = "history"
+    tags = "tags"
+    spaces="spaces"
 
 
 class Query(BaseModel):
     type: QueryType
+    space_name : str = Field(..., regex=regex.SPACENAME)
     subpath: str = Field(..., regex=regex.SUBPATH)
     filter_types: list[ResourceType] | None = None
     filter_shortnames: list[str] | None = Field(
         regex=regex.SHORTNAME, default_factory=list
     )
+    filter_tags: list[str] | None = None
     search: str | None = None
     from_date: datetime | None = None
     to_date: datetime | None = None
@@ -32,7 +41,6 @@ class Query(BaseModel):
     retrieve_json_payload: bool = False
     limit: int = 10
     offset: int = 0
-    tags: list[str] | None = None
 
 
 class Status(str, Enum):
@@ -43,7 +51,7 @@ class Status(str, Enum):
 class Error(BaseModel):
     type: str
     code: int
-    message: str | List[Dict]
+    message: str | list[dict]
 
 
 class Response(BaseModel):

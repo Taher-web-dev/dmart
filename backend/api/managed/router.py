@@ -1,5 +1,5 @@
 import hashlib
-from fastapi import APIRouter, Depends, UploadFile, Path
+from fastapi import APIRouter, Depends, UploadFile, Path, Form
 from fastapi.responses import FileResponse
 
 import models.api as api
@@ -12,6 +12,7 @@ import sys
 from jsonschema import validate
 import json
 from pathlib import Path as FSPath
+from utils.settings import settings
 
 router = APIRouter()
 
@@ -26,68 +27,87 @@ async def query_entries(query: api.Query) -> api.Response:
     )
 
 
-@router.post("/create", response_model=api.Response, response_model_exclude_none=True)
-async def create_entry_or_attachment(
-    record: core.Record, shortname=Depends(JWTBearer())
-) -> api.Response:
-    resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-    db.save(record.subpath, resource_obj)
-    return api.Response(status=api.Status.success)
-
-
-@router.post("/update", response_model=api.Response, response_model_exclude_none=True)
-async def update_entry_or_attachment(
-    record: core.Record, shortname=Depends(JWTBearer())
-) -> api.Response:
-    resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-    db.update(record.subpath, resource_obj)
-    return api.Response(status=api.Status.success)
-
-
-@router.post("/delete", response_model=api.Response, response_model_exclude_none=True)
-async def delete_entry(record: core.Record) -> api.Response:
-    cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
-    item = db.load(record.subpath, record.shortname, cls)
-    db.delete(record.subpath, item)
-    return api.Response(status=api.Status.success)
-
-
-@router.post("/move", response_model=api.Response, response_model_exclude_none=True)
-async def move_entry(
-    src_subpath: str,
-    src_shortname: str,
-    dest_subpath,
-    dest_shortname: str,
-    resource_type: api.ResourceType,
-) -> api.Response:
-    cls = getattr(sys.modules["models.core"], resource_type.capitalize())
-    item = db.load(src_subpath, src_shortname, cls)
-    if not dest_subpath and not dest_shortname:
+@router.post("/request", response_model=api.Response, response_model_exclude_none=True)
+async def serve_request(request: api.Request, shortname=Depends(JWTBearer())) -> api.Response:
+    if request.space_name not in settings.space_names:
         raise api.Exception(
             404,
             api.Error(
-                type="move",
+                type="reqeust",
                 code=202,
-                message="Please provide a new path or a new shortname",
+                message="Space name provided is empty or invalid",
+            ),
+        )
+    if not request.records: 
+        raise api.Exception(
+            404,
+            api.Error(
+                type="reqeust",
+                code=202,
+                message="Request records cannot be empty",
             ),
         )
 
-    db.move(src_subpath, src_shortname, dest_subpath, dest_shortname, item)
-    return api.Response(status=api.Status.success)
+    match request.request_type:
+        case api.RequestType.create:
+            for record in request.records:
+                resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+                db.save(request.space_name, record.subpath, resource_obj)
+        case api.RequestType.update:
+            for record in request.records:
+                resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+                db.update(request.space_name, record.subpath, resource_obj)
+        case api.RequestType.delete:
+            for record in request.records:
+                cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
+                item = db.load(request.space_name, record.subpath, record.shortname, cls)
+                db.delete(request.space_name, record.subpath, item)
+        case api.RequestType.move:
+            for record in request.records:
+                if ("dest_subpath" not in record.attributes and not record.attributes["dest_subpath"]) and ("dest_shortname" not in record.attributes and not record.attributes["dest_shortname"]):
+                    raise api.Exception(
+                        404,
+                        api.Error(
+                            type="move",
+                            code=202,
+                            message="Please provide a new path or a new shortname",
+                        ),
+                    )
 
+                if ("src_subpath" not in record.attributes and not record.attributes["src_subpath"]) and ("src_shortname" not in record.attributes  and not record.attributes["src_shortname"]):
+                    raise api.Exception(
+                        404,
+                        api.Error(
+                            type="move",
+                            code=202,
+                            message="Please provide a new path or a new shortname",
+                        ),
+                    )
+                cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
+                item = db.load(request.space_name, record.attributes["src_subpath"], record.attributes["src_shortname"], cls)
+                db.move(
+                    request.space_name,
+                    record.attributes["src_subpath"], 
+                    record.attributes["src_shortname"], 
+                    record.attributes["dest_subpath"], 
+                    record.attributes["dest_shortname"], 
+                    item)
+    return api.Response(status=api.Status.success)
+            
 
 @router.get(
-    "/payload/{resource_type}/{subpath:path}/{shortname}.{ext}", response_model_exclude_none=True
+    "/payload/{resource_type}/{space_name}/{subpath:path}/{shortname}.{ext}", response_model_exclude_none=True
 )
 async def retrieve_entry_or_attachment_payload(
     resource_type : api.ResourceType,
+    space_name: str = Path(..., regex=regex.SPACENAME),
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
 ) -> FileResponse:
 
     cls = getattr(sys.modules["models.core"], resource_type.capitalize())
-    meta = db.load(subpath, shortname, cls)
+    meta = db.load(space_name, subpath, shortname, cls)
     if (
         meta.payload is None
         or meta.payload.body is None
@@ -101,18 +121,28 @@ async def retrieve_entry_or_attachment_payload(
         )
 
     # TODO check security labels for pubblic access
-    payload_path = db.payload_path(subpath, cls)
+    payload_path = db.payload_path(space_name, subpath, cls)
     return FileResponse(payload_path / str(meta.payload.body))
 
 
 @router.post(
-    "/create_with_payload",
+    "/resource_with_payload",
     response_model=api.Response,
     response_model_exclude_none=True,
 )
-async def create_entry_or_attachment_with_payload(
-    payload_file: UploadFile, request_record: UploadFile, shortname=Depends(JWTBearer())
+async def create_or_update_resource_with_payload(
+        payload_file: UploadFile, request_record: UploadFile, space_name : str = Form(),  shortname=Depends(JWTBearer())
 ):
+    # NOTE We currently make no distinction between create and update. in such case update should contain all the data every time.
+    if space_name not in settings.space_names:
+        raise api.Exception(
+            404,
+            api.Error(
+                type="reqeust",
+                code=202,
+                message="Space name provided is empty or invalid",
+            ),
+        )
     if payload_file.filename.endswith(".json"):
         resource_content_type = ContentType.json
     elif payload_file.content_type == "text/markdown":
@@ -161,7 +191,7 @@ async def create_entry_or_attachment_with_payload(
         and "schema_shortname" in record.attributes
     ):
         resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
-        schema_payload_path = db.payload_path("schema", core.Schema)
+        schema_payload_path = db.payload_path(space_name, "schema", core.Schema)
         schema = json.loads(
             FSPath(
                 schema_payload_path / f"{resource_obj.payload.schema_shortname}.json"
@@ -171,8 +201,8 @@ async def create_entry_or_attachment_with_payload(
         validate(instance=data, schema=schema)
         await payload_file.seek(0)
 
-    db.save(record.subpath, resource_obj)
+    db.save(space_name, record.subpath, resource_obj)
     await db.save_payload(
-        record.subpath, resource_obj, payload_file
+        space_name, record.subpath, resource_obj, payload_file
     )  # save any type of entries
     return api.Response(status=api.Status.success)
