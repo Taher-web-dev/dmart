@@ -6,3 +6,11 @@ workspace.xml
 settings.json
 .vscode
 .coverage
+**/node_modules/
+run
+/trash/
+/dist/
+**/.history
+src/tmp/
+.routify
+*.swp

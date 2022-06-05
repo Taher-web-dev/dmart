@@ -1,0 +1,10 @@
+{
+  "shortname": "demo",
+  "displayname": { "en": "Demo"},
+  "description": { "en": "A demo / sample space"},
+  "uuid": "9c73a31b-0874-4bf2-890f-44c7699c86c7",
+  "resource_type": "Space",
+  "languages": ["en"],
+  "primary_website":"https://dmart.cc",
+  "mirrors": []
+}
