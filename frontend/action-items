@@ -1,0 +1,53 @@
+
+
+
+- [ ] Add media attachments button (plugin) to html editor and markdown editor
+- [ ] Add Dashboard page
+- [ ] Add Personal profile page ... Edit own Pwd,Photo/avatr, Name translations .... Build public profile, View history of changes/activity
+- [ ] translate the hardcode ui text ... e.g. no view message, modal accept/cancel, tooltips ...etc. public ui: feedback successfully submitted.
+- [ ] Query/Search on member experience with table view. Mass management?
+- [ ] Marked or switch to markdown-it for plantuml and imx query plugins. (should consider server-side (imx) rendering of images and data). 
+- [ ] Contact us and sumbit in general (polls, forms, messages, notifications ...)
+- [ ] Accept/Edit/Reject pending public interactions on managed
+- [ ] Treeview add rename, move, copy ...
+- [ ] Display/shortname/type in the EntryEditor status bar. (bolded or h6)
+- [ ] Consider server-side plugin support. 
+- [ ] Admin features (command line is ok for now) git (commit/pull/push/rollback)
+- [ ] Submission form feature: to support contact/poll/questionair ...etc.
+- [ ] Test and check Arabic search with Redisearch (stemming, logical operators ...etc)
+
+Bugs
+
+- [ ] Adding new media entry causes the siblings to disapear from sidebar tree and the new entry is not shown
+- [ ] Check if redisearch is doing proper arabic stemming and search
+- [ ] Enable http chunking on caddy and kemal
+
+Minor  to medium
+================
+- [ ] Fix public interactions
+- [x] Create public demo space with sample data
+- [ ] change is_active to publish_status : Public, Draft, Pending review, Archived (Public but not surfaced or promoted).
+- [ ] EntryEditor : Support History, Term/Task/Contact ... types, Make code prismjs, add refresh (reload) button
+- [ ] Websockets and life notifications
+- [ ] Full and proper SSR with OpenGraph.
+- [ ] Managed ui: show entry in entryeditor from direct url. /entry/subpath/shortname (like public ui)
+- [ ] Add search page to managed section
+- [ ] Add media processors ffmpeg -i source.mkv -codec copy dest.mp4, qpf --linearize source.pdf dest.pdf
+- [ ] Profile sectoin : Biography, Contact details (including keys ...), Personal content (the user can choose to keep it private or make it public): General content like posts and media, .
+- [ ] Timeline (feed) section: Subscriptions (list/manage), Actual feed
+- [ ] Notifications (simple table/mass view into notifications folder).  /members/{name}/[messages,content,notifications,subscriptions,feed, activity?]
+- [ ] Messages section.
+- [ ] Command-line to create a member (and create empty directories for the member sections) and reset password. + list and delete.
+- [ ] Make sure Static file generation and SSR are working as expected including proper SPA hanlder serving from crystal pod.
+- [ ] Add meta/OG to pages.
+
+
+Major
+======
+
+- [ ] Stored Queries / Massview: Could live in a section of its own.
+- [ ] User registration / login ... support OAUTH?
+- [ ] Subscriptions management and Timeline
+- [ ] Messaging with SMTP gateway
+- [ ] Workflow
+- [ ] User + Access managements

@@ -1,0 +1,12 @@
+**/node_modules/
+/trash/
+/dist/
+.DS_Store
+**/.history
+src/tmp/
+.routify
+.netlify
+assets/build
+.vercel
+*.swp
+/src/space_config/index.js

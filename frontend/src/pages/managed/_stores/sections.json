@@ -1,0 +1,172 @@
+[
+  {
+    "name": "memberprofile",
+    "icon": "person-circle",
+    "children": [
+      {
+        "type": "link",
+        "name": "memberprofile"
+      }
+    ]
+  },
+  {
+    "name": "dashboard",
+    "icon": "house-door",
+    "children": [
+      {
+        "type": "link", 
+        "name": "dashboard"
+      }
+    ]
+  },
+  {
+    "name": "newsfeed",
+    "icon": "rss", 
+    "children": [
+      { 
+        "type": "folder", 
+        "name": "subscriptions",
+        "expanded": false, 
+        "children_loaded": false, 
+        "resource_types": [],
+        "dmart_path": "posts" 
+      }
+    ]
+  },
+  {
+    "name": "content",
+    "icon": "journals", 
+    "children": [
+      { 
+        "type": "folder", 
+        "name": "posts",
+        "expanded": false, 
+        "children_loaded": false, 
+        "resource_types": [],
+        "dmart_path": "posts" 
+      }
+    ]
+  },
+  {
+    "name": "tickets",
+    "icon": "calendar2-check", 
+    "children": [
+      { 
+        "type": "folder", 
+        "name": "tickets",
+        "expanded": false, 
+        "children_loaded": false, 
+        "resource_types": [],
+        "dmart_path": "tickets" 
+      }
+    ]
+  },
+  {
+    "name": "calendar",
+    "icon": "calendar", 
+    "children": [
+      { 
+        "type": "folder", 
+        "name": "calendar",
+        "expanded": false, 
+        "children_loaded": false, 
+        "resource_types": [],
+        "dmart_path": "calendar" 
+      }
+    ]
+  },
+  {
+    "name": "messages",
+    "icon": "envelope", 
+    "children": [
+      { 
+        "type": "folder", 
+        "name": "messages",
+        "expanded": false, 
+        "children_loaded": false, 
+        "resource_types": [],
+        "dmart_path": "messages" 
+      }
+    ]
+  },
+  {
+    "name": "submissions",
+    "icon": "truck", 
+    "children": [
+      { 
+        "type": "folder", 
+        "name": "submissions",
+        "expanded": false, 
+        "children_loaded": false, 
+        "resource_types": [],
+        "dmart_path": "submissions" 
+      }
+    ]
+  },
+  {
+    "name": "notifications",
+    "icon": "bell",
+    "children": [
+      {
+        "type": "link",
+        "name": "notifications"
+      }
+    ]
+  },
+  {
+    "name": "contacts",
+    "icon": "people", 
+    "children": [
+      { 
+        "type": "folder", 
+        "name": "contacts",
+        "expanded": false, 
+        "children_loaded": false, 
+        "resource_types": [],
+        "dmart_path": "contacts" 
+      }
+    ]
+  },
+  {
+    "name": "sysadmin",
+    "icon": "gear",
+    "children": [
+      {
+        "type": "link",
+        "name": "sysadmin"
+      }
+    ]
+  },
+  {
+    "name": "tools",
+    "icon": "tools",
+    "children": [
+      {
+        "type": "link",
+        "name": "query",
+        "icon": "binoculars"
+      },
+      {
+        "type": "link",
+        "name": "console",
+        "icon": "terminal"
+      },
+      {
+        "type": "link",
+        "name": "terminal",
+        "icon": "terminal"
+      },
+      {
+        "type": "link",
+        "name": "logs",
+        "icon": "receipt-cutoff"
+      },
+      {
+        "type": "link",
+        "name": "events",
+        "icon": "receipt-cutoff"
+      }
+    ]
+  }
+]
+
