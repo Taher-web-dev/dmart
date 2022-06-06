@@ -54,14 +54,6 @@ app = FastAPI(
 # json_logging.init_fastapi(enable_json=True)
 # json_logging.init_request_instrument(app)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 async def capture_body(request: Request):
     request.state.request_body = {}
@@ -235,6 +227,16 @@ async def catchall():
         ),
     )
 
+
+origins = ["http://localhost:5000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 if __name__ == "__main__":
     uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
