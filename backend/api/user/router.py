@@ -111,8 +111,10 @@ async def login(
             value=access_token,
             expires=settings.jwt_access_expires,
             httponly=True,
-            secure=True,
-            samesite="none",
+            #samesite="none",
+            #secure=True,
+            secure=False,
+            samesite="lax",
         )
         return api.Response(
             status=api.Status.success,
