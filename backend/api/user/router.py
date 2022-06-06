@@ -1,6 +1,6 @@
 """ Session Apis """
 
-from fastapi import APIRouter, Body, status, Depends
+from fastapi import APIRouter, Body, status, Depends, Response
 
 import models.api as api
 import models.core as core
@@ -8,6 +8,7 @@ import utils.db as db
 from utils.jwt import JWTBearer, sign_jwt
 from typing import Any
 import utils.regex as regex
+from utils.settings import settings
 
 router = APIRouter()
 
@@ -94,14 +95,27 @@ async def update_profile(
     response_model_exclude_none=True,
 )
 async def login(
-    shortname: str = Body(..., regex=regex.SHORTNAME),  # , regex=regex.USERNAME),
-    password: str = Body(...),  # , regex=regex.PASSWORD),
+    response : Response,
+    shortname: str = Body(..., regex=regex.SHORTNAME),
+    password: str = Body(..., regex=regex.PASSWORD),
 ) -> api.Response:
     """Login and generate refresh token"""
     user = db.load(MANAGEMENT_SPACE, USERS_SUBPATH, shortname, core.User)
     if user and user.password == password:
         access_token = sign_jwt({"username": shortname})
-        return api.Response(status=api.Status.success, auth_token=access_token)
+        response.set_cookie(
+            key="auth_token", 
+            value=access_token,
+            expires=settings.jwt_access_expires,
+            httponly=True,
+            secure=True,
+            samesite='none'
+        )
+        return api.Response(status=api.Status.success, records=[core.Record(
+                                    resource_type=core.ResourceType.user, 
+                                    subpath="users", 
+                                    shortname=shortname, 
+                                    attributes={})]) 
     raise api.Exception(
         status.HTTP_401_UNAUTHORIZED,
         api.Error(type="auth", code=10, message="Bad creds"),

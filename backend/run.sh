@@ -7,6 +7,6 @@ LISTENING_PORT=$(grep -i '^LISTENING_PORT' $BACKEND_ENV | sed 's/^[^=]* *= *//g'
 LISTENING_HOST=$(grep -i '^LISTENING_HOST' $BACKEND_ENV | sed 's/^[^=]* *= *//g' | tr -d '"' | tr -d "'")
 mkdir -p $LOG_PATH
 #uvicorn --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app
-#uvicorn  --log-config $BASE/json_log.ini --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 2>&1 | jq
-uvicorn  --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 
+uvicorn  --log-config $BASE/json_log.ini --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 2>&1 | jq
+#uvicorn  --log-config $BASE/json_log.ini --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 
 #gunicorn -w 2 -k uvicorn.workers.UvicornWorker --log-config json_log.ini main:app
