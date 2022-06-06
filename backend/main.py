@@ -123,7 +123,7 @@ async def middle(request: Request, call_next):
             try:
                 response_body = json.loads(raw_data)
             except:
-                response_body = raw_data.decode("ascii")
+                response_body = ''
     except api.Exception as ex:
         response = JSONResponse(
             status_code=ex.status_code,
