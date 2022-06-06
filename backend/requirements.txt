@@ -1,10 +1,13 @@
-uvicorn
 json_logging
 fastapi
 python-multipart
 jsonschema
+pyjwt
+email-validator
 
 pydantic
 jinja2
 pydantic[dotenv]
 redis
+concurrent-log-handler
+hypercorn

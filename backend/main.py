@@ -2,14 +2,13 @@
 
 import time
 import traceback
-import uvicorn
+# import uvicorn
 
 # import json_logging
-from utils.settings import settings
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request, status, Depends
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse
 import models.api as api
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
@@ -236,5 +235,5 @@ async def catchall():
     )
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
+#if __name__ == "__main__":
+#    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
