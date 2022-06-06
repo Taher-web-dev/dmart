@@ -9,32 +9,21 @@ from main import app
 
 client = TestClient(app)
 
+PRODUCTS_SPACE : str ="products"
+DEMO_SPACE : str ="demo"
+USERS_SUBPATH : str ="users"
+
 user_shortname: str = "alibaba"
 password: str = "hello"
-token: str = ""
 
-subpath: str = "cars"
-shortname: str = "BMW"
+subpath: str = "cool"
+shortname: str = "stuff"
 attachment_shortname: str = "doors"
 
-dirpath = f"{settings.space_root}/{subpath}/.dm/{shortname}"
+dirpath = f"{settings.spaces_folder}/{PRODUCTS_SPACE}/{subpath}/.dm/{shortname}"
 
-attachment_record_path = "../space/test/createmedia.json"
-attachment_media_path = "../space/test/logo.jpeg"
-# attachment = {
-#     "file": {
-#         "logo.jpeg",
-#         attachment_media_path,
-#         # open(, "rb"),
-#         "application/octet-stream",
-#     },
-#     "request": {
-#         "createmedia.json",
-#         attachment_record_path,
-#         # open(attachment_record_path, "rb"),
-#         "application/json",
-#     },
-# }
+attachment_record_path = f"{settings.spaces_folder}/{DEMO_SPACE}/test/createmedia.json"
+attachment_payload_path = f"{settings.spaces_folder}/{DEMO_SPACE}/test/logo.jpeg"
 
 if os.path.exists(dirpath):
     shutil.rmtree(dirpath)
@@ -49,48 +38,22 @@ def test_login():
     assert response.status_code == status.HTTP_200_OK
     json_response = response.json()
     assert json_response["status"] == "success"
-    global token
-    token = json_response["auth_token"]
 
 
 def test_create_content_resource():
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-    endpoint = "/managed/create"
+    headers = {"Content-Type": "application/json"}
+    endpoint = "/managed/request"
     request_data = {
-        "resource_type": "content",
-        "subpath": subpath,
-        "shortname": shortname,
-        "attributes": {"body": "2 door only"},
-    }
-
-    assert_code_and_status_success(
-        client.post(endpoint, json=request_data, headers=headers)
-    )
-
-
-def test_create_user_resource():
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-    endpoint = "/managed/create"
-    request_data = {
-        "resource_type": "user",
-        "subpath": subpath,
-        "shortname": shortname,
-        "attributes": {"email": "info@bmw.com", "password": "password"},
-    }
-
-    assert_code_and_status_success(
-        client.post(endpoint, json=request_data, headers=headers)
-    )
-
-
-def test_update_user_resource():
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-    endpoint = "/managed/update"
-    request_data = {
-        "resource_type": "user",
-        "subpath": subpath,
-        "shortname": shortname,
-        "attributes": {"email": "info@bmw.com", "password": "UPDATED"},
+        "space_name": PRODUCTS_SPACE,
+        "request_type": "create",
+        "records": [
+            {
+                "resource_type": "content",
+                "subpath": subpath,
+                "shortname": shortname,
+                "attributes": {"body": "2 door only"},
+            }
+        ]
     }
 
     assert_code_and_status_success(
@@ -99,14 +62,20 @@ def test_update_user_resource():
 
 
 def test_create_folder_resource():
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-    endpoint = "/managed/create"
+    headers = {"Content-Type": "application/json"}
+    endpoint = "/managed/request"
     request_data = {
-        "resource_type": "folder",
-        "subpath": subpath,
-        "shortname": shortname,
-        "attributes": {"body": "2 door only"},
-    }
+        "space_name": PRODUCTS_SPACE,
+        "request_type": "create",
+        "records": [
+            {
+                "resource_type": "folder",
+                "subpath": subpath,
+                "shortname": shortname,
+                "attributes": {},
+            }
+        ]
+    } 
 
     assert_code_and_status_success(
         client.post(endpoint, json=request_data, headers=headers)
@@ -114,13 +83,19 @@ def test_create_folder_resource():
 
 
 def test_create_comment_resource():
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-    endpoint = "/managed/create"
+    headers = {"Content-Type": "application/json"}
+    endpoint = "/managed/request"
     request_data = {
-        "resource_type": "comment",
-        "subpath": f"{subpath}/{shortname}",
-        "shortname": attachment_shortname,
-        "attributes": {"body": "A very speed car"},
+        "space_name": PRODUCTS_SPACE,
+        "request_type": "create",
+        "records": [
+            {
+                "resource_type": "comment",
+                "subpath": f"{subpath}/{shortname}",
+                "shortname": attachment_shortname,
+                "attributes": {"body": "A very speed car"},
+            }
+        ]
     }
 
     assert_code_and_status_success(
@@ -128,13 +103,46 @@ def test_create_comment_resource():
     )
 
 
+def test_upload_attachment_with_payload():
+    endpoint = "managed/resource_with_payload"
+    request_file = open(attachment_record_path, "rb")
+    media_file = open(attachment_payload_path, "rb")
+
+    data = [
+        ("request_record", ("createmedia.json", request_file, "application/json")),
+        ("payload_file", ("logo.jpeg", media_file, "image/jpeg")),
+    ]
+
+    assert_code_and_status_success(client.post(endpoint, data={"space_name": PRODUCTS_SPACE}, files=data))
+    request_file.close()
+    media_file.close()
+
+
+def test_retrieve_attachment():
+ 
+    request_file = open(attachment_record_path, "rb")
+    request_file_data = json.loads(request_file.read())
+
+    subpath = request_file_data["subpath"]
+    file_name = (
+        request_file_data["shortname"] + "." + attachment_payload_path.split(".")[-1]
+    )
+    print("\n\n SUBPATH: ", subpath, "\n FILENAME: ", file_name)
+    endpoint = f"managed/payload/media/{PRODUCTS_SPACE}/{subpath}/{file_name}"
+    response = client.get(endpoint)
+    assert response.status_code == status.HTTP_200_OK
+
+    request_file.close()
+
+
 def test_query_subpath():
-    limit = 3
-    filter_types = ["content", "comment", "user", "folder"]
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+    limit = 2
+    filter_types = ["content", "comment", "folder", "media"]
+    headers = {"Content-Type": "application/json"}
     endpoint = "/managed/query"
     request_data = {
         "type": "subpath",
+        "space_name": PRODUCTS_SPACE,
         "subpath": subpath,
         "filter_types": filter_types,
         "filter_shortnames": [shortname],
@@ -147,6 +155,8 @@ def test_query_subpath():
     json_response = response.json()
     assert json_response["status"] == "success"
     assert json_response["attributes"]["returned"] == limit
+    assert "comment" in json_response["records"][0]["attachments"]
+    assert "media" in json_response["records"][0]["attachments"]
     for record in json_response["records"]:
         assert record["resource_type"] in filter_types
 
@@ -159,12 +169,6 @@ def test_delete_all():
     # DELETE CONTENT RESOURCE
     response = delete_resource(
         resource="content", del_subpath=subpath, del_shortname=shortname
-    )
-    assert_code_and_status_success(response=response)
-
-    # DELETE USER RESOURCE
-    response = delete_resource(
-        resource="user", del_subpath=subpath, del_shortname=shortname
     )
     assert_code_and_status_success(response=response)
 
@@ -182,60 +186,34 @@ def test_delete_all():
     )
     assert_code_and_status_success(response=response)
 
-    path = settings.space_root / subpath
+    path = settings.spaces_folder / PRODUCTS_SPACE / subpath
     if path.is_dir():
         shutil.rmtree(path)
 
 
 def delete_user():
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+    headers = {"Content-Type": "application/json"}
     endpoint = "/user/delete"
     return client.post(endpoint, json={}, headers=headers)
 
 
 def delete_resource(resource: str, del_subpath: str, del_shortname: str):
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-    endpoint = "/managed/delete"
+    headers = {"Content-Type": "application/json"}
+    endpoint = "/managed/request"
     request_data = {
-        "resource_type": resource,
-        "subpath": del_subpath,
-        "shortname": del_shortname,
-        "attributes": {},
+        "space_name": PRODUCTS_SPACE,
+        "request_type": "delete",
+        "records": [
+            {
+                "resource_type": resource,
+                "subpath": del_subpath,
+                "shortname": del_shortname,
+                "attributes": {},
+            }
+        ]
     }
 
     return client.post(endpoint, json=request_data, headers=headers)
-
-
-def test_upload_attachment_with_payload():
-    headers = {"Authorization": f"Bearer {token}"}
-    endpoint = "managed/create_with_payload"
-    request_file = open(attachment_record_path, "rb")
-    media_file = open(attachment_media_path, "rb")
-
-    data = [
-        ("request_record", ("createmedia.json", request_file, "application/json")),
-        ("payload_file", ("logo.jpeg", media_file, "image/jpeg")),
-    ]
-
-    assert_code_and_status_success(client.post(endpoint, files=data, headers=headers))
-    request_file.close()
-    media_file.close()
-
-
-def test_retrieve_attachment():
-    headers = {"Authorization": f"Bearer {token}"}
-    request_file = open(attachment_record_path, "rb")
-    request_file_data = json.loads(request_file.read())
-
-    subpath = request_file_data["subpath"]
-    file_name = (
-        request_file_data["shortname"] + "." + attachment_media_path.split(".")[-1]
-    )
-    endpoint = f"managed/payload/media/{subpath}/{file_name}"
-    response = client.get(endpoint, headers=headers)
-    assert response.status_code == status.HTTP_200_OK
-
-    request_file.close()
 
 
 def assert_code_and_status_success(response):
