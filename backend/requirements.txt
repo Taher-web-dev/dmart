@@ -1,4 +1,4 @@
-json_logging
+python-json-logger
 fastapi
 python-multipart
 jsonschema
@@ -10,4 +10,5 @@ jinja2
 pydantic[dotenv]
 redis
 concurrent-log-handler
-uvicorn
+hypercorn
+

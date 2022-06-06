@@ -2,7 +2,7 @@
 
 import time
 import traceback
-import uvicorn
+#import uvicorn
 
 import json_logging
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -53,7 +53,7 @@ app = FastAPI(
 
 
 json_logging.init_fastapi(enable_json=True)
-json_logging.init_request_instrument(app)
+#json_logging.init_request_instrument(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -187,17 +187,17 @@ async def middle(request: Request, call_next):
         "props": {
             "timestamp": start_time,
             "duration": 1000 * (time.time() - start_time),
-            "verb": request.method,
-            "path": str(request.url.path),
             "request": {
                 "url": request.url._url,
+                "verb": request.method,
+                "path": str(request.url.path),
                 "query_params": dict(request.query_params.items()),
                 "headers": dict(request.headers.items()),
             },
             "response": {
                 "headers": dict(response.headers.items()),
+                "http_status": response.status_code,
             },
-            "http_status": response.status_code,
         }
     }
 
@@ -251,5 +251,5 @@ async def catchall():
     )
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
+#if __name__ == "__main__":
+#    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
