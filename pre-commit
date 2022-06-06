@@ -12,7 +12,6 @@ if ! flake8; then
   exit 1
 fi
 
-psql -h 127.0.0.1 -U galleon galleon -c 'delete from users; delete from otp;'
 export BACKEND_ENV=config.env
 cd backend
 if ! pytest -v; then

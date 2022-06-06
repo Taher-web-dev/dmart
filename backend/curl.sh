@@ -77,8 +77,8 @@ echo -n -e "Query content: \t\t"
 RECORD=$(jq -c -n --arg subpath "$SUBPATH" '{space_name: "demo", type: "subpath", subpath: $subpath}')
 curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query | jq .status
 
-echo -n -e "Delete user: \t\t"
-curl -s -b mycookies.jar -H "$CT" -d '{}' $API_URL/user/delete | jq .status
+# echo -n -e "Delete user: \t\t"
+# curl -s -b mycookies.jar -H "$CT" -d '{}' $API_URL/user/delete | jq .status
 
 rm mycookies.jar
 

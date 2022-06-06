@@ -20,6 +20,8 @@ from starlette.concurrency import iterate_in_threadpool
 import json
 from typing import Any
 from fastapi.middleware.cors import CORSMiddleware
+from utils.settings import settings
+from urllib.parse import urlparse
 
 app = FastAPI(
     title="Datamart API",
@@ -52,6 +54,14 @@ app = FastAPI(
 
 # json_logging.init_fastapi(enable_json=True)
 # json_logging.init_request_instrument(app)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 async def capture_body(request: Request):
@@ -155,6 +165,20 @@ async def middle(request: Request, call_next):
         )
         response_body = json.loads(response.body.decode())
 
+    referer = request.headers.get(
+        "referer",
+        request.headers.get("x-forwarded-proto", "http")
+        + "://"
+        + request.headers.get(
+            "x-forwarded-host", f"{settings.listening_host}:{settings.listening_port}"
+        ),
+    )
+    origin = urlparse(referer)
+    response.headers[
+        "Access-Control-Allow-Origin"
+    ] = f"{origin.scheme}://{origin.netloc}"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
@@ -226,16 +250,6 @@ async def catchall():
         ),
     )
 
-
-origins = ["http://localhost:5000"]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 if __name__ == "__main__":
     uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
