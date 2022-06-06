@@ -8,8 +8,8 @@ LISTENING_HOST=$(grep -i '^LISTENING_HOST' $BACKEND_ENV | sed 's/^[^=]* *= *//g'
 mkdir -p $LOG_PATH
 
 #hypercorn main:app -w $(nproc --all) -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio'
-hypercorn main:app --config ./hypercorn.toml -w 2 -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio'
+#hypercorn main:app --config ./json_log.ini -w 2 -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio'
 #uvicorn --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app
-#uvicorn  --log-config $BASE/json_log.ini --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 2>&1 | jq
+uvicorn  --log-config $BASE/json_log.ini --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 2>&1 | jq
 #uvicorn  --log-config $BASE/json_log.ini --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 
 #gunicorn -w 2 -k uvicorn.workers.UvicornWorker --log-config json_log.ini main:app

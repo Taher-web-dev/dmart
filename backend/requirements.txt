@@ -10,4 +10,4 @@ jinja2
 pydantic[dotenv]
 redis
 concurrent-log-handler
-hypercorn
+uvicorn
