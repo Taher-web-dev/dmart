@@ -160,7 +160,7 @@ async def retrieve_entry_or_attachment_payload(
 async def create_or_update_resource_with_payload(
     payload_file: UploadFile,
     request_record: UploadFile,
-    space_name: str = Form(),
+    space_name: str = Form(...),
     shortname=Depends(JWTBearer()),
 ):
     # NOTE We currently make no distinction between create and update. in such case update should contain all the data every time.
