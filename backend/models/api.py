@@ -8,10 +8,11 @@ from builtins import Exception as PyException
 from models.enums import RequestType
 import utils.regex as regex
 
+
 class Request(BaseModel):
-    space_name : str = Field(..., regex=regex.SPACENAME)
-    request_type : RequestType
-    records : list[core.Record]
+    space_name: str = Field(..., regex=regex.SPACENAME)
+    request_type: RequestType
+    records: list[core.Record]
 
 
 class QueryType(str, Enum):
@@ -20,12 +21,12 @@ class QueryType(str, Enum):
     events = "events"
     history = "history"
     tags = "tags"
-    spaces="spaces"
+    spaces = "spaces"
 
 
 class Query(BaseModel):
     type: QueryType
-    space_name : str = Field(..., regex=regex.SPACENAME)
+    space_name: str = Field(..., regex=regex.SPACENAME)
     subpath: str = Field(..., regex=regex.SUBPATH)
     filter_types: list[ResourceType] | None = None
     filter_shortnames: list[str] | None = Field(

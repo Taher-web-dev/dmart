@@ -21,9 +21,9 @@ for one in locators:
 ret = search.index.search("alibaba")
 print("Returned : ", len(ret.docs))
 if ret.docs:
-   for one in ret.docs:
-      #print(json.dumps(json.loads(json.loads(one.json)), indent=4))
-      print(json.dumps(json.loads(one.json), indent=4))
+    for one in ret.docs:
+        # print(json.dumps(json.loads(json.loads(one.json)), indent=4))
+        print(json.dumps(json.loads(one.json), indent=4))
 
 
 # ret = search.index.search(Query("curl")) # .return_field("$.meta.is_active", as_field="is_active")).docs

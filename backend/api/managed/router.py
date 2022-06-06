@@ -28,7 +28,9 @@ async def query_entries(query: api.Query) -> api.Response:
 
 
 @router.post("/request", response_model=api.Response, response_model_exclude_none=True)
-async def serve_request(request: api.Request, shortname=Depends(JWTBearer())) -> api.Response:
+async def serve_request(
+    request: api.Request, shortname=Depends(JWTBearer())
+) -> api.Response:
     if request.space_name not in settings.space_names:
         raise api.Exception(
             404,
@@ -38,7 +40,7 @@ async def serve_request(request: api.Request, shortname=Depends(JWTBearer())) ->
                 message="Space name provided is empty or invalid",
             ),
         )
-    if not request.records: 
+    if not request.records:
         raise api.Exception(
             404,
             api.Error(
@@ -59,12 +61,22 @@ async def serve_request(request: api.Request, shortname=Depends(JWTBearer())) ->
                 db.update(request.space_name, record.subpath, resource_obj)
         case api.RequestType.delete:
             for record in request.records:
-                cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
-                item = db.load(request.space_name, record.subpath, record.shortname, cls)
+                cls = getattr(
+                    sys.modules["models.core"], record.resource_type.capitalize()
+                )
+                item = db.load(
+                    request.space_name, record.subpath, record.shortname, cls
+                )
                 db.delete(request.space_name, record.subpath, item)
         case api.RequestType.move:
             for record in request.records:
-                if ("dest_subpath" not in record.attributes and not record.attributes["dest_subpath"]) and ("dest_shortname" not in record.attributes and not record.attributes["dest_shortname"]):
+                if (
+                    "dest_subpath" not in record.attributes
+                    and not record.attributes["dest_subpath"]
+                ) and (
+                    "dest_shortname" not in record.attributes
+                    and not record.attributes["dest_shortname"]
+                ):
                     raise api.Exception(
                         404,
                         api.Error(
@@ -74,7 +86,13 @@ async def serve_request(request: api.Request, shortname=Depends(JWTBearer())) ->
                         ),
                     )
 
-                if ("src_subpath" not in record.attributes and not record.attributes["src_subpath"]) and ("src_shortname" not in record.attributes  and not record.attributes["src_shortname"]):
+                if (
+                    "src_subpath" not in record.attributes
+                    and not record.attributes["src_subpath"]
+                ) and (
+                    "src_shortname" not in record.attributes
+                    and not record.attributes["src_shortname"]
+                ):
                     raise api.Exception(
                         404,
                         api.Error(
@@ -83,23 +101,32 @@ async def serve_request(request: api.Request, shortname=Depends(JWTBearer())) ->
                             message="Please provide a new path or a new shortname",
                         ),
                     )
-                cls = getattr(sys.modules["models.core"], record.resource_type.capitalize())
-                item = db.load(request.space_name, record.attributes["src_subpath"], record.attributes["src_shortname"], cls)
+                cls = getattr(
+                    sys.modules["models.core"], record.resource_type.capitalize()
+                )
+                item = db.load(
+                    request.space_name,
+                    record.attributes["src_subpath"],
+                    record.attributes["src_shortname"],
+                    cls,
+                )
                 db.move(
                     request.space_name,
-                    record.attributes["src_subpath"], 
-                    record.attributes["src_shortname"], 
-                    record.attributes["dest_subpath"], 
-                    record.attributes["dest_shortname"], 
-                    item)
+                    record.attributes["src_subpath"],
+                    record.attributes["src_shortname"],
+                    record.attributes["dest_subpath"],
+                    record.attributes["dest_shortname"],
+                    item,
+                )
     return api.Response(status=api.Status.success)
-            
+
 
 @router.get(
-    "/payload/{resource_type}/{space_name}/{subpath:path}/{shortname}.{ext}", response_model_exclude_none=True
+    "/payload/{resource_type}/{space_name}/{subpath:path}/{shortname}.{ext}",
+    response_model_exclude_none=True,
 )
 async def retrieve_entry_or_attachment_payload(
-    resource_type : api.ResourceType,
+    resource_type: api.ResourceType,
     space_name: str = Path(..., regex=regex.SPACENAME),
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
@@ -131,7 +158,10 @@ async def retrieve_entry_or_attachment_payload(
     response_model_exclude_none=True,
 )
 async def create_or_update_resource_with_payload(
-        payload_file: UploadFile, request_record: UploadFile, space_name : str = Form(),  shortname=Depends(JWTBearer())
+    payload_file: UploadFile,
+    request_record: UploadFile,
+    space_name: str = Form(),
+    shortname=Depends(JWTBearer()),
 ):
     # NOTE We currently make no distinction between create and update. in such case update should contain all the data every time.
     if space_name not in settings.space_names:
@@ -158,7 +188,6 @@ async def create_or_update_resource_with_payload(
                 message="The file type is not supported",
             ),
         )
-
 
     record = core.Record.parse_raw(request_record.file.read())
     sha1 = hashlib.sha1()

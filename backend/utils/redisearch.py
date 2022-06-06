@@ -12,7 +12,7 @@ from utils.settings import settings
 
 
 client = redis.Redis(host=settings.redis_host, port=6379)
-index : dict[str, Any] = {} 
+index: dict[str, Any] = {}
 for space_name in settings.space_names:
     index[space_name] = client.ft(space_name)
 
@@ -20,17 +20,11 @@ META_SCHEMA = (
     TextField("$.uuid", no_stem=True, as_name="uuid"),
     TextField("$.shortname", sortable=True, no_stem=True, as_name="shortname"),
     TextField("$.subpath", sortable=True, no_stem=True, as_name="subpath"),
-    TextField(
-        "$.resource_type", sortable=True, no_stem=True, as_name="resource_type"
-    ),
+    TextField("$.resource_type", sortable=True, no_stem=True, as_name="resource_type"),
     TextField("$.displayname", sortable=True, as_name="displayname"),
     TextField("$.description", sortable=True, as_name="description"),
-    TextField(
-        "$.payload.content_type", no_stem=True, as_name="payload_content_type"
-    ),
-    TextField(
-        "$.payload.schema_shortname", no_stem=True, as_name="schema_shortname"
-    ),
+    TextField("$.payload.content_type", no_stem=True, as_name="payload_content_type"),
+    TextField("$.payload.schema_shortname", no_stem=True, as_name="schema_shortname"),
     NumericField("$.created_at", sortable=True, as_name="created_at"),
     NumericField("$.updated_at", sortable=True, as_name="updated_at"),
     TextField(
@@ -38,20 +32,25 @@ META_SCHEMA = (
     ),
     # NumericField("$.is_active", sortable=True, as_name="is_active"),
     TagField("$.tags", as_name="tags"),
-    #TextField("$.payload.body", as_name="payload_body"),
+    # TextField("$.payload.body", as_name="payload_body"),
 )
 
 
-def create_index(space_name : str):
+def create_index(space_name: str):
     try:
         index[space_name].dropindex(delete_documents=True)
     except:
         pass
 
-    ret = index[space_name].create_index(META_SCHEMA, definition=IndexDefinition(prefix=[f"{space_name}:meta:"], index_type=IndexType.JSON))
+    ret = index[space_name].create_index(
+        META_SCHEMA,
+        definition=IndexDefinition(
+            prefix=[f"{space_name}:meta:"], index_type=IndexType.JSON
+        ),
+    )
     print("Creat index ret: ", ret)
 
-    # TBD : Create schema indexes. i.e. for each space name, there should be schema indexes for all available schema_shortnames 
+    # TBD : Create schema indexes. i.e. for each space name, there should be schema indexes for all available schema_shortnames
 
 
 def save_entry(space_name: str, subpath: str, meta: core.Meta):

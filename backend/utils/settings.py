@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     log_filename: str = "x-ljson.log"
     jwt_secret: str = ""
     jwt_algorithm: str = ""
-    jwt_access_expires: int = 30 * 86400 # 30 days
+    jwt_access_expires: int = 30 * 86400  # 30 days
     listening_host: str = "0.0.0.0"
     listening_port: int = 8282
     redis_host: str = "127.0.0.1"

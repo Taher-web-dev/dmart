@@ -23,7 +23,8 @@ async def query_entries(query: api.Query) -> api.Response:
 
 
 @router.get(
-    "/meta/{resource_type}/{space_name}/{subpath:path}/{shortname}", response_model_exclude_none=True
+    "/meta/{resource_type}/{space_name}/{subpath:path}/{shortname}",
+    response_model_exclude_none=True,
 )
 async def retrieve_entry_meta(
     resource_type: core.ResourceType,
@@ -44,6 +45,7 @@ async def retrieve_entry_meta(
     # TODO check security labels for pubblic access
     # assert meta.is_active
     return meta.dict(exclude_none=True)
+
 
 # Public payload retrieval; can be used in "src=" in html pages
 @router.get(
@@ -76,6 +78,7 @@ async def retrieve_entry_or_attachment_payload(
     payload_path = db.payload_path(space_name, subpath, resource_class)
     media_file = payload_path / str(meta.payload.body)
     return FileResponse(media_file)
+
 
 """
 @router.post("/submit", response_model_exclude_none=True)

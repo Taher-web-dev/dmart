@@ -51,8 +51,8 @@ app = FastAPI(
 )
 
 
-#json_logging.init_fastapi(enable_json=True)
-#json_logging.init_request_instrument(app)
+# json_logging.init_fastapi(enable_json=True)
+# json_logging.init_request_instrument(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,6 +61,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 async def capture_body(request: Request):
     request.state.request_body = {}
@@ -111,7 +112,7 @@ async def middle(request: Request, call_next):
 
     start_time = time.time()
     response_body: str | dict = ""
-    exception_data : dict[str, Any] | None = None
+    exception_data: dict[str, Any] | None = None
     try:
         response = await call_next(request)
         raw_response = [section async for section in response.body_iterator]
@@ -138,7 +139,7 @@ async def middle(request: Request, call_next):
             for frame, lineno in traceback.walk_tb(ex.__traceback__)
             if "site-packages" not in frame.f_code.co_filename
         ]
-        exception_data={"props": {"exception": str(ex), "stack": stack}}
+        exception_data = {"props": {"exception": str(ex), "stack": stack}}
         response_body = json.loads(response.body.decode())
     except Exception as ex:
         if ex:
@@ -151,7 +152,7 @@ async def middle(request: Request, call_next):
                 for frame, lineno in traceback.walk_tb(ex.__traceback__)
                 if "site-packages" not in frame.f_code.co_filename
             ]
-            exception_data={"props": {"exception": str(ex), "stack": stack}}
+            exception_data = {"props": {"exception": str(ex), "stack": stack}}
         response = JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=jsonable_encoder(
@@ -167,7 +168,7 @@ async def middle(request: Request, call_next):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
 
-    extra={
+    extra = {
         "props": {
             "timestamp": start_time,
             "duration": 1000 * (time.time() - start_time),
@@ -192,12 +193,10 @@ async def middle(request: Request, call_next):
     if response_body:
         extra["props"]["response"]["body"] = response_body
 
-    logger.info(
-        "Served request",
-        extra=extra
-    )
+    logger.info("Served request", extra=extra)
 
     return response
+
 
 @app.get("/", include_in_schema=False)
 async def root():
@@ -212,9 +211,16 @@ async def root():
     }
 
 
-app.include_router(user, prefix="/user", tags=["user"], dependencies=[Depends(capture_body)])
-app.include_router(managed, prefix="/managed", tags=["managed"], dependencies=[Depends(capture_body)])
-app.include_router(public, prefix="/public", tags=["public"], dependencies=[Depends(capture_body)])
+app.include_router(
+    user, prefix="/user", tags=["user"], dependencies=[Depends(capture_body)]
+)
+app.include_router(
+    managed, prefix="/managed", tags=["managed"], dependencies=[Depends(capture_body)]
+)
+app.include_router(
+    public, prefix="/public", tags=["public"], dependencies=[Depends(capture_body)]
+)
+
 
 @app.get("/{x:path}", include_in_schema=False)
 @app.post("/{x:path}", include_in_schema=False)

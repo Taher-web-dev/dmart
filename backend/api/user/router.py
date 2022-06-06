@@ -12,8 +12,9 @@ from utils.settings import settings
 
 router = APIRouter()
 
-MANAGEMENT_SPACE : str ="management"
-USERS_SUBPATH : str ="users"
+MANAGEMENT_SPACE: str = "management"
+USERS_SUBPATH: str = "users"
+
 
 @router.post("/create", response_model=api.Response, response_model_exclude_none=True)
 async def create_user(record: core.Record) -> api.Response:
@@ -29,9 +30,11 @@ async def create_user(record: core.Record) -> api.Response:
         # jwt-signed shortname, email and expiration time
         raise api.Exception(
             status_code=400,
-            error=api.Error(type="create", code=50, message="bad or missign invitation token"),
+            error=api.Error(
+                type="create", code=50, message="bad or missign invitation token"
+            ),
         )
-    
+
     # TBD : Raise error if user already eists.
 
     if "password" not in record.attributes:
@@ -95,7 +98,7 @@ async def update_profile(
     response_model_exclude_none=True,
 )
 async def login(
-    response : Response,
+    response: Response,
     shortname: str = Body(..., regex=regex.SHORTNAME),
     password: str = Body(..., regex=regex.PASSWORD),
 ) -> api.Response:
@@ -104,18 +107,24 @@ async def login(
     if user and user.password == password:
         access_token = sign_jwt({"username": shortname})
         response.set_cookie(
-            key="auth_token", 
+            key="auth_token",
             value=access_token,
             expires=settings.jwt_access_expires,
             httponly=True,
             secure=True,
-            samesite='none'
+            samesite="none",
         )
-        return api.Response(status=api.Status.success, records=[core.Record(
-                                    resource_type=core.ResourceType.user, 
-                                    subpath="users", 
-                                    shortname=shortname, 
-                                    attributes={})]) 
+        return api.Response(
+            status=api.Status.success,
+            records=[
+                core.Record(
+                    resource_type=core.ResourceType.user,
+                    subpath="users",
+                    shortname=shortname,
+                    attributes={},
+                )
+            ],
+        )
     raise api.Exception(
         status.HTTP_401_UNAUTHORIZED,
         api.Error(type="auth", code=10, message="Bad creds"),

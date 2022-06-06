@@ -24,6 +24,7 @@ class Resource(BaseModel):
     class Config:
         use_enum_values = True
 
+
 class Payload(Resource):
     content_type: ContentType
     content_sub_type: str | None = (
@@ -126,7 +127,8 @@ class Locator(Resource):
 
 
 class Space(Meta):
-    root_registration_signature : str = ""
+    root_registration_signature: str = ""
+
 
 class Actor(Meta):
     pass
