@@ -12,3 +12,5 @@
 - Support is_active (published/draft) 
 - implement history (alteration) creation
 - implement history and events query
+- implement branches / tags and history switch/rollback (backed by git)
+- implement public query of cotnent by git branch (support multiple versions of the data at the same time) : served only from the filesystem (no redis)

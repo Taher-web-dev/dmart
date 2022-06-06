@@ -2,7 +2,12 @@
 
 import time
 import traceback
-#import uvicorn
+import asyncio
+from hypercorn.config import Config
+from hypercorn.asyncio import serve
+
+
+# import uvicorn
 
 import json_logging
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -54,6 +59,7 @@ app = FastAPI(
 
 json_logging.init_fastapi(enable_json=True)
 #json_logging.init_request_instrument(app)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -251,5 +257,6 @@ async def catchall():
     )
 
 
-#if __name__ == "__main__":
-#    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
+if __name__ == "__main__":
+    #    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
+    asyncio.run(serve(app, Config())) # type: ignore
