@@ -4,7 +4,7 @@ import time
 import traceback
 import uvicorn
 
-# import json_logging
+import json_logging
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request, status, Depends
@@ -52,8 +52,8 @@ app = FastAPI(
 )
 
 
-# json_logging.init_fastapi(enable_json=True)
-# json_logging.init_request_instrument(app)
+json_logging.init_fastapi(enable_json=True)
+json_logging.init_request_instrument(app)
 
 app.add_middleware(
     CORSMiddleware,
