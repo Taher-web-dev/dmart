@@ -81,4 +81,4 @@ curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query | jq .st
 # curl -s -b mycookies.jar -H "$CT" -d '{}' $API_URL/user/delete | jq .status
 
 rm mycookies.jar
-
+rm -rf ../spaces/demo/{content,cool,myposts,schema}
