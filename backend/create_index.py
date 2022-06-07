@@ -35,6 +35,7 @@ for one in locators:
 
 
 
+print(f"Added the content inside: {subpath}, to redis DB")
 
 # ret = search.index.search(Query("curl")) # .return_field("$.meta.is_active", as_field="is_active")).docs
 # print(ret.total)
