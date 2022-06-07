@@ -70,8 +70,7 @@ async def serve_request(
                     resource_obj.payload.schema_shortname = schema_shortname
                     record.attributes.pop("schema_shortname")
 
-                    schema_payload_path = db.payload_path(
-                        request.space_name, "schema", core.Schema)
+                    schema_payload_path = db.payload_path(request.space_name, "schema", core.Schema)
                     validate_payload_with_schema(
                         schema_path=schema_payload_path / f"{schema_shortname}.json",
                         payload_data=record.attributes
