@@ -1,12 +1,11 @@
 import csv
 import hashlib
-from io import StringIO
 from fastapi import APIRouter, Depends, UploadFile, Path, Form
 from fastapi.responses import FileResponse
 
 import models.api as api
 import models.core as core
-from models.enums import ContentType, RequestType
+from models.enums import ContentType
 import utils.db as db
 import utils.regex as regex
 from utils.jwt import JWTBearer
