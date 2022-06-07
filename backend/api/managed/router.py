@@ -55,12 +55,11 @@ async def serve_request(
     match request.request_type:
         case api.RequestType.create:
             for record in request.records:
-                resource_obj = core.Meta.from_record(
-                    record=record, shortname=shortname)
+                resource_obj = core.Meta.from_record(record=record, shortname=shortname)
                 # Check if the payload should goes in the meta file or in a separate file
-                # if record.payload_inline:
+                #if record.payload_inline:
                 #    db.save(request.space_name, record.subpath, resource_obj)
-                # else :
+                #else :
                 resource_obj.payload = core.Payload(  # detect the resource type
                     content_type=ContentType.json,
                     body=record.shortname + ".json",
@@ -75,8 +74,7 @@ async def serve_request(
                     schema_payload_path = db.payload_path(
                         request.space_name, "schema", core.Schema)
                     validate_payload_with_schema(
-                        schema_path=schema_payload_path /
-                        f"{schema_shortname}.json",
+                        schema_path=schema_payload_path / f"{schema_shortname}.json",
                         payload_data=record.attributes
                     )
 
@@ -87,8 +85,7 @@ async def serve_request(
 
         case api.RequestType.update:
             for record in request.records:
-                resource_obj = core.Meta.from_record(
-                    record=record, shortname=shortname)
+                resource_obj = core.Meta.from_record(record=record, shortname=shortname)
                 db.update(request.space_name, record.subpath, resource_obj)
         case api.RequestType.delete:
             for record in request.records:
@@ -251,11 +248,9 @@ async def create_or_update_resource_with_payload(
         and "schema_shortname" in record.attributes
     ):
         resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
-        schema_payload_path = db.payload_path(
-            space_name, "schema", core.Schema)
+        schema_payload_path = db.payload_path(space_name, "schema", core.Schema)
         validate_payload_with_schema(
-            schema_path=schema_payload_path /
-            f"{resource_obj.payload.schema_shortname}.json",
+            schema_path=schema_payload_path / f"{resource_obj.payload.schema_shortname}.json",
             payload_data=payload_file
         )
 
@@ -271,7 +266,7 @@ def validate_payload_with_schema(schema_path: FSPath, payload_data: UploadFile |
     if not isinstance(payload_data, dict):
         data = json.load(payload_data.file)
         payload_data.file.seek(0)
-    else:
+    else :
         data = payload_data
 
     validate(instance=data, schema=schema)
