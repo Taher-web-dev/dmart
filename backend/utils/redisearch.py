@@ -15,9 +15,12 @@ from utils.settings import settings
 
 
 client = redis.Redis(host=settings.redis_host, port=6379)
-index: dict[str, Search] = {}
+# Index should be on the schema level
+index: dict[str, dict[str, Search]] = {}
 for space_name in settings.space_names:
-    index[space_name] = client.ft(space_name)
+    index[space_name]["meta"] = client.ft(f"{space_name}:meta")
+    # LIST SCHEMA INSIDE THE CURRENT SPACE
+    # ADD IT INDEX FOR EACH OF THEM index[space_name][schema]
 
 META_SCHEMA = (
     TextField("$.uuid", no_stem=True, as_name="uuid"),
@@ -45,7 +48,10 @@ def create_index(space_name: str):
     except:
         pass
 
-    ret = index[space_name].create_index(
+    # Loop over the space
+    # create the index for meta
+    # create indices for all the schemas inside the space
+    ret = index[space_name]["meta"].create_index(
         META_SCHEMA,
         definition=IndexDefinition(
             prefix=[f"{space_name}:meta:"], index_type=IndexType.JSON
@@ -78,6 +84,7 @@ def search(
     limit: int,
     offset: int,
     sort_by: str | None = None,
+    schema_name: str = "meta",
 ):
     if space_name not in index:
         raise Exception("Invalid space name")
@@ -97,7 +104,7 @@ def search(
 
     search_query = search_query.paging(offset, limit)
     
-    return index[space_name].search(query=search_query).docs
+    return index[space_name][schema_name].search(query=search_query).docs
 
 
 """
