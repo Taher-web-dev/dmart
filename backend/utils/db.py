@@ -105,9 +105,25 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
 
         case api.QueryType.search:
             # Send request to RediSearch and process response into the records list to be returned to the user
-            search_res = redis_search(query.space_name, search="*" if not query.search else query.search)
+            search_res = redis_search(
+                space_name=query.space_name, 
+                search=query.search,
+                filters={
+                    "resource_type": query.filter_types,
+                    "shortname": query.filter_shortnames,
+                    "tags": query.filter_tags,
+                    "subpath": [query.subpath],
+                },
+                limit=query.limit,
+                offset=query.offset,
+                sort_by=query.sort_by
+            )
+
             for one in search_res:
                 json_meta = json.loads(one.json)
+
+                if json_meta["tags"] == "none":
+                    json_meta["tags"] = []
                 resource_class = getattr(sys.modules["models.core"], json_meta["resource_type"].title())
                 resource_obj = resource_class.parse_obj(json_meta)
                 resource_base_record = resource_obj.to_record(json_meta["subpath"], json_meta["shortname"], query.include_fields)

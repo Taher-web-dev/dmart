@@ -5,6 +5,7 @@ from redis.commands.json.path import Path
 from redis.commands.search.field import TextField, NumericField, TagField
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search import Search
+from redis.commands.search.query import Query
 #from redis import Search
 #from redis.commands.search.query import NumericFilter, Query
 #from typing import Any
@@ -50,7 +51,6 @@ def create_index(space_name: str):
             prefix=[f"{space_name}:meta:"], index_type=IndexType.JSON
         ),
     )
-    print("Creat index ret: ", ret)
 
     # TBD : Create schema indexes. i.e. for each space name, there should be schema indexes for all available schema_shortnames
 
@@ -71,10 +71,35 @@ def save_entry(space_name: str, subpath: str, meta: core.Meta):
     # TBD : If entry of type content and json payload, save the json document under the respective schema index
 
 
-def search(space_name: str, search: str):
+def search(
+    space_name: str, 
+    search: str, 
+    filters: dict[str : list], 
+    limit: int,
+    offset: int,
+    sort_by: str | None = None,
+):
     if space_name not in index:
         raise Exception("Invalid space name")
-    return index[space_name].search(search).docs
+
+    query_string = search
+
+    for item in filters.items():
+        if item[0] == "tags" and item[1]:
+            query_string += " @tags:{" + "|".join(item[1]) + "}"
+        elif item[1]:
+            query_string += " @" + item[0]+ ":(" + "|".join(item[1]) + ")"
+        
+    search_query = Query(query_string=query_string)
+
+    if sort_by:
+        search_query = search_query.sort_by(sort_by)
+
+    search_query = search_query.paging(offset, limit)
+    
+    return index[space_name].search(query=search_query).docs
+
+
 """
 def convert(d : dict[str,Any]|list[Any]) -> dict[str,Any]|list[Any]:
     if isinstance(d, dict):
