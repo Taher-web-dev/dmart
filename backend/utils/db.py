@@ -9,6 +9,7 @@ import re
 import json
 from pathlib import Path
 from utils.logger import logger
+from utils.redisearch import search as redis_search
 
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
@@ -103,9 +104,15 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                     space_name = match.group(1)
 
         case api.QueryType.search:
-            query.search  # This contains search request that should be executed via RediSearch.
-            # * name=dfs tags=32
             # Send request to RediSearch and process response into the records list to be returned to the user
+            search_res = redis_search(query.space_name, search="*" if not query.search else query.search)
+            for one in search_res:
+                json_meta = json.loads(one.json)
+                resource_class = getattr(sys.modules["models.core"], json_meta["resource_type"].title())
+                resource_obj = resource_class.parse_obj(json_meta)
+                resource_base_record = resource_obj.to_record(json_meta["subpath"], json_meta["shortname"], query.include_fields)
+                records.append(resource_base_record)
+
         case api.QueryType.subpath:
             path = settings.spaces_folder / query.space_name / query.subpath
             if query.include_fields is None:
@@ -149,10 +156,11 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                     query.subpath, shortname, query.include_fields
                 )
                 if (
-                    query.retrieve_json_payload
-                    and resource_obj.payload.content_type
-                    and resource_obj.payload.content_type == ContentType.json
-                    and (path / resource_obj.payload.body).is_file()
+                    query.retrieve_json_payload and
+                    resource_obj.payload and
+                    resource_obj.payload.content_type and 
+                    resource_obj.payload.content_type == ContentType.json and
+                    (path / resource_obj.payload.body).is_file()
                 ):
                     with open(
                         path / resource_obj.payload.body, "r"
@@ -222,7 +230,6 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 )
     return total, records
 
-
 def metapath(
     space_name: str, subpath: str, shortname: str, class_type: Type[MetaChild]
 ) -> tuple[Path, str]:
@@ -267,7 +274,7 @@ def load(
             error=api.Error(type="db", code=12, message="requested object not found"),
         )
     return class_type.parse_raw(path.read_text())
-
+    
 
 def save(space_name: str, subpath: str, meta: core.Meta):
     """Save Meta Json to respectiv file"""
@@ -310,6 +317,20 @@ async def save_payload(space_name: str, subpath: str, meta: core.Meta, attachmen
         while content := await attachment.read(1024):
             file.write(content)
 
+def save_payload_from_json(space_name: str, subpath: str, meta: core.Meta, payload_data: dict):
+    path, filename = metapath(space_name, subpath, meta.shortname, meta.__class__)
+    payload_file_path = payload_path(space_name, subpath, meta.__class__)
+    payload_filename = meta.shortname + ".json"
+
+    if not (path / filename).is_file():
+        raise api.Exception(
+            status_code=401,
+            error=api.Error(type="create", code=30, message="metadata is missing"),
+        )
+
+    with open(payload_file_path / payload_filename, "w") as file:
+        file.write(json.dumps(payload_data))
+
 
 def update(space_name, subpath: str, meta: core.Meta):
     path, filename = metapath(space_name, subpath, meta.shortname, meta.__class__)
@@ -340,6 +361,7 @@ def move(
         dest_shortname or src_shortname,
         meta.__class__,
     )
+    
     # Create dest dir if not exist
     if not os.path.isdir(dest_path):
         os.makedirs(dest_path)

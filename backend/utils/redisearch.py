@@ -4,15 +4,17 @@ import models.core as core
 from redis.commands.json.path import Path
 from redis.commands.search.field import TextField, NumericField, TagField
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
-from redis.commands.search.query import NumericFilter, Query
-from typing import Any
+from redis.commands.search import Search
+#from redis import Search
+#from redis.commands.search.query import NumericFilter, Query
+#from typing import Any
 
 
 from utils.settings import settings
 
 
 client = redis.Redis(host=settings.redis_host, port=6379)
-index: dict[str, Any] = {}
+index: dict[str, Search] = {}
 for space_name in settings.space_names:
     index[space_name] = client.ft(space_name)
 
@@ -59,15 +61,20 @@ def save_entry(space_name: str, subpath: str, meta: core.Meta):
     meta_json = json.loads(meta.json(exclude_none=True))
 
     # Inject resource_type
+    meta_json["subpath"] = subpath
     meta_json["resource_type"] = resource_type
     meta_json["created_at"] = meta.created_at.timestamp()
-    meta_json["updated_at"] = meta.created_at.timestamp()
+    meta_json["updated_at"] = meta.updated_at.timestamp()
     meta_json["tags"] = "none" if not meta.tags else "|".join(meta.tags)
     client.json().set(docid, Path.root_path(), meta_json)
 
     # TBD : If entry of type content and json payload, save the json document under the respective schema index
 
 
+def search(space_name: str, search: str):
+    if space_name not in index:
+        raise Exception("Invalid space name")
+    return index[space_name].search(search).docs
 """
 def convert(d : dict[str,Any]|list[Any]) -> dict[str,Any]|list[Any]:
     if isinstance(d, dict):

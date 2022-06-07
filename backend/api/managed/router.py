@@ -54,7 +54,32 @@ async def serve_request(
         case api.RequestType.create:
             for record in request.records:
                 resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+                # Check if the payload should goes in the meta file or in a separate file
+                #if record.payload_inline:
+                #    db.save(request.space_name, record.subpath, resource_obj)
+                #else :
+                resource_obj.payload = core.Payload(  # detect the resource type
+                    content_type=ContentType.json,
+                    body=record.shortname + ".json",
+                )
+
+                # Validate schema if present
+                if ("schema_shortname" in record.attributes):
+                    schema_shortname = record.attributes["schema_shortname"]
+                    resource_obj.payload.schema_shortname = schema_shortname
+                    record.attributes.pop("schema_shortname")
+
+                    schema_payload_path = db.payload_path(request.space_name, "schema", core.Schema)
+                    validate_payload_with_schema(
+                        schema_path=schema_payload_path / f"{schema_shortname}.json",
+                        payload_data=record.attributes
+                    )
+
                 db.save(request.space_name, record.subpath, resource_obj)
+                db.save_payload_from_json(
+                    request.space_name, record.subpath, resource_obj, record.attributes
+                )
+                    
         case api.RequestType.update:
             for record in request.records:
                 resource_obj = core.Meta.from_record(record=record, shortname=shortname)
@@ -221,17 +246,23 @@ async def create_or_update_resource_with_payload(
     ):
         resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
         schema_payload_path = db.payload_path(space_name, "schema", core.Schema)
-        schema = json.loads(
-            FSPath(
-                schema_payload_path / f"{resource_obj.payload.schema_shortname}.json"
-            ).read_text()
+        validate_payload_with_schema(
+            schema_path=schema_payload_path / f"{resource_obj.payload.schema_shortname}.json",
+            payload_data=payload_file
         )
-        data = json.load(payload_file.file)
-        validate(instance=data, schema=schema)
-        await payload_file.seek(0)
 
     db.save(space_name, record.subpath, resource_obj)
     await db.save_payload(
         space_name, record.subpath, resource_obj, payload_file
-    )  # save any type of entries
+    )
     return api.Response(status=api.Status.success)
+
+def validate_payload_with_schema(schema_path: FSPath, payload_data: UploadFile | dict):
+    schema = json.loads(FSPath(schema_path).read_text())
+    if not isinstance(payload_data, dict):
+        data = json.load(payload_data.file)
+        payload_data.file.seek(0)
+    else :
+        data = payload_data
+
+    validate(instance=data, schema=schema)
