@@ -1,10 +1,12 @@
+import csv
 import hashlib
+from io import StringIO
 from fastapi import APIRouter, Depends, UploadFile, Path, Form
 from fastapi.responses import FileResponse
 
 import models.api as api
 import models.core as core
-from models.enums import ContentType
+from models.enums import ContentType, RequestType
 import utils.db as db
 import utils.regex as regex
 from utils.jwt import JWTBearer
@@ -53,11 +55,12 @@ async def serve_request(
     match request.request_type:
         case api.RequestType.create:
             for record in request.records:
-                resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+                resource_obj = core.Meta.from_record(
+                    record=record, shortname=shortname)
                 # Check if the payload should goes in the meta file or in a separate file
-                #if record.payload_inline:
+                # if record.payload_inline:
                 #    db.save(request.space_name, record.subpath, resource_obj)
-                #else :
+                # else :
                 resource_obj.payload = core.Payload(  # detect the resource type
                     content_type=ContentType.json,
                     body=record.shortname + ".json",
@@ -69,9 +72,11 @@ async def serve_request(
                     resource_obj.payload.schema_shortname = schema_shortname
                     record.attributes.pop("schema_shortname")
 
-                    schema_payload_path = db.payload_path(request.space_name, "schema", core.Schema)
+                    schema_payload_path = db.payload_path(
+                        request.space_name, "schema", core.Schema)
                     validate_payload_with_schema(
-                        schema_path=schema_payload_path / f"{schema_shortname}.json",
+                        schema_path=schema_payload_path /
+                        f"{schema_shortname}.json",
                         payload_data=record.attributes
                     )
 
@@ -79,10 +84,11 @@ async def serve_request(
                 db.save_payload_from_json(
                     request.space_name, record.subpath, resource_obj, record.attributes
                 )
-                    
+
         case api.RequestType.update:
             for record in request.records:
-                resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+                resource_obj = core.Meta.from_record(
+                    record=record, shortname=shortname)
                 db.update(request.space_name, record.subpath, resource_obj)
         case api.RequestType.delete:
             for record in request.records:
@@ -245,9 +251,11 @@ async def create_or_update_resource_with_payload(
         and "schema_shortname" in record.attributes
     ):
         resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
-        schema_payload_path = db.payload_path(space_name, "schema", core.Schema)
+        schema_payload_path = db.payload_path(
+            space_name, "schema", core.Schema)
         validate_payload_with_schema(
-            schema_path=schema_payload_path / f"{resource_obj.payload.schema_shortname}.json",
+            schema_path=schema_payload_path /
+            f"{resource_obj.payload.schema_shortname}.json",
             payload_data=payload_file
         )
 
@@ -257,12 +265,91 @@ async def create_or_update_resource_with_payload(
     )
     return api.Response(status=api.Status.success)
 
+
 def validate_payload_with_schema(schema_path: FSPath, payload_data: UploadFile | dict):
     schema = json.loads(FSPath(schema_path).read_text())
     if not isinstance(payload_data, dict):
         data = json.load(payload_data.file)
         payload_data.file.seek(0)
-    else :
+    else:
         data = payload_data
 
     validate(instance=data, schema=schema)
+
+
+@router.post("/resources_from_csv/{resource_type}/{space_name}/{subpath:path}/{schema_shortname}", response_model=api.Response, response_model_exclude_none=True)
+async def import_resources_from_csv(
+    resources_file: UploadFile,
+    resource_type: api.ResourceType,
+    space_name: str = Path(..., regex=regex.SPACENAME),
+    subpath: str = Path(..., regex=regex.SUBPATH),
+    schema_shortname: str = Path(..., regex=regex.SHORTNAME),
+    owner_shortname=Depends(JWTBearer())
+):
+
+    contents = await resources_file.read()
+    decoded = contents.decode()
+    buffer = StringIO(decoded)
+    csv_reader = csv.DictReader(buffer)
+
+    schema_path = db.payload_path(
+        space_name, "schema", core.Schema) / f"{schema_shortname}.json"
+    with open(schema_path) as schema_file:
+        schema_content = json.load(schema_file)
+
+    schema_properties = schema_content["properties"]
+    data_types_mapper = {
+        'integer': int,
+        "string": str
+    }
+
+    records: list = []
+    for row in csv_reader:
+        shortname: str = ""
+        payload_object: dict = {}
+        for key, value in row.items():
+            if not value:
+                continue
+
+            keys_list = key.split(".")
+            current_schema_property = schema_properties
+            for item in keys_list:
+                current_schema_property = current_schema_property[item.strip()]
+            value = data_types_mapper[current_schema_property["type"]](value)
+
+            match len(keys_list):
+                case 1:
+                    payload_object[keys_list[0].strip()] = value
+                case 2:
+                    if keys_list[0].strip() not in payload_object:
+                        payload_object[keys_list[0].strip()] = {}
+                    payload_object[keys_list[0].strip()][keys_list[1].strip()] = value
+                case 3:
+                    if keys_list[0].strip() not in payload_object:
+                        payload_object[keys_list[0].strip()] = {}
+                    if keys_list[1].strip() not in payload_object[keys_list[0].strip()]:
+                        payload_object[keys_list[0].strip()][keys_list[1].strip()] = {}
+                    payload_object[keys_list[0].strip()][keys_list[1].strip()][keys_list[2].strip()] = value
+                case _:
+                    continue
+
+            if key == "id":
+                shortname = value
+
+        if shortname:
+            payload_object["schema_shortname"] = schema_shortname
+            records.append(core.Record(
+                resource_type=resource_type,
+                shortname=shortname,
+                subpath=subpath,
+                attributes=payload_object
+            ))
+
+    return await serve_request(
+        request=api.Request(
+            space_name=space_name,
+            request_type=RequestType.create,
+            records=records
+        ),
+        shortname=owner_shortname
+    )
