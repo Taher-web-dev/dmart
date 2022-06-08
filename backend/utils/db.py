@@ -9,7 +9,7 @@ import re
 import json
 from pathlib import Path
 from utils.logger import logger
-from utils.redisearch import search as redis_search
+from utils.redis_services import search as redis_search
 
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
