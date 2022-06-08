@@ -117,7 +117,6 @@ def load_data_to_redis(space_name, subpath):
         # myclass = db.resource_class(core.ResourceType(one.__class__.__name__.lower()))
         try:
             myclass = getattr(sys.modules["models.core"], core.ResourceType("content").title())
-            # print("\n\n\n\n space_name: ", space_name, "\n subpath: ", one.subpath, "\nshortname: ", one.shortname)
             meta = db.load(space_name=space_name, subpath=one.subpath, shortname=one.shortname, class_type=myclass)
             redis_services.save_meta_doc(space_name=space_name, schema_shortname="meta", subpath=subpath, meta=meta)
             if meta.payload and meta.payload.content_type == ContentType.json and meta.payload.schema_shortname:
@@ -140,11 +139,9 @@ def load_all_spaces_data_to_redis():
     """
     for space_name in settings.space_names:
         path = settings.spaces_folder / space_name
-        # print("\n\n\n path: ", path, path.is_dir())
         if path.is_dir():
             for subpath in path.iterdir():
                 if subpath.is_dir():
-                    print("\n\n\n subpath: ", subpath.name)
                     load_data_to_redis(space_name, subpath.name)
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ def save_meta_doc(space_name: str, schema_shortname: str, subpath: str, meta: co
 def save_payload_doc(space_name: str, schema_shortname: str, payload_shortname, payload: dict):
     docid = f"{space_name}:{schema_shortname}/{payload_shortname}"
     
-    print(client.json().set(docid, Path.root_path(), payload))
+    client.json().set(docid, Path.root_path(), payload)
 
     # TBD : If entry of type content and json payload, save the json document under the respective schema index
 
