@@ -105,7 +105,7 @@ async def login(
     """Login and generate refresh token"""
     user = db.load(MANAGEMENT_SPACE, USERS_SUBPATH, shortname, core.User)
     if user and user.password == password:
-        access_token = sign_jwt({"username": shortname})
+        access_token = sign_jwt({"username": shortname}, settings.jwt_access_expires)
         response.set_cookie(
             key="auth_token",
             value=access_token,
