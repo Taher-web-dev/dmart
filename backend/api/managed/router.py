@@ -294,6 +294,7 @@ async def import_resources_from_csv(
     schema_properties = schema_content["properties"]
     data_types_mapper = {
         'integer': int,
+        'number': float,
         "string": str
     }
 
@@ -302,14 +303,22 @@ async def import_resources_from_csv(
         shortname: str = ""
         payload_object: dict = {}
         for key, value in row.items():
-            if not value:
+            if not key:
+                continue
+
+            if key == "shortname":
+                shortname = value
                 continue
 
             keys_list = key.split(".")
             current_schema_property = schema_properties
             for item in keys_list:
                 current_schema_property = current_schema_property[item.strip()]
-            value = data_types_mapper[current_schema_property["type"]](value)
+
+            if not value:
+                value = "null" if current_schema_property["type"] == "string" else "0"
+
+            value = data_types_mapper[current_schema_property["type"]](value if current_schema_property["type"] == "string" else value.replace(",", ""))
 
             match len(keys_list):
                 case 1:
@@ -326,9 +335,6 @@ async def import_resources_from_csv(
                     payload_object[keys_list[0].strip()][keys_list[1].strip()][keys_list[2].strip()] = value
                 case _:
                     continue
-
-            if key == "id":
-                shortname = value
 
         if shortname:
             payload_object["schema_shortname"] = schema_shortname
