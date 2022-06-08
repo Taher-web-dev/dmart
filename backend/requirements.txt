@@ -7,8 +7,9 @@ email-validator
 
 pydantic
 jinja2
-pydantic[dotenv]
+pydantic[email,dotenv]
 redis
 concurrent-log-handler
 hypercorn
+python-json-logger
 
