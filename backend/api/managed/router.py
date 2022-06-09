@@ -59,10 +59,11 @@ async def serve_request(
                 # if record.payload_inline:
                 #    db.save(request.space_name, record.subpath, resource_obj)
                 # else :
-                resource_obj.payload = core.Payload(  # detect the resource type
-                    content_type=ContentType.json,
-                    body=record.shortname + ".json",
-                )
+                if len(record.attributes) > 0:
+                    resource_obj.payload = core.Payload(  # detect the resource type
+                        content_type=ContentType.json,
+                        body=record.shortname + ".json",
+                    )
 
                 # Validate schema if present
                 if "schema_shortname" in record.attributes:
@@ -79,9 +80,13 @@ async def serve_request(
                     )
 
                 await db.save(request.space_name, record.subpath, resource_obj)
-                await db.save_payload_from_json(
-                    request.space_name, record.subpath, resource_obj, record.attributes
-                )
+                if len(record.attributes) > 0:
+                    await db.save_payload_from_json(
+                        request.space_name,
+                        record.subpath,
+                        resource_obj,
+                        record.attributes,
+                    )
 
         case api.RequestType.update:
             for record in request.records:

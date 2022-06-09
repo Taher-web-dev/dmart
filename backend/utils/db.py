@@ -9,9 +9,9 @@ import re
 import json
 from pathlib import Path
 from utils.logger import logger
-from utils.redisearch import search as redis_search
 from fastapi import status
 import aiofiles
+from utils.redis_services import search as redis_search
 
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
@@ -138,10 +138,24 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
         case api.QueryType.search:
             # Send request to RediSearch and process response into the records list to be returned to the user
             search_res = redis_search(
-                query.space_name, search="*" if not query.search else query.search
+                space_name=query.space_name,
+                search=query.search,
+                filters={
+                    "resource_type": query.filter_types,
+                    "shortname": query.filter_shortnames,
+                    "tags": query.filter_tags,
+                    "subpath": [query.subpath],
+                },
+                limit=query.limit,
+                offset=query.offset,
+                sort_by=query.sort_by,
             )
+
             for one in search_res:
                 json_meta = json.loads(one.json)
+
+                if json_meta["tags"] == "none":
+                    json_meta["tags"] = []
                 resource_class = getattr(
                     sys.modules["models.core"], json_meta["resource_type"].title()
                 )
@@ -152,7 +166,10 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 records.append(resource_base_record)
 
         case api.QueryType.subpath:
-            path = settings.spaces_folder / query.space_name / query.subpath
+            subpath = query.subpath
+            if subpath[0] == "/":
+                subpath = "." + subpath
+            path = settings.spaces_folder / query.space_name / subpath
             if query.include_fields is None:
                 query.include_fields = []
 
@@ -275,6 +292,8 @@ def metapath(
     """Construct the full path of the meta file"""
     path = settings.spaces_folder / space_name
     filename = ""
+    if subpath[0] == "/":
+        subpath = f".{subpath}"
     if issubclass(class_type, core.Folder):
         path = path / subpath / shortname / ".dm"
         filename = f"meta.{class_type.__name__.lower()}.json"
@@ -292,6 +311,8 @@ def metapath(
 def payload_path(space_name: str, subpath: str, class_type: Type[MetaChild]) -> Path:
     """Construct the full path of the meta file"""
     path = settings.spaces_folder
+    if subpath[0] == "/":
+        subpath = f".{subpath}"
     if issubclass(class_type, core.Attachment):
         [parent_subpath, parent_name] = subpath.rsplit("/", 1)
         attachment_folder = f"{parent_name}/attachments.{class_type.__name__.lower()}"

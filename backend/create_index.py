@@ -1,37 +1,63 @@
-import utils.redisearch as search
-import models.core as core
+import json
 import models.api as api
 import utils.db as db
+import models.core as core
 import sys
+from models.enums import ContentType
+import utils.redis_services as redis_services
+from utils.settings import settings
 
-import json
+def load_data_to_redis(space_name, subpath):
+    """
+    Load meta files inside subpath then store them to redis as :space_name:meta prefixed doc,
+    and if the meta file has a separate payload file follwing a schema we loads the payload content and store it to redis as :space_name:schema_name prefixed doc
+    """
+    total, locators = db.locators_query(
+        api.Query(space_name=space_name, subpath=subpath, type=api.QueryType.subpath, limit=10000)
+    )
+    loaded_to_redis = 0
+    for one in locators:
+        # myclass = db.resource_class(core.ResourceType(one.__class__.__name__.lower()))
+        try:
+            myclass = getattr(sys.modules["models.core"], core.ResourceType("content").title())
+            # print("\n\n\n", "\n space_name: ", space_name, "\n subpath: ", one.subpath, "\n shortname: ", one.shortname, "\n class_type: ", myclass)
+            meta = db.load(space_name=space_name, subpath=one.subpath, shortname=one.shortname, class_type=myclass)
+            redis_services.save_meta_doc(space_name=space_name, schema_shortname="meta", subpath=subpath, meta=meta)
+            if meta.payload and meta.payload.content_type == ContentType.json and meta.payload.schema_shortname:
+                payload_path = db.payload_path(space_name, one.subpath, myclass) / str(meta.payload.body)
+                payload_data = json.loads(payload_path.read_text())
+                redis_services.save_payload_doc(
+                    space_name=space_name, 
+                    schema_shortname=meta.payload.schema_shortname, 
+                    payload_shortname=meta.payload.body.split(".")[0], 
+                    subpath=subpath,
+                    payload=payload_data
+                )
+            loaded_to_redis += 1
+        except:
+            pass
+    print(f"Added {loaded_to_redis} document to redis from {space_name}/{subpath}")
 
-search.create_index()
-subpath = "myposts"
-total, locators = db.locators_query(
-    api.Query(subpath=subpath, type=api.QueryType.subpath, limit=100000)
-)
+def load_all_spaces_data_to_redis():
+    """
+    Loop over spaces and subpaths inside it and load the data to redis
+    """
+    for space_name in settings.space_names:
+        path = settings.spaces_folder / space_name
+        if path.is_dir():
+            for subpath in path.iterdir():
+                if subpath.is_dir():
+                    load_data_to_redis(space_name, subpath.name)
 
-for one in locators:
-    myclass = getattr(sys.modules["models.core"], core.ResourceType("content").title())
-    # myclass = db.resource_class(core.ResourceType(one.__class__.__name__.lower()))
-    meta = db.load(one.subpath, one.shortname, myclass)
-    search.save_meta(subpath, meta)
+if __name__ == "__main__":
+    load_all_spaces_data_to_redis()
+    redis_services.create_indices_for_all_spaces_meta_and_schemas()
 
-# ret = search.index.search("alibaba")
-# print("Returned : ", len(ret.docs))
-# if ret.docs:
-#     for one in ret.docs:
-#         # print(json.dumps(json.loads(json.loads(one.json)), indent=4))
-#         print(json.dumps(json.loads(one.json), indent=4))
-
-print(f"Added the content inside: {subpath}, to redis DB")
-
-# ret = search.index.search(Query("curl")) # .return_field("$.meta.is_active", as_field="is_active")).docs
-# print(ret.total)
-# print(ret)
-
-# print(search.index.info())
-# print(one.json())
-# print(one.json())
-# info()
+    # print(redis_services.search(
+    #     space_name="products",
+    #     schema_name="offer",
+    #     search="*",
+    #     filters={},
+    #     limit=5,
+    #     offset=0
+    # ))
