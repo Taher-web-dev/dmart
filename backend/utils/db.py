@@ -130,7 +130,10 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 records.append(resource_base_record)
 
         case api.QueryType.subpath:
-            path = settings.spaces_folder / query.space_name / query.subpath
+            subpath = query.subpath
+            if subpath[0] == "/":
+                subpath = "." + subpath
+            path = settings.spaces_folder / query.space_name / subpath
             if query.include_fields is None:
                 query.include_fields = []
 
@@ -252,6 +255,8 @@ def metapath(
     """Construct the full path of the meta file"""
     path = settings.spaces_folder / space_name
     filename = ""
+    if subpath[0] == "/":
+        subpath = "." + subpath
     if issubclass(class_type, core.Folder):
         path = path / subpath / shortname / ".dm"
         filename = "meta." + class_type.__name__.lower() + ".json"
@@ -269,6 +274,8 @@ def metapath(
 def payload_path(space_name: str, subpath: str, class_type: Type[MetaChild]) -> Path:
     """Construct the full path of the meta file"""
     path = settings.spaces_folder
+    if subpath[0] == "/":
+        subpath = "." + subpath
     if issubclass(class_type, core.Attachment):
         [parent_subpath, parent_name] = subpath.rsplit("/", 1)
         attachment_folder = parent_name + "/attachments." + class_type.__name__.lower()
