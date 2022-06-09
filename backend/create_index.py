@@ -60,7 +60,7 @@ def get_redis_index_fields(key_chain, property, redis_schema_definition):
     """
     takes a key and a value of a schema definition, and return the redis schema index appropriate field class/es
     """
-    if "type" in property:
+    if "type" in property and property["type"] != "object":
         redis_schema_definition.append(REDIS_SCHEMA_DATA_TYPES_MAPPER[property["type"]](f"$.{key_chain}", as_name=key_chain.replace(".", "_")))
         return redis_schema_definition
 
