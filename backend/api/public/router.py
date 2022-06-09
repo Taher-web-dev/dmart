@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Path
+from fastapi import APIRouter, Path, status
 import utils.db as db
 import models.api as api
 import utils.regex as regex
@@ -36,7 +36,7 @@ async def retrieve_entry_meta(
     meta = db.load(space_name, subpath, shortname, resource_class)
     if meta is None:
         raise api.Exception(
-            404,
+            status.HTTP_400_BAD_REQUEST,
             error=api.Error(
                 type="media", code=221, message="Request object is not available"
             ),
@@ -67,7 +67,7 @@ async def retrieve_entry_or_attachment_payload(
         or meta.payload.body != f"{shortname}.{ext}"
     ):
         raise api.Exception(
-            404,
+            status.HTTP_400_BAD_REQUEST,
             error=api.Error(
                 type="media", code=220, message="Request object is not available"
             ),

@@ -1,7 +1,6 @@
 """ Session Apis """
 
 from fastapi import APIRouter, Body, status, Depends, Response
-
 import models.api as api
 import models.core as core
 import utils.db as db
@@ -21,7 +20,7 @@ async def create_user(record: core.Record) -> api.Response:
     """Register a new user by invitation"""
     if not record.attributes:
         raise api.Exception(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             error=api.Error(type="create", code=50, message="Empty attributes"),
         )
 
@@ -29,7 +28,7 @@ async def create_user(record: core.Record) -> api.Response:
         # TBD validate invitation (simply it is a jwt signed token )
         # jwt-signed shortname, email and expiration time
         raise api.Exception(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             error=api.Error(
                 type="create", code=50, message="bad or missign invitation token"
             ),
@@ -39,7 +38,7 @@ async def create_user(record: core.Record) -> api.Response:
 
     if "password" not in record.attributes:
         raise api.Exception(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             error=api.Error(type="create", code=50, message="empty password"),
         )
 
@@ -111,8 +110,8 @@ async def login(
             value=access_token,
             expires=settings.jwt_access_expires,
             httponly=True,
-            #samesite="none",
-            #secure=True,
+            # samesite="none",
+            # secure=True,
             secure=False,
             samesite="lax",
         )

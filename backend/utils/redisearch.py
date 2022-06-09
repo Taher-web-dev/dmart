@@ -1,3 +1,4 @@
+from fastapi import status
 import json
 import redis
 import models.core as core
@@ -5,9 +6,11 @@ from redis.commands.json.path import Path
 from redis.commands.search.field import TextField, NumericField, TagField
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search import Search
-#from redis import Search
-#from redis.commands.search.query import NumericFilter, Query
-#from typing import Any
+import models.api as api
+
+# from redis import Search
+# from redis.commands.search.query import NumericFilter, Query
+# from typing import Any
 
 
 from utils.settings import settings
@@ -41,7 +44,7 @@ META_SCHEMA = (
 def create_index(space_name: str):
     try:
         index[space_name].dropindex(delete_documents=True)
-    except:
+    except Exception:
         pass
 
     ret = index[space_name].create_index(
@@ -73,8 +76,17 @@ def save_entry(space_name: str, subpath: str, meta: core.Meta):
 
 def search(space_name: str, search: str):
     if space_name not in index:
-        raise Exception("Invalid space name")
+        raise api.Exception(
+            status.HTTP_400_BAD_REQUEST,
+            api.Error(
+                type="space",
+                code=202,
+                message="Invalid space name",
+            ),
+        )
     return index[space_name].search(search).docs
+
+
 """
 def convert(d : dict[str,Any]|list[Any]) -> dict[str,Any]|list[Any]:
     if isinstance(d, dict):
