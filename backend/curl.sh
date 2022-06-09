@@ -25,6 +25,10 @@ echo -n -e "Login: \t\t\t"
 LOGIN=$(jq -c -n --arg shortname "$SHORTNAME" --arg password "$PASSWORD" '{shortname: $shortname, password: $password}')
 curl -s -c mycookies.jar -H "$CT" -d "$LOGIN" ${API_URL}/user/login | jq .status
 
+echo -n -e "Query spaces: \t\t"
+RECORD=$(jq -c -n '{space_name: "demo", type: "spaces", subpath: "/"}')
+curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query  | jq #.attributes
+
 #TOKEN=$(curl -s -H "$CT" -d "$LOGIN" ${API_URL}/user/login | jq .auth_token | tr -d '"')
 
 #AUTH="Authorization: Bearer ${TOKEN}"
@@ -41,6 +45,11 @@ curl -s -b mycookies.jar -H "$CT" -d "$UPDATE" $API_URL/user/profile | jq .statu
 
 echo -n -e "Get profile: \t\t"
 curl -s -b mycookies.jar -H "$CT" $API_URL/user/profile | jq .status
+
+
+echo -n -e "Create TLF: \t\t"
+REQUEST=$(jq -c -n '{ space_name: "demo", request_type:"create", records: [{resource_type: "folder", subpath: "/", shortname: "myfolder", attributes:{tags: ["one","two"], displayname: "This is a nice one", description: "Furhter description could help"}}]}')
+curl -s -b mycookies.jar -H "$CT" -d "$REQUEST" ${API_URL}/managed/request | jq .status
 
 SUBPATH="myposts"
 
@@ -75,7 +84,7 @@ curl -s -b mycookies.jar -F 'space_name="demo"' -F 'request_record=@"../spaces/d
 
 echo -n -e "Query content: \t\t"
 RECORD=$(jq -c -n --arg subpath "$SUBPATH" '{space_name: "demo", type: "subpath", subpath: $subpath}')
-curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query | jq .status
+curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query | jq .attributes
 
 echo -n -e "Delete user: \t\t"
 curl -s -b mycookies.jar -H "$CT" -d '{}' $API_URL/user/delete | jq .status

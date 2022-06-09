@@ -1,0 +1,11 @@
+{
+  "shortname": "products",
+  "owner_shortname": "soheyb",
+  "displayname": "Zain Product",
+  "description": "A product / sample space",
+  "uuid": "a0bbc755-7254-4bcb-95ff-8f5fedff9e54",
+  "resource_type": "Space",
+  "languages": ["english"],
+  "primary_website": "https://dmart.cc",
+  "mirrors": []
+}

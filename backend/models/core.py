@@ -7,8 +7,9 @@ from uuid import uuid4
 from pydantic import Field
 from datetime import datetime
 import sys
+import json
 
-from models.enums import ContentType, RequestType, ResourceType
+from models.enums import ContentType, Language, RequestType, ResourceType
 import utils.regex as regex
 
 
@@ -95,7 +96,7 @@ class Meta(Resource):
             "resource_type": type(self).__name__.lower(),
             "uuid": self.uuid,
             "shortname": self.shortname,
-            "subpath": subpath,
+            "subpath": subpath
         }
 
         meta_fields = list(Meta.__fields__.keys())
@@ -103,6 +104,12 @@ class Meta(Resource):
         for key, value in self.__dict__.items():
             if (not include or key in include) and key not in meta_fields:
                 attributes[key] = value
+
+        if self.displayname:
+            attributes["displayname"] = self.displayname
+
+        if self.description:
+            attributes["description"] = self.description
 
         if self.payload:
             attributes["payload"] = self.payload.body
@@ -128,6 +135,9 @@ class Locator(Resource):
 
 class Space(Meta):
     root_registration_signature: str = ""
+    primary_website: str = ""
+    languages: list[Language] = [Language.en]
+    mirrors: list[str] = []
 
 
 class Actor(Meta):

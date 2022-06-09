@@ -1,9 +1,9 @@
 import csv
 import hashlib
 from io import StringIO
-from fastapi import APIRouter, Depends, UploadFile, Path, Form
+import aiofiles
+from fastapi import APIRouter, Depends, UploadFile, Path, Form, status
 from fastapi.responses import FileResponse
-
 import models.api as api
 import models.core as core
 from models.enums import ContentType, RequestType
@@ -21,7 +21,7 @@ router = APIRouter()
 
 @router.post("/query", response_model=api.Response, response_model_exclude_none=True)
 async def query_entries(query: api.Query) -> api.Response:
-    total, records = db.serve_query(query)
+    total, records = await db.serve_query(query)
     return api.Response(
         status=api.Status.success,
         records=records,
@@ -35,7 +35,7 @@ async def serve_request(
 ) -> api.Response:
     if request.space_name not in settings.space_names:
         raise api.Exception(
-            404,
+            status.HTTP_400_BAD_REQUEST,
             api.Error(
                 type="reqeust",
                 code=202,
@@ -44,7 +44,7 @@ async def serve_request(
         )
     if not request.records:
         raise api.Exception(
-            404,
+            status.HTTP_400_BAD_REQUEST,
             api.Error(
                 type="reqeust",
                 code=202,
@@ -57,9 +57,9 @@ async def serve_request(
             for record in request.records:
                 resource_obj = core.Meta.from_record(record=record, shortname=shortname)
                 # Check if the payload should goes in the meta file or in a separate file
-                #if record.payload_inline:
+                # if record.payload_inline:
                 #    db.save(request.space_name, record.subpath, resource_obj)
-                #else :
+                # else :
                 if len(record.attributes) > 0:
                     resource_obj.payload = core.Payload(  # detect the resource type
                         content_type=ContentType.json,
@@ -67,27 +67,32 @@ async def serve_request(
                     )
 
                 # Validate schema if present
-                if ("schema_shortname" in record.attributes):
+                if "schema_shortname" in record.attributes:
                     schema_shortname = record.attributes["schema_shortname"]
                     resource_obj.payload.schema_shortname = schema_shortname
                     record.attributes.pop("schema_shortname")
 
-                    schema_payload_path = db.payload_path(request.space_name, "schema", core.Schema)
+                    schema_payload_path = db.payload_path(
+                        request.space_name, "schema", core.Schema
+                    )
                     validate_payload_with_schema(
                         schema_path=schema_payload_path / f"{schema_shortname}.json",
-                        payload_data=record.attributes
+                        payload_data=record.attributes,
                     )
 
-                db.save(request.space_name, record.subpath, resource_obj)
+                await db.save(request.space_name, record.subpath, resource_obj)
                 if len(record.attributes) > 0:
-                    db.save_payload_from_json(
-                        request.space_name, record.subpath, resource_obj, record.attributes
+                    await db.save_payload_from_json(
+                        request.space_name,
+                        record.subpath,
+                        resource_obj,
+                        record.attributes,
                     )
-                    
+
         case api.RequestType.update:
             for record in request.records:
                 resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-                db.update(request.space_name, record.subpath, resource_obj)
+                await db.update(request.space_name, record.subpath, resource_obj)
         case api.RequestType.delete:
             for record in request.records:
                 cls = getattr(
@@ -107,7 +112,7 @@ async def serve_request(
                     and not record.attributes["dest_shortname"]
                 ):
                     raise api.Exception(
-                        404,
+                        status.HTTP_400_BAD_REQUEST,
                         api.Error(
                             type="move",
                             code=202,
@@ -123,7 +128,7 @@ async def serve_request(
                     and not record.attributes["src_shortname"]
                 ):
                     raise api.Exception(
-                        404,
+                        status.HTTP_400_BAD_REQUEST,
                         api.Error(
                             type="move",
                             code=202,
@@ -139,7 +144,7 @@ async def serve_request(
                     record.attributes["src_shortname"],
                     cls,
                 )
-                db.move(
+                await db.move(
                     request.space_name,
                     record.attributes["src_subpath"],
                     record.attributes["src_shortname"],
@@ -170,7 +175,7 @@ async def retrieve_entry_or_attachment_payload(
         or meta.payload.body != f"{shortname}.{ext}"
     ):
         raise api.Exception(
-            404,
+            status.HTTP_400_BAD_REQUEST,
             error=api.Error(
                 type="media", code=220, message="Request object is not available"
             ),
@@ -195,7 +200,7 @@ async def create_or_update_resource_with_payload(
     # NOTE We currently make no distinction between create and update. in such case update should contain all the data every time.
     if space_name not in settings.space_names:
         raise api.Exception(
-            404,
+            status.HTTP_400_BAD_REQUEST,
             api.Error(
                 type="reqeust",
                 code=202,
@@ -210,7 +215,7 @@ async def create_or_update_resource_with_payload(
         resource_content_type = ContentType.image
     else:
         raise api.Exception(
-            406,
+            status.HTTP_406_NOT_ACCEPTABLE,
             api.Error(
                 type="attachment",
                 code=217,
@@ -224,10 +229,10 @@ async def create_or_update_resource_with_payload(
     checksum = sha1.hexdigest()
     await payload_file.seek(0)
     resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-    resource_obj.payload = core.Payload(  # detect the resource type
+    resource_obj.payload = core.Payload(
         content_type=resource_content_type,
         checksum=checksum,
-        body=record.shortname + "." + payload_file.filename.split(".")[1],
+        body=f"{record.shortname}." + payload_file.filename.split(".")[1],
     )
 
     if (
@@ -236,7 +241,7 @@ async def create_or_update_resource_with_payload(
         and not isinstance(resource_obj, core.Schema)
     ):
         raise api.Exception(
-            406,
+            status.HTTP_400_BAD_REQUEST,
             api.Error(
                 type="attachment",
                 code=217,
@@ -251,14 +256,13 @@ async def create_or_update_resource_with_payload(
         resource_obj.payload.schema_shortname = record.attributes["schema_shortname"]
         schema_payload_path = db.payload_path(space_name, "schema", core.Schema)
         validate_payload_with_schema(
-            schema_path=schema_payload_path / f"{resource_obj.payload.schema_shortname}.json",
-            payload_data=payload_file
+            schema_path=schema_payload_path
+            / f"{resource_obj.payload.schema_shortname}.json",
+            payload_data=payload_file,
         )
 
-    db.save(space_name, record.subpath, resource_obj)
-    await db.save_payload(
-        space_name, record.subpath, resource_obj, payload_file
-    )
+    await db.save(space_name, record.subpath, resource_obj)
+    await db.save_payload(space_name, record.subpath, resource_obj, payload_file)
     return api.Response(status=api.Status.success)
 
 
@@ -267,21 +271,24 @@ def validate_payload_with_schema(schema_path: FSPath, payload_data: UploadFile |
     if not isinstance(payload_data, dict):
         data = json.load(payload_data.file)
         payload_data.file.seek(0)
-    else :
+    else:
         data = payload_data
 
     validate(instance=data, schema=schema)
 
 
-
-@router.post("/resources_from_csv/{resource_type}/{space_name}/{subpath:path}/{schema_shortname}", response_model=api.Response, response_model_exclude_none=True)
+@router.post(
+    "/resources_from_csv/{resource_type}/{space_name}/{subpath:path}/{schema_shortname}",
+    response_model=api.Response,
+    response_model_exclude_none=True,
+)
 async def import_resources_from_csv(
     resources_file: UploadFile,
     resource_type: api.ResourceType,
     space_name: str = Path(..., regex=regex.SPACENAME),
     subpath: str = Path(..., regex=regex.SUBPATH),
     schema_shortname: str = Path(..., regex=regex.SHORTNAME),
-    owner_shortname=Depends(JWTBearer())
+    owner_shortname=Depends(JWTBearer()),
 ):
 
     contents = await resources_file.read()
@@ -289,16 +296,14 @@ async def import_resources_from_csv(
     buffer = StringIO(decoded)
     csv_reader = csv.DictReader(buffer)
 
-    schema_path = db.payload_path(space_name, "schema", core.Schema) / f"{schema_shortname}.json"
+    schema_path = (
+        db.payload_path(space_name, "schema", core.Schema) / f"{schema_shortname}.json"
+    )
     with open(schema_path) as schema_file:
         schema_content = json.load(schema_file)
 
     schema_properties = schema_content["properties"]
-    data_types_mapper = {
-        'integer': int,
-        'number': float,
-        "string": str
-    }
+    data_types_mapper = {"integer": int, "number": float, "string": str}
 
     records: list = []
     for row in csv_reader:
@@ -320,13 +325,17 @@ async def import_resources_from_csv(
             if not value:
                 value = "null" if current_schema_property["type"] == "string" else "0"
 
-            value = data_types_mapper[current_schema_property["type"]](value if current_schema_property["type"] == "string" else value.replace(",", ""))
+            value = data_types_mapper[current_schema_property["type"]](
+                value
+                if current_schema_property["type"] == "string"
+                else value.replace(",", "")
+            )
 
             match len(keys_list):
                 case 1:
                     payload_object[keys_list[0].strip()] = value
                 case 2:
-                    if keys_list[0].strip() not in payload_object: 
+                    if keys_list[0].strip() not in payload_object:
                         payload_object[keys_list[0].strip()] = {}
                     payload_object[keys_list[0].strip()][keys_list[1].strip()] = value
                 case 3:
@@ -334,24 +343,26 @@ async def import_resources_from_csv(
                         payload_object[keys_list[0].strip()] = {}
                     if keys_list[1].strip() not in payload_object[keys_list[0].strip()]:
                         payload_object[keys_list[0].strip()][keys_list[1].strip()] = {}
-                    payload_object[keys_list[0].strip()][keys_list[1].strip()][keys_list[2].strip()] = value
+                    payload_object[keys_list[0].strip()][keys_list[1].strip()][
+                        keys_list[2].strip()
+                    ] = value
                 case _:
                     continue
 
         if shortname:
             payload_object["schema_shortname"] = schema_shortname
-            records.append(core.Record(
-                resource_type=resource_type,
-                shortname=shortname,
-                subpath=subpath,
-                attributes=payload_object
-            ))
+            records.append(
+                core.Record(
+                    resource_type=resource_type,
+                    shortname=shortname,
+                    subpath=subpath,
+                    attributes=payload_object,
+                )
+            )
 
     return await serve_request(
         request=api.Request(
-            space_name=space_name,
-            request_type=RequestType.create,
-            records=records
+            space_name=space_name, request_type=RequestType.create, records=records
         ),
-        shortname=owner_shortname
+        shortname=owner_shortname,
     )

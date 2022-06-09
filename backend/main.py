@@ -58,7 +58,7 @@ app = FastAPI(
 
 
 json_logging.init_fastapi(enable_json=True)
-#json_logging.init_request_instrument(app)
+# json_logging.init_request_instrument(app)
 
 
 app.add_middleware(
@@ -129,7 +129,7 @@ async def middle(request: Request, call_next):
             try:
                 response_body = json.loads(raw_data)
             except:
-                response_body = ''
+                response_body = ""
     except api.Exception as ex:
         response = JSONResponse(
             status_code=ex.status_code,
@@ -259,4 +259,4 @@ async def catchall():
 
 if __name__ == "__main__":
     #    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
-    asyncio.run(serve(app, Config())) # type: ignore
+    asyncio.run(serve(app, Config()))  # type: ignore

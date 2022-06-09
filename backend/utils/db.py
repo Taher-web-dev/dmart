@@ -10,6 +10,8 @@ import json
 from pathlib import Path
 from utils.logger import logger
 from utils.redis_services import search as redis_search, get_meta_doc_for_schema_doc
+from fastapi import status
+import aiofiles
 
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
@@ -20,6 +22,18 @@ SPACES_PATTERN = re.compile("\\/([a-zA-Z0-9_]*)\\/.dm\\/meta.space.json$")
 
 
 def locators_query(query: api.Query) -> tuple[int, list[core.Locator]]:
+    """Given a query return the total and the locators
+    Parameters
+    ----------
+    query: api.Query
+        Query of type subpath
+
+    Returns
+    -------
+    Total, Locators
+
+    """
+
     locators: list[core.Locator] = []
     total: int = 0
     match query.type:
@@ -92,16 +106,36 @@ def locators_query(query: api.Query) -> tuple[int, list[core.Locator]]:
     return total, locators
 
 
-def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
+async def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
+    """Given a query return the total and the records
+
+    Parameters
+    ----------
+    query: api.Query
+        query of type [spaces, search, subpath]
+
+    Returns
+    -------
+    Total, Records
+
+    """
     records: list[core.Record] = []
     total: int = 0
     match query.type:
         case api.QueryType.spaces:
             path = settings.spaces_folder
-            for one in path.glob("*/.dm/meta.space.json"):
+            spaces_glob = "*/.dm/meta.space.json"
+            for one in path.glob(spaces_glob):
+                total += 1
                 match = SPACES_PATTERN.search(str(one))
-                if match is not None:
-                    space_name = match.group(1)
+                if match:
+                    records.append(
+                        core.Space.parse_raw(one.read_text()).to_record(
+                            query.subpath,
+                            match.group(1),
+                            query.include_fields if query.include_fields else [],
+                        )
+                    )
 
         case api.QueryType.search:
             search_res: list = []
@@ -190,17 +224,17 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                     query.subpath, shortname, query.include_fields
                 )
                 if (
-                    query.retrieve_json_payload and
-                    resource_obj.payload and
-                    resource_obj.payload.content_type and 
-                    resource_obj.payload.content_type == ContentType.json and
-                    (path / resource_obj.payload.body).is_file()
+                    query.retrieve_json_payload
+                    and resource_obj.payload
+                    and resource_obj.payload.content_type
+                    and resource_obj.payload.content_type == ContentType.json
+                    and (path / resource_obj.payload.body).is_file()
                 ):
-                    with open(
+                    async with aiofiles.open(
                         path / resource_obj.payload.body, "r"
                     ) as payload_file_content:
                         resource_base_record.attributes["payload"] = json.loads(
-                            payload_file_content.read()
+                            await payload_file_content.read()
                         )
 
                 # Get all matching attachments
@@ -264,6 +298,7 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 )
     return total, records
 
+
 def metapath(
     space_name: str, subpath: str, shortname: str, class_type: Type[MetaChild]
 ) -> tuple[Path, str]:
@@ -271,18 +306,18 @@ def metapath(
     path = settings.spaces_folder / space_name
     filename = ""
     if subpath[0] == "/":
-        subpath = "." + subpath
+        subpath = f".{subpath}"
     if issubclass(class_type, core.Folder):
         path = path / subpath / shortname / ".dm"
-        filename = "meta." + class_type.__name__.lower() + ".json"
+        filename = f"meta.{class_type.__name__.lower()}.json"
     elif issubclass(class_type, core.Attachment):
         [parent_subpath, parent_name] = subpath.rsplit("/", 1)
-        attachment_folder = parent_name + "/attachments." + class_type.__name__.lower()
+        attachment_folder = f"{parent_name}/attachments.{class_type.__name__.lower()}"
         path = path / parent_subpath / ".dm" / attachment_folder
         filename = f"meta.{shortname}.json"
     else:
         path = path / subpath / ".dm" / shortname
-        filename = "meta." + class_type.__name__.lower() + ".json"
+        filename = f"meta.{class_type.__name__.lower()}.json"
     return path, filename
 
 
@@ -290,10 +325,10 @@ def payload_path(space_name: str, subpath: str, class_type: Type[MetaChild]) -> 
     """Construct the full path of the meta file"""
     path = settings.spaces_folder
     if subpath[0] == "/":
-        subpath = "." + subpath
+        subpath = f".{subpath}"
     if issubclass(class_type, core.Attachment):
         [parent_subpath, parent_name] = subpath.rsplit("/", 1)
-        attachment_folder = parent_name + "/attachments." + class_type.__name__.lower()
+        attachment_folder = f"{parent_name}/attachments.{class_type.__name__.lower()}"
         path = path / space_name / parent_subpath / ".dm" / attachment_folder
     else:
         path = path / space_name / subpath
@@ -308,36 +343,36 @@ def load(
     path /= filename
     if not path.is_file():
         raise api.Exception(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             error=api.Error(type="db", code=12, message="requested object not found"),
         )
     return class_type.parse_raw(path.read_text())
-    
 
-def save(space_name: str, subpath: str, meta: core.Meta):
+
+async def save(space_name: str, subpath: str, meta: core.Meta):
     """Save Meta Json to respectiv file"""
     path, filename = metapath(space_name, subpath, meta.shortname, meta.__class__)
 
     if not path.is_dir():
         os.makedirs(path)
 
-    with open(path / filename, "w") as file:
-        file.write(meta.json(exclude_none=True))
+    async with aiofiles.open(path / filename, "w") as file:
+        await file.write(meta.json(exclude_none=True))
 
 
-def create(space_name: str, subpath: str, meta: core.Meta):
+async def create(space_name: str, subpath: str, meta: core.Meta):
     path, filename = metapath(space_name, subpath, meta.shortname, meta.__class__)
     if (path / filename).is_file():
         raise api.Exception(
-            status_code=401,
+            status_code=status.HTTP_400_BAD_REQUEST,
             error=api.Error(type="create", code=30, message="already exists"),
         )
 
     if not path.is_dir():
         os.makedirs(path)
 
-    with open(path / filename, "w") as file:
-        file.write(meta.json(exclude_none=True))
+    async with aiofiles.open(path / filename, "w") as file:
+        await file.write(meta.json(exclude_none=True))
 
 
 async def save_payload(space_name: str, subpath: str, meta: core.Meta, attachment):
@@ -347,42 +382,45 @@ async def save_payload(space_name: str, subpath: str, meta: core.Meta, attachmen
 
     if not (path / filename).is_file():
         raise api.Exception(
-            status_code=401,
+            status_code=status.HTTP_400_BAD_REQUEST,
             error=api.Error(type="create", code=30, message="metadata is missing"),
         )
 
-    with open(payload_file_path / payload_filename, "wb") as file:
+    async with aiofiles.open(payload_file_path / payload_filename, "wb") as file:
         while content := await attachment.read(1024):
-            file.write(content)
+            await file.write(content)
 
-def save_payload_from_json(space_name: str, subpath: str, meta: core.Meta, payload_data: dict):
+
+async def save_payload_from_json(
+    space_name: str, subpath: str, meta: core.Meta, payload_data: dict
+):
     path, filename = metapath(space_name, subpath, meta.shortname, meta.__class__)
     payload_file_path = payload_path(space_name, subpath, meta.__class__)
-    payload_filename = meta.shortname + ".json"
+    payload_filename = f"{meta.shortname}.json"
 
     if not (path / filename).is_file():
         raise api.Exception(
-            status_code=401,
+            status_code=status.HTTP_400_BAD_REQUEST,
             error=api.Error(type="create", code=30, message="metadata is missing"),
         )
 
-    with open(payload_file_path / payload_filename, "w") as file:
-        file.write(json.dumps(payload_data))
+    async with aiofiles.open(payload_file_path / payload_filename, "w") as file:
+        await file.write(json.dumps(payload_data))
 
 
-def update(space_name, subpath: str, meta: core.Meta):
+async def update(space_name: str, subpath: str, meta: core.Meta):
     path, filename = metapath(space_name, subpath, meta.shortname, meta.__class__)
     if not (path / filename).is_file():
         raise api.Exception(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             error=api.Error(type="update", code=30, message="does not exist"),
         )
 
-    with open(path / filename, "w") as file:
-        file.write(meta.json(exclude_none=True))
+    async with aiofiles.open(path / filename, "w") as file:
+        await file.write(meta.json(exclude_none=True))
 
 
-def move(
+async def move(
     space_name: str,
     src_subpath: str,
     src_shortname: str,
@@ -390,6 +428,18 @@ def move(
     dest_shortname: str | None,
     meta: core.Meta,
 ):
+    """Move the file that match the criteria given, remove source folder if empty
+
+    Parameters
+    ----------
+    space_name: str,
+    src_subpath: str,
+    src_shortname: str,
+    dest_subpath: str | None,
+    dest_shortname: str | None,
+    meta: core.Meta
+    """
+
     src_path, src_filename = metapath(
         space_name, src_subpath, src_shortname, meta.__class__
     )
@@ -399,7 +449,7 @@ def move(
         dest_shortname or src_shortname,
         meta.__class__,
     )
-    
+
     # Create dest dir if not exist
     if not os.path.isdir(dest_path):
         os.makedirs(dest_path)
@@ -441,8 +491,8 @@ def move(
 
     # Store meta updates in the file
     if meta_updated:
-        with open(dest_path / dest_filename, "w") as opened_file:
-            opened_file.write(meta.json(exclude_none=True))
+        async with aiofiles.open(dest_path / dest_filename, "w") as opened_file:
+            await opened_file.write(meta.json(exclude_none=True))
 
     # Delete Src path if empty
     if src_path.is_dir() and len(os.listdir(src_path)) == 0:
@@ -450,10 +500,25 @@ def move(
 
 
 def delete(space_name: str, subpath: str, meta: core.Meta):
+    """Delete the file that match the criteria given, remove folder if empty
+
+    Parameters
+    ----------
+    space_name: str
+    subpath: str
+    shortname: str
+    meta: Meta
+
+    Exception
+    ----------
+    api.Exception:
+        HTTP_404_NOT_FOUND
+    """
+
     path, filename = metapath(space_name, subpath, meta.shortname, meta.__class__)
     if not path.is_dir() or not (path / filename).is_file():
         raise api.Exception(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             error=api.Error(type="delete", code=30, message="does not exist"),
         )
 

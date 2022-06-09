@@ -1,0 +1,1 @@
+{"uuid": "d609976d-50b2-4efc-a27b-23fc13008ada", "shortname": "greatcomment", "is_active": false, "created_at": "2022-06-09T12:34:13.767834", "updated_at": "2022-06-09T12:34:13.767841", "owner_shortname": "alibaba", "payload": {"content_type": "json", "body": "greatcomment.json"}, "body": "A comment insdie the content resource"}

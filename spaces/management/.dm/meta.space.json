@@ -1,0 +1,11 @@
+{
+  "shortname": "management",
+  "owner_shortname": "soheyb",
+  "displayname": "Managment",
+  "description": "A managment / sample space",
+  "uuid": "69ab4e02-b9ce-41e4-ada4-1e0869ccdc8f",
+  "resource_type": "Space",
+  "languages": ["english"],
+  "primary_website": "https://dmart.cc",
+  "mirrors": []
+}
