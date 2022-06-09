@@ -8,9 +8,11 @@
 - [x] Implement support for structured content : both schemaful and schemaless
 - redis index, search, load, save of entries (meta)
 - redis index, seach of schma-content separelty to support admin UI
-- security labels and acl rules
-- Support is_active (published/draft) 
+- security labels and acl rules : Permission, Group and Role.
+- Support is_active (published/unpublished)
+- Support draft : A type of attachment?
 - implement history (alteration) creation
 - implement history and events query
 - implement branches / tags and history switch/rollback (backed by git)
 - implement public query of cotnent by git branch (support multiple versions of the data at the same time) : served only from the filesystem (no redis)
+- implement bitbucket pipeline to edit/publish changes to CMS 

@@ -1,4 +1,5 @@
 python-json-logger
+json_logging
 fastapi
 python-multipart
 jsonschema
@@ -11,5 +12,4 @@ pydantic[email,dotenv]
 redis
 concurrent-log-handler
 hypercorn
-python-json-logger
 
