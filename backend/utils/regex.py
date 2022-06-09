@@ -1,4 +1,4 @@
-SUBPATH = r"^[\w\/]{1,32}$"
+SUBPATH = r"^[\w\/]{0,32}$"
 SHORTNAME = r"^\w{1,32}$"
 FILENAME = r"^\w{1,32}\.(gif|png|jpeg|jpg)$"
 SPACENAME = r"^\w{1,32}$"
