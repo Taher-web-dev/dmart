@@ -1,6 +1,8 @@
+from http import HTTPStatus
 import re
 import json
 import redis
+import models.api as api
 import models.core as core
 from redis.commands.json.path import Path
 from redis.commands.search.field import TextField, NumericField, TagField
@@ -98,6 +100,11 @@ def create_indices_for_all_spaces_meta_and_schemas():
 
             if redis_schema_definition:
                 redis_indices[space_name][schema_shortname] = client.ft(f"{space_name}:{schema_shortname}")
+                redis_schema_definition.extend([
+                    TextField("$.subpath", as_name="subpath"),
+                    TextField("$.resource_type", as_name="resource_type"),
+                    TextField("$.shortname", as_name="shortname")
+                ])
                 create_index(space_name, schema_shortname, tuple(redis_schema_definition))
 
 
@@ -118,6 +125,9 @@ def save_meta_doc(space_name: str, schema_shortname: str, subpath: str, meta: co
 def save_payload_doc(space_name: str, schema_shortname: str, subpath: str, payload_shortname, payload: dict):
     docid = f"{space_name}:{schema_shortname}:{subpath}/{payload_shortname}"
     
+    payload["subpath"] = subpath
+    payload["resource_type"] = "content"
+    payload["shortname"] = payload_shortname
     client.json().set(docid, Path.root_path(), payload)
 
     # TBD : If entry of type content and json payload, save the json document under the respective schema index
@@ -143,14 +153,38 @@ def search(
     for item in filters.items():
         if item[0] == "tags" and item[1]:
             query_string += " @tags:{" + "|".join(item[1]) + "}"
+
         elif item[1]:
             query_string += " @" + item[0]+ ":(" + "|".join(item[1]) + ")"
-        
+
+    
     search_query = Query(query_string=query_string)
 
     if sort_by:
-        search_query = search_query.sort_by(sort_by)
+        search_query.sort_by(sort_by)
 
-    search_query = search_query.paging(offset, limit)
+    search_query.paging(offset, limit)
 
-    return ft_index.search(query=search_query).docs
+    # search_query.no_content()
+    # print("\n\n\n query: ", search_query.get_args())
+
+    try:
+        return ft_index.search(query=search_query).docs
+    except :
+        raise api.Exception(
+            status_code=HTTPStatus.BAD_REQUEST,
+            error=api.Error(type="query", code=30, message="Invalid search attribute"),
+        )
+
+def get_meta_doc_for_schema_doc(schema_doc_id: str):
+    # Example schema_doc_id "products:offer:offers/2140692"
+    schema_doc_id_parts = schema_doc_id.split(":")
+    space_name = schema_doc_id_parts[0]
+    schema_name = "meta"
+    shortname = schema_doc_id_parts[2].split("/")[1]
+    subpath = schema_doc_id_parts[2].split("/")[0]
+    uuid = "*"
+    resource_type = "content"
+    meta_document_id = client.keys(f"{space_name}:{schema_name}:{subpath}/{shortname}/{uuid}/{resource_type}")[0]
+    return client.json().get(name=meta_document_id)
+    

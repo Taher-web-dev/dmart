@@ -29,6 +29,7 @@ class Query(BaseModel):
     space_name: str = Field(..., regex=regex.SPACENAME)
     subpath: str = Field(..., regex=regex.SUBPATH)
     filter_types: list[ResourceType] | None = None
+    filter_schema_names: list[str] = ["meta"]
     filter_shortnames: list[str] | None = Field(
         regex=regex.SHORTNAME, default_factory=list
     )

@@ -53,11 +53,14 @@ if __name__ == "__main__":
     load_all_spaces_data_to_redis()
     redis_services.create_indices_for_all_spaces_meta_and_schemas()
 
-    # print(redis_services.search(
-    #     space_name="products",
-    #     schema_name="offer",
-    #     search="*",
-    #     filters={},
-    #     limit=5,
-    #     offset=0
-    # ))
+    test_search = redis_services.search(
+        space_name="products",
+        schema_name="offer",
+        search="@cbs_name:DB_ATLDaily_600MB",
+        filters={"subpath": ["offers"], "shortname": ["2140692"]},
+        limit=10,
+        offset=0
+    )
+    print("\n\n\nresult count: ", len(test_search), "\n\nresult: ", test_search)
+
+    # print("\n\n GET DOC: ", redis_services.get_meta_doc_for_schema_doc("products:offer:offers/2140692"))

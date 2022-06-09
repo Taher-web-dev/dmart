@@ -9,7 +9,7 @@ import re
 import json
 from pathlib import Path
 from utils.logger import logger
-from utils.redis_services import search as redis_search
+from utils.redis_services import search as redis_search, get_meta_doc_for_schema_doc
 
 MetaChild = TypeVar("MetaChild", bound=core.Meta)
 
@@ -104,29 +104,44 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                     space_name = match.group(1)
 
         case api.QueryType.search:
-            # Send request to RediSearch and process response into the records list to be returned to the user
-            search_res = redis_search(
-                space_name=query.space_name, 
-                search=query.search,
-                filters={
-                    "resource_type": query.filter_types,
-                    "shortname": query.filter_shortnames,
-                    "tags": query.filter_tags,
-                    "subpath": [query.subpath],
-                },
-                limit=query.limit,
-                offset=query.offset,
-                sort_by=query.sort_by
-            )
-
+            search_res: list = []
+            for schema_name in query.filter_schema_names:
+                search_res.extend(
+                    redis_search(
+                        space_name=query.space_name, 
+                        schema_name=schema_name,
+                        search=query.search,
+                        filters={
+                            "resource_type": query.filter_types,
+                            "shortname": query.filter_shortnames,
+                            "tags": query.filter_tags,
+                            "subpath": [query.subpath]
+                        },
+                        limit=query.limit,
+                        offset=query.offset,
+                        sort_by=query.sort_by
+                    )
+                )
             for one in search_res:
                 json_meta = json.loads(one.json)
 
-                if json_meta["tags"] == "none":
+                # This means redis returned content payload object not meta object
+                json_payload = None
+                if "meta" not in one.id:
+                    json_payload = json_meta
+                    json_meta = get_meta_doc_for_schema_doc(one.id)
+
+                if "tags" not in json_meta or json_meta["tags"] == "none":
                     json_meta["tags"] = []
+
                 resource_class = getattr(sys.modules["models.core"], json_meta["resource_type"].title())
                 resource_obj = resource_class.parse_obj(json_meta)
                 resource_base_record = resource_obj.to_record(json_meta["subpath"], json_meta["shortname"], query.include_fields)
+                if json_payload and query.retrieve_json_payload:
+                    json_payload.pop("subpath")
+                    json_payload.pop("resource_type")
+                    json_payload.pop("shortname")
+                    resource_base_record.attributes["payload"] = json_payload
                 records.append(resource_base_record)
 
         case api.QueryType.subpath:
