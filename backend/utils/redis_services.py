@@ -50,7 +50,7 @@ def create_index(space_name: str, schema_name: str, redis_schema: tuple):
             prefix=[f"{space_name}:{schema_name}"], index_type=IndexType.JSON
         ),
     )
-    print(f"Created new index named {space_name}:{schema_name}\n")
+    #print(f"Created new index named {space_name}:{schema_name}\n")
 
 
 def get_redis_index_fields(key_chain, property, redis_schema_definition):

@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/query", response_model=api.Response, response_model_exclude_none=True)
 async def query_entries(query: api.Query) -> api.Response:
-    total, records = db.serve_query(query)
+    total, records = await db.serve_query(query)
     return api.Response(
         status=api.Status.success,
         records=records,

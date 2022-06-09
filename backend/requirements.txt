@@ -12,4 +12,5 @@ pydantic[email,dotenv]
 redis
 concurrent-log-handler
 hypercorn
+aiofiles
 

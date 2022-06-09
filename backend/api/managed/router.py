@@ -1,6 +1,7 @@
 import csv
 import hashlib
 from io import StringIO
+import aiofiles
 from fastapi import APIRouter, Depends, UploadFile, Path, Form, status
 from fastapi.responses import FileResponse
 import models.api as api
@@ -20,7 +21,7 @@ router = APIRouter()
 
 @router.post("/query", response_model=api.Response, response_model_exclude_none=True)
 async def query_entries(query: api.Query) -> api.Response:
-    total, records = db.serve_query(query)
+    total, records = await db.serve_query(query)
     return api.Response(
         status=api.Status.success,
         records=records,

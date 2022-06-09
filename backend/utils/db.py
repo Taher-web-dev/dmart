@@ -106,7 +106,7 @@ def locators_query(query: api.Query) -> tuple[int, list[core.Locator]]:
     return total, locators
 
 
-def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
+async def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
     """Given a query return the total and the records
 
     Parameters
@@ -127,19 +127,21 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
             spaces_glob = "*/.dm/meta.space.json"
             for one in path.glob(spaces_glob):
                 total += 1
-                records.append(
-                    core.Space.parse_raw(one.read_text()).to_record(
-                        query.subpath,
-                        SPACES_PATTERN.search(str(one)).group(1),
-                        query.include_fields,
+                match = SPACES_PATTERN.search(str(one))
+                if match:
+                    records.append(
+                        core.Space.parse_raw(one.read_text()).to_record(
+                            query.subpath,
+                            match.group(1),
+                            query.include_fields if query.include_fields else [],
+                        )
                     )
-                )
 
         case api.QueryType.search:
             # Send request to RediSearch and process response into the records list to be returned to the user
             search_res = redis_search(
                 space_name=query.space_name,
-                search=query.search,
+                search=str(query.search),
                 filters={
                     "resource_type": query.filter_types,
                     "shortname": query.filter_shortnames,
@@ -217,11 +219,11 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                     and resource_obj.payload.content_type == ContentType.json
                     and (path / resource_obj.payload.body).is_file()
                 ):
-                    with open(
+                    async with aiofiles.open(
                         path / resource_obj.payload.body, "r"
                     ) as payload_file_content:
                         resource_base_record.attributes["payload"] = json.loads(
-                            payload_file_content.read()
+                            await payload_file_content.read()
                         )
 
                 # Get all matching attachments
@@ -478,7 +480,7 @@ async def move(
 
     # Store meta updates in the file
     if meta_updated:
-        async with open(dest_path / dest_filename, "w") as opened_file:
+        async with aiofiles.open(dest_path / dest_filename, "w") as opened_file:
             await opened_file.write(meta.json(exclude_none=True))
 
     # Delete Src path if empty
