@@ -1,4 +1,5 @@
 import json
+import re
 import models.api as api
 import utils.db as db
 import models.core as core
@@ -6,6 +7,7 @@ import sys
 from models.enums import ContentType
 import utils.redis_services as redis_services
 from utils.settings import settings
+import utils.regex as regex
 
 def load_data_to_redis(space_name, subpath):
     """
@@ -46,7 +48,7 @@ def load_all_spaces_data_to_redis():
         path = settings.spaces_folder / space_name
         if path.is_dir():
             for subpath in path.iterdir():
-                if subpath.is_dir():
+                if subpath.is_dir() and re.match(regex.SUBPATH, subpath.name):
                     load_data_to_redis(space_name, subpath.name)
 
 if __name__ == "__main__":
@@ -63,5 +65,3 @@ if __name__ == "__main__":
     #     sort_by="cbs_id"
     # )
     # print("\n\n\nresult count: ", len(test_search), "\n\nresult: ", test_search)
-
-    # print("\n\n GET DOC: ", redis_services.get_meta_doc_for_schema_doc("products:offer:offers/2140692"))
