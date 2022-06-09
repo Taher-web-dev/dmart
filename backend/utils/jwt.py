@@ -56,7 +56,7 @@ class JWTBearer(HTTPBearer):
         )
 
 
-def sign_jwt(data: dict, expires: int = 600) -> str:
+def sign_jwt(data: dict, expires: int = 86400) -> str:
     payload = {"data": data, "expires": time() + expires}
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 

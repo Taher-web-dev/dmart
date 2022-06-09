@@ -10,7 +10,7 @@ mkdir -p $LOG_PATH
 cd $BASEDIR
 
 #hypercorn main:app -w $(nproc --all) -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio'
-hypercorn --log-config json_log.ini -w 1 --reload -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio' main:app 2>&1 | jq
+hypercorn --log-config json_log.ini -w 1 --reload -b $LISTENING_HOST':'$LISTENING_PORT -k 'asyncio' main:app
 #uvicorn --port $LISTENING_PORT --app-dir ${BASEDIR} --host $LISTENING_HOST --reload main:app
 #uvicorn  --log-config $BASEDIR/json_log.ini --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 2>&1 | jq
 #uvicorn  --log-config $BASEDIR/json_log.ini --port $LISTENING_PORT --app-dir ${BASE} --host $LISTENING_HOST --reload main:app 
