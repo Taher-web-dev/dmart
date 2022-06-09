@@ -42,6 +42,11 @@ curl -s -b mycookies.jar -H "$CT" -d "$UPDATE" $API_URL/user/profile | jq .statu
 echo -n -e "Get profile: \t\t"
 curl -s -b mycookies.jar -H "$CT" $API_URL/user/profile | jq .status
 
+
+echo -n -e "Create TLF: \t\t"
+REQUEST=$(jq -c -n '{ space_name: "demo", request_type:"create", records: [{resource_type: "folder", subpath: "/", shortname: "myfolder", attributes:{tags: ["one","two"], displayname: "This is a nice one", description: "Furhter description could help"}}]}')
+curl -s -b mycookies.jar -H "$CT" -d "$REQUEST" ${API_URL}/managed/request | jq .status
+
 SUBPATH="myposts"
 
 echo -n -e "Create folder: \t\t"
