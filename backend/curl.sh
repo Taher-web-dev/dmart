@@ -27,7 +27,11 @@ curl -s -c mycookies.jar -H "$CT" -d "$LOGIN" ${API_URL}/user/login | jq .status
 
 echo -n -e "Query spaces: \t\t"
 RECORD=$(jq -c -n '{space_name: "demo", type: "spaces", subpath: "/"}')
-curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query  | jq #.attributes
+curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query  | jq .attributes
+
+echo -n -e "Query folders: \t\t"
+REQUEST=$(jq -c -n  '{ space_name: "products", type:"subpath", subpath: "/" }')
+curl -s -b mycookies.jar -H "$CT" -d "$REQUEST" ${API_URL}/managed/query | jq .attributes 
 
 #TOKEN=$(curl -s -H "$CT" -d "$LOGIN" ${API_URL}/user/login | jq .auth_token | tr -d '"')
 
