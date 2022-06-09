@@ -124,12 +124,16 @@ def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
     match query.type:
         case api.QueryType.spaces:
             path = settings.spaces_folder
-            for one in path.glob("*/.dm/meta.space.json"):
-                match = SPACES_PATTERN.search(str(one))
-                if match is not None:
-                    space_name = match.group(1)
-                    print("*", space_name)
-                print("**", match)
+            spaces_glob = "*/.dm/meta.space.json"
+            for one in path.glob(spaces_glob):
+                total += 1
+                records.append(
+                    core.Space.parse_raw(one.read_text()).to_record(
+                        query.subpath,
+                        SPACES_PATTERN.search(str(one)).group(1),
+                        query.include_fields,
+                    )
+                )
 
         case api.QueryType.search:
             # Send request to RediSearch and process response into the records list to be returned to the user

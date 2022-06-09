@@ -75,7 +75,11 @@ curl -s -b mycookies.jar -F 'space_name="demo"' -F 'request_record=@"../spaces/d
 
 echo -n -e "Query content: \t\t"
 RECORD=$(jq -c -n --arg subpath "$SUBPATH" '{space_name: "demo", type: "subpath", subpath: $subpath}')
-curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query | jq .status
+curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query | jq .attributes
+
+echo -n -e "Query spaces: \t\t"
+RECORD=$(jq -c -n --arg subpath "$SUBPATH" '{space_name: "demo", type: "spaces", subpath: $subpath}')
+curl -s -b mycookies.jar -H "$CT" -d "$RECORD" ${API_URL}/managed/query | jq .attributes
 
 echo -n -e "Delete user: \t\t"
 curl -s -b mycookies.jar -H "$CT" -d '{}' $API_URL/user/delete | jq .status
