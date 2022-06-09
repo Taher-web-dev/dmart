@@ -78,15 +78,15 @@ async def serve_request(
                         payload_data=record.attributes,
                     )
 
-                db.save(request.space_name, record.subpath, resource_obj)
-                db.save_payload_from_json(
+                await db.save(request.space_name, record.subpath, resource_obj)
+                await db.save_payload_from_json(
                     request.space_name, record.subpath, resource_obj, record.attributes
                 )
 
         case api.RequestType.update:
             for record in request.records:
                 resource_obj = core.Meta.from_record(record=record, shortname=shortname)
-                db.update(request.space_name, record.subpath, resource_obj)
+                await db.update(request.space_name, record.subpath, resource_obj)
         case api.RequestType.delete:
             for record in request.records:
                 cls = getattr(
@@ -138,7 +138,7 @@ async def serve_request(
                     record.attributes["src_shortname"],
                     cls,
                 )
-                db.move(
+                await db.move(
                     request.space_name,
                     record.attributes["src_subpath"],
                     record.attributes["src_shortname"],
@@ -255,7 +255,7 @@ async def create_or_update_resource_with_payload(
             payload_data=payload_file,
         )
 
-    db.save(space_name, record.subpath, resource_obj)
+    await db.save(space_name, record.subpath, resource_obj)
     await db.save_payload(space_name, record.subpath, resource_obj, payload_file)
     return api.Response(status=api.Status.success)
 

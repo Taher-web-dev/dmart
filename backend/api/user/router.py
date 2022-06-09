@@ -50,7 +50,7 @@ async def create_user(record: core.Record) -> api.Response:
     if "email" in record.attributes:
         user.email = record.attributes["email"]
 
-    db.create(MANAGEMENT_SPACE, USERS_SUBPATH, user)
+    await db.create(MANAGEMENT_SPACE, USERS_SUBPATH, user)
     return api.Response(status=api.Status.success)
 
 
@@ -87,7 +87,7 @@ async def update_profile(
     if "email" in profile.attributes:
         user.email = profile.attributes["email"]
 
-    db.update(MANAGEMENT_SPACE, USERS_SUBPATH, user)
+    await db.update(MANAGEMENT_SPACE, USERS_SUBPATH, user)
     return api.Response(status=api.Status.success)
 
 

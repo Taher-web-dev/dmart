@@ -350,7 +350,7 @@ async def save_payload(space_name: str, subpath: str, meta: core.Meta, attachmen
 
     async with aiofiles.open(payload_file_path / payload_filename, "wb") as file:
         while content := await attachment.read(1024):
-            file.write(content)
+            await file.write(content)
 
 
 async def save_payload_from_json(
@@ -378,7 +378,7 @@ async def update(space_name: str, subpath: str, meta: core.Meta):
             error=api.Error(type="update", code=30, message="does not exist"),
         )
 
-    async with open(path / filename, "w") as file:
+    async with aiofiles.open(path / filename, "w") as file:
         await file.write(meta.json(exclude_none=True))
 
 
