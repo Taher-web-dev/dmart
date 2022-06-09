@@ -8,7 +8,7 @@ from pydantic import Field
 from datetime import datetime
 import sys
 
-from models.enums import ContentType, RequestType, ResourceType
+from models.enums import ContentType, Language, RequestType, ResourceType
 import utils.regex as regex
 
 
@@ -128,6 +128,9 @@ class Locator(Resource):
 
 class Space(Meta):
     root_registration_signature: str = ""
+    primary_website: str = ""
+    languages: list[Language] = [Language.en]
+    mirrors: list[str] = []
 
 
 class Actor(Meta):
