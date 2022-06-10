@@ -136,6 +136,7 @@ class Locator(Resource):
 class Space(Meta):
     root_registration_signature: str = ""
     primary_website: str = ""
+    indexing_enabled: bool = False
     languages: list[Language] = [Language.en]
     mirrors: list[str] = []
 
