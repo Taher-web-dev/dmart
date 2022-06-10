@@ -113,6 +113,8 @@ class Meta(Resource):
 
         if self.payload:
             attributes["payload"] = self.payload.body
+            if self.payload.schema_shortname:
+                attributes["schema_shortname"] = self.payload.schema_shortname
             attributes["checksum"] = self.payload.checksum
         if self.tags:
             attributes["tags"] = self.tags
@@ -136,6 +138,7 @@ class Locator(Resource):
 class Space(Meta):
     root_registration_signature: str = ""
     primary_website: str = ""
+    indexing_enabled: bool = False
     languages: list[Language] = [Language.en]
     mirrors: list[str] = []
 

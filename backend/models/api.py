@@ -59,7 +59,6 @@ class Error(BaseModel):
 class Response(BaseModel):
     status: Status
     error: Error | None = None
-    auth_token: str | None = None
     records: list[core.Record] | None = None
     attributes: dict[str, Any] | None = None
 
