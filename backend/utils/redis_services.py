@@ -110,10 +110,10 @@ def create_indices_for_all_spaces_meta_and_schemas():
             if redis_schema_definition:
                 redis_indices[space_name][schema_shortname] = client.ft(f"{space_name}:{schema_shortname}")
                 redis_schema_definition.extend([
-                    TextField("$.subpath", as_name="subpath"),
-                    TextField("$.resource_type", as_name="resource_type"),
-                    TextField("$.shortname", as_name="shortname"),
-                    TextField("$.meta_doc_id", as_name="meta_doc_id"),
+                    TextField("$.subpath", no_stem=True, as_name="subpath"),
+                    TextField("$.resource_type", no_stem=True, as_name="resource_type"),
+                    TextField("$.shortname", no_stem=True, as_name="shortname"),
+                    TextField("$.meta_doc_id", no_stem=True, as_name="meta_doc_id"),
                 ])
                 create_index(space_name, schema_shortname, tuple(redis_schema_definition))
 
