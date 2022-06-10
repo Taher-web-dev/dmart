@@ -113,6 +113,7 @@ class Meta(Resource):
 
         if self.payload:
             attributes["payload"] = self.payload.body
+            attributes["schema_shortname"] = self.payload.schema_shortname
             attributes["checksum"] = self.payload.checksum
         if self.tags:
             attributes["tags"] = self.tags
