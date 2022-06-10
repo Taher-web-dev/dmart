@@ -61,7 +61,7 @@ app = FastAPI(
 json_logging.init_fastapi(enable_json=True)
 # json_logging.init_request_instrument(app)
 
-spaces : dict[str, core.Space]
+spaces : dict[str, core.Space] = {}
 
 app.add_middleware(
     CORSMiddleware,
