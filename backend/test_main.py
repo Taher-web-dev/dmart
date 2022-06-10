@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from fastapi import status
 import os
+from test_utils import check_not_found, check_validation
 import test_managed as managed
 from utils.settings import settings
 
@@ -8,8 +9,8 @@ from main import app
 
 client = TestClient(app)
 
-MANAGEMENT_SPACE : str ="management"
-USERS_SUBPATH : str ="users"
+MANAGEMENT_SPACE: str = "management"
+USERS_SUBPATH: str = "users"
 
 shortname: str = "alibaba"
 displayname: str = "Ali Baba"
@@ -35,7 +36,7 @@ def test_card():
 
 def test_create_user():
     headers = {"Content-Type": "application/json"}
-    endpoint = f"/user/create"
+    endpoint = "/user/create"
     request_data = {
         "resource_type": "user",
         "subpath": "users",
@@ -44,14 +45,19 @@ def test_create_user():
             "displayname": displayname,
             "email": email,
             "password": password,
-            "invitation": invitation
+            "invitation": invitation,
         },
     }
     response = client.post(endpoint, json=request_data, headers=headers)
-    # print("\n\n\n RESPONSE: ", response.json())
     assert response.status_code == status.HTTP_200_OK
-    json_response = response.json()
-    assert json_response["status"] == "success"
+    assert response.json()["status"] == "success"
+
+    # invalid resource_type
+    check_validation(
+        client.post(
+            endpoint, json={**request_data, "resource_type": "stuffy"}, headers=headers
+        )
+    )
 
 
 def test_login():
@@ -61,9 +67,20 @@ def test_login():
 
     response = client.post(endpoint, json=request_data, headers=headers)
     assert response.status_code == status.HTTP_200_OK
-    json_response = response.json()
-    assert json_response["status"] == "success"
-    global token
+    assert response.json()["status"] == "success"
+
+    check_not_found(
+        client.post(
+            endpoint, json={**request_data, "shortname": "shortname"}, headers=headers
+        )
+    )
+
+    response = client.post(
+        endpoint, json={**request_data, "password": "password"}, headers=headers
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json().get("status") == "failed"
+    assert response.json().get("error").get("type") == "auth"
 
 
 def test_get_profile():

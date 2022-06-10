@@ -142,18 +142,18 @@ async def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
             for schema_name in query.filter_schema_names:
                 search_res.extend(
                     redis_search(
-                        space_name=query.space_name, 
+                        space_name=query.space_name,
                         schema_name=schema_name,
                         search=query.search,
                         filters={
                             "resource_type": query.filter_types,
                             "shortname": query.filter_shortnames,
                             "tags": query.filter_tags,
-                            "subpath": [query.subpath]
+                            "subpath": [query.subpath],
                         },
                         limit=query.limit,
                         offset=query.offset,
-                        sort_by=query.sort_by
+                        sort_by=query.sort_by,
                     )
                 )
             for one in search_res:
@@ -168,9 +168,13 @@ async def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 if "tags" not in json_meta or json_meta["tags"] == "none":
                     json_meta["tags"] = []
 
-                resource_class = getattr(sys.modules["models.core"], json_meta["resource_type"].title())
+                resource_class = getattr(
+                    sys.modules["models.core"], json_meta["resource_type"].title()
+                )
                 resource_obj = resource_class.parse_obj(json_meta)
-                resource_base_record = resource_obj.to_record(json_meta["subpath"], json_meta["shortname"], query.include_fields)
+                resource_base_record = resource_obj.to_record(
+                    json_meta["subpath"], json_meta["shortname"], query.include_fields
+                )
                 if json_payload and query.retrieve_json_payload:
                     json_payload.pop("subpath", None)
                     json_payload.pop("resource_type", None)
@@ -362,6 +366,7 @@ async def save(space_name: str, subpath: str, meta: core.Meta):
 
 async def create(space_name: str, subpath: str, meta: core.Meta):
     path, filename = metapath(space_name, subpath, meta.shortname, meta.__class__)
+
     if (path / filename).is_file():
         raise api.Exception(
             status_code=status.HTTP_400_BAD_REQUEST,
