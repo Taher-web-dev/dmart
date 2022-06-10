@@ -142,7 +142,7 @@ def save_meta_doc(space_name: str, schema_shortname: str, subpath: str, meta: co
 
 def save_payload_doc(space_name: str, schema_shortname: str, subpath: str, payload_shortname, payload: dict):
     meta_doc_id = generate_doc_id(space_name, "meta", payload_shortname, subpath)
-    docid = get_doc_id_format(space_name, schema_shortname, payload_shortname, subpath)
+    docid = generate_doc_id(space_name, schema_shortname, payload_shortname, subpath)
     
     payload["subpath"] = subpath
     payload["resource_type"] = "content"
@@ -184,7 +184,7 @@ def search(
         search_query.sort_by(sort_by)
 
     search_query.paging(offset, limit)
-    
+
     try:
         return ft_index.search(query=search_query).docs
     except :
