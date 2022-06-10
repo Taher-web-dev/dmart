@@ -64,7 +64,7 @@ def get_redis_index_fields(key_chain, property, redis_schema_definition):
         redis_schema_definition.append(REDIS_SCHEMA_DATA_TYPES_MAPPER[property["type"]](f"$.{key_chain}", sortable=True, as_name=key_chain.replace(".", "_")))
         return redis_schema_definition
 
-    for property_key, property_value in property.items():
+    for property_key, property_value in property["properties"].items():
         redis_schema_definition = get_redis_index_fields(f"{key_chain}.{property_key}", property_value, redis_schema_definition)
 
     return redis_schema_definition
