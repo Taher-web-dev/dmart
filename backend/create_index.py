@@ -42,18 +42,27 @@ def load_data_to_redis(space_name, subpath):
 
 def load_all_spaces_data_to_redis():
     """
-    Loop over spaces and subpaths inside it and load the data to redis
+    Loop over spaces and subpaths inside it and load the data to redis of indexing_enabled for the space
     """
     for space_name in settings.space_names:
         path = settings.spaces_folder / space_name
-        if path.is_dir():
-            for subpath in path.iterdir():
-                if subpath.is_dir() and re.match(regex.SUBPATH, subpath.name):
-                    load_data_to_redis(space_name, subpath.name)
+        if not path.is_dir():
+            continue
+
+        space_meta_file = (path / ".dm/meta.space.json")
+        if not space_meta_file.is_file():
+            continue
+        space_meta_data = json.loads(space_meta_file.read_text())
+        if "indexing_enabled" not in space_meta_data or not space_meta_data["indexing_enabled"]:
+            continue
+
+        for subpath in path.iterdir():
+            if subpath.is_dir() and re.match(regex.SUBPATH, subpath.name):
+                load_data_to_redis(space_name, subpath.name)
 
 if __name__ == "__main__":
-    load_all_spaces_data_to_redis()
     redis_services.create_indices_for_all_spaces_meta_and_schemas()
+    load_all_spaces_data_to_redis()
 
     # test_search = redis_services.search(
     #     space_name="products",

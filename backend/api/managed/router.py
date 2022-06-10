@@ -302,7 +302,6 @@ async def import_resources_from_csv(
     with open(schema_path) as schema_file:
         schema_content = json.load(schema_file)
 
-    schema_properties = schema_content["properties"]
     data_types_mapper = {"integer": int, "number": float, "string": str}
 
     records: list = []
@@ -318,9 +317,9 @@ async def import_resources_from_csv(
                 continue
 
             keys_list = key.split(".")
-            current_schema_property = schema_properties
+            current_schema_property = schema_content
             for item in keys_list:
-                current_schema_property = current_schema_property[item.strip()]
+                current_schema_property = current_schema_property["properties"][item.strip()]
 
             if not value:
                 value = "null" if current_schema_property["type"] == "string" else "0"
