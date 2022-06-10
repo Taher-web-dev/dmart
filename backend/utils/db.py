@@ -172,9 +172,9 @@ async def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                 resource_obj = resource_class.parse_obj(json_meta)
                 resource_base_record = resource_obj.to_record(json_meta["subpath"], json_meta["shortname"], query.include_fields)
                 if json_payload and query.retrieve_json_payload:
-                    json_payload.pop("subpath")
-                    json_payload.pop("resource_type")
-                    json_payload.pop("shortname")
+                    json_payload.pop("subpath", None)
+                    json_payload.pop("resource_type", None)
+                    json_payload.pop("shortname", None)
                     resource_base_record.attributes["payload"] = json_payload
                 records.append(resource_base_record)
 
