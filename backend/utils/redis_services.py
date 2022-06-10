@@ -111,7 +111,7 @@ def create_indices_for_all_spaces_meta_and_schemas():
 
 def save_meta_doc(space_name: str, schema_shortname: str, subpath: str, meta: core.Meta):
     resource_type = meta.__class__.__name__.lower()
-    docid = f"{space_name}:{schema_shortname}:{subpath}/{meta.shortname}/{meta.uuid}/{resource_type}"
+    docid = f"{space_name}:{schema_shortname}:{subpath}/{meta.shortname}"
     meta_json = json.loads(meta.json(exclude_none=True))
 
     # Inject resource_type
@@ -171,19 +171,14 @@ def search(
     try:
         return ft_index.search(query=search_query).docs
     except :
-        raise api.Exception(
-            status_code=HTTPStatus.BAD_REQUEST,
-            error=api.Error(type="query", code=30, message="Invalid search attribute"),
-        )
+        return []
 
 def get_meta_doc_for_schema_doc(schema_doc_id: str):
     # Example schema_doc_id "products:offer:offers/2140692"
+    # parent meta_doc_id "products:meta:offers/2140692"
     schema_doc_id_parts = schema_doc_id.split(":")
     space_name = schema_doc_id_parts[0]
     schema_name = "meta"
-    shortname = schema_doc_id_parts[2].split("/")[1]
     subpath = schema_doc_id_parts[2].split("/")[0]
-    uuid = "*"
-    resource_type = "content"
-    meta_document_id = client.keys(f"{space_name}:{schema_name}:{subpath}/{shortname}/{uuid}/{resource_type}")[0]
-    return client.json().get(name=meta_document_id)
+    shortname = schema_doc_id_parts[2].split("/")[1]
+    return client.json().get(name=f"{space_name}:{schema_name}:{subpath}/{shortname}")
