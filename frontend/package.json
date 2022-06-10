@@ -87,6 +87,7 @@
     "cl-editor": "^2.3.0",
     "prettier": "^2.6.2",
     "prettier-plugin-svelte": "^2.7.0",
+    "svelte-jsoneditor": "^0.3.60",
     "svelte-notifications": "^0.9.93",
     "svelte-prismjs": "^1.0.2",
     "xterm": "^4.18.0",

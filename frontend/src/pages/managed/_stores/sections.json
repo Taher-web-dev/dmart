@@ -14,92 +14,92 @@
     "icon": "house-door",
     "children": [
       {
-        "type": "link", 
+        "type": "link",
         "name": "dashboard"
       }
     ]
   },
   {
     "name": "newsfeed",
-    "icon": "rss", 
+    "icon": "rss",
     "children": [
-      { 
-        "type": "folder", 
+      {
+        "type": "folder",
         "name": "subscriptions",
-        "expanded": false, 
-        "children_loaded": false, 
+        "expanded": false,
+        "children_loaded": false,
         "resource_types": [],
-        "dmart_path": "posts" 
+        "dmart_path": "/"
       }
     ]
   },
   {
     "name": "content",
-    "icon": "journals", 
+    "icon": "journals",
     "children": [
-      { 
-        "type": "folder", 
+      {
+        "type": "folder",
         "name": "posts",
-        "expanded": false, 
-        "children_loaded": false, 
+        "expanded": false,
+        "children_loaded": false,
         "resource_types": [],
-        "dmart_path": "posts" 
+        "dmart_path": "/"
       }
     ]
   },
   {
     "name": "tickets",
-    "icon": "calendar2-check", 
+    "icon": "calendar2-check",
     "children": [
-      { 
-        "type": "folder", 
+      {
+        "type": "folder",
         "name": "tickets",
-        "expanded": false, 
-        "children_loaded": false, 
+        "expanded": false,
+        "children_loaded": false,
         "resource_types": [],
-        "dmart_path": "tickets" 
+        "dmart_path": "tickets"
       }
     ]
   },
   {
     "name": "calendar",
-    "icon": "calendar", 
+    "icon": "calendar",
     "children": [
-      { 
-        "type": "folder", 
+      {
+        "type": "folder",
         "name": "calendar",
-        "expanded": false, 
-        "children_loaded": false, 
+        "expanded": false,
+        "children_loaded": false,
         "resource_types": [],
-        "dmart_path": "calendar" 
+        "dmart_path": "calendar"
       }
     ]
   },
   {
     "name": "messages",
-    "icon": "envelope", 
+    "icon": "envelope",
     "children": [
-      { 
-        "type": "folder", 
+      {
+        "type": "folder",
         "name": "messages",
-        "expanded": false, 
-        "children_loaded": false, 
+        "expanded": false,
+        "children_loaded": false,
         "resource_types": [],
-        "dmart_path": "messages" 
+        "dmart_path": "messages"
       }
     ]
   },
   {
     "name": "submissions",
-    "icon": "truck", 
+    "icon": "truck",
     "children": [
-      { 
-        "type": "folder", 
+      {
+        "type": "folder",
         "name": "submissions",
-        "expanded": false, 
-        "children_loaded": false, 
+        "expanded": false,
+        "children_loaded": false,
         "resource_types": [],
-        "dmart_path": "submissions" 
+        "dmart_path": "submissions"
       }
     ]
   },
@@ -115,15 +115,15 @@
   },
   {
     "name": "contacts",
-    "icon": "people", 
+    "icon": "people",
     "children": [
-      { 
-        "type": "folder", 
+      {
+        "type": "folder",
         "name": "contacts",
-        "expanded": false, 
-        "children_loaded": false, 
+        "expanded": false,
+        "children_loaded": false,
         "resource_types": [],
-        "dmart_path": "contacts" 
+        "dmart_path": "contacts"
       }
     ]
   },
@@ -169,4 +169,3 @@
     ]
   }
 ]
-

@@ -3,6 +3,7 @@
   import { active_section } from "../_stores/active_section.js";
   import { active_entry } from "../_stores/active_entry.js";
   import Folder from "./Folder.svelte";
+  import File from "./File.svelte";
   import Icon from "../../_components/Icon.svelte";
   import { _ } from "../../../i18n";
   //import { onDestroy } from "svelte";
@@ -36,13 +37,23 @@
     //icon = $active_section.icon;
     resource_types = $active_section.resource_types;
     //children = $active_section.children;
-    //console.log("Active section has changed to ", name, children);
     for (let child of $active_section.children) {
-      if (child.type && child.type == "folder" && child.dmart_path && !(child.dmart_path in $entries)) {
+      if (
+        child.type &&
+        child.type == "folder" &&
+        child.dmart_path &&
+        !(child.dmart_path in $entries)
+      ) {
         let subpath = child.dmart_path;
-        dmart_entries(subpath, resource_types, shortnames, query_type, search, max_returned_items).then((_entries) => {
+        dmart_entries(
+          subpath,
+          resource_types,
+          shortnames,
+          query_type,
+          search,
+          max_returned_items
+        ).then((_entries) => {
           $entries[subpath] = []; // Empty the list of entries for the subpath
-          //console.log("Loading entries for ", subpath);
           _entries.forEach((_entry) => {
             $entries[subpath].push({ data: _entry });
           });
@@ -56,18 +67,24 @@
 
   let head_height;
   let foot_height;
+
 </script>
 
-<div bind:clientHeight="{head_height}">
+<div bind:clientHeight={head_height}>
   <h5 class="my-0">
-    {#if $active_section.icon}<Icon name="{$active_section.icon}" class="pe-1" />{/if}
+    {#if $active_section.icon}<Icon
+        name={$active_section.icon}
+        class="pe-1"
+      />{/if}
     {#if $active_section.name}{$_($active_section.name)}{/if}
   </h5>
   <hr class="w-100 mt-1 mb-0" />
 </div>
 <div
   class="no-bullets scroller pe-0 w-100"
-  style="height: calc(100% - {head_height + foot_height}px); overflow: hidden auto;">
+  style="height: calc(100% - {head_height +
+    foot_height}px); overflow: hidden auto;"
+>
   <ListGroup flush class="w-100">
     {#each $active_section.children as child ($active_section.name + child.name)}
       {#if child.type == "link"}
@@ -75,13 +92,16 @@
         <ListGroupItem
           color="light"
           action
-          href="{$url('/managed/' + $active_section.name + '/' + child.name)}"
-          active="{$isActive('/managed/' + $active_section.name + '/' + child.name)}">
-          {#if child.icon}<Icon name="{child.icon}" class="pe-1" />{/if}
+          href={$url("/managed/" + $active_section.name + "/" + child.name)}
+          active={$isActive(
+            "/managed/" + $active_section.name + "/" + child.name
+          )}
+        >
+          {#if child.icon}<Icon name={child.icon} class="pe-1" />{/if}
           {$_(child.name)}
         </ListGroupItem>
       {:else if child.type == "component" && child.name in components}
-        <svelte:component this="{components[child.name]}" />
+        <svelte:component this={components[child.name]} />
       {:else if child.type == "folder" && $entries[child.dmart_path] && $entries[child.dmart_path].length > 0}
         <ListGroupItem class="px-0">
           <!--b> {child.name}</b> <br/-->
@@ -91,14 +111,14 @@
           </div>
 
           {#each $entries[child.dmart_path] as entry (child.dmart_path + entry.data.shortname)}
-            <Folder data="{entry.data}" />
+            <Folder data={entry.data} />
           {/each}
         </ListGroupItem>
       {/if}
     {/each}
   </ListGroup>
 </div>
-<div class="w-100" bind:clientHeight="{foot_height}">
+<div class="w-100" bind:clientHeight={foot_height}>
   {#if $active_entry.data}
     <hr class="my-0" />
     <p class="lh-1 my-0">
@@ -108,7 +128,9 @@
         <span class="text-muted">{$_("displayname")}:</span>
         {$active_entry.data.displayname} <br />
         <span class="text-muted">{$_("content_type")}:</span>
-        {$active_entry?.data?.attributes?.payload?.content_type?.split(";")[0] || "uknown"}
+        {$active_entry?.data?.attributes?.payload?.content_type?.split(
+          ";"
+        )[0] || "uknown"}
       </small>
     </p>
   {/if}
