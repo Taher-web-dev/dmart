@@ -4,12 +4,13 @@ from utils.settings import settings
 import models.core as core
 from typing import Any, TypeVar, Type
 import models.api as api
+import utils.regex as regex
 import os
 import re
 import json
 from pathlib import Path
 from utils.logger import logger
-from utils.redis_services import search as redis_search, get_meta_doc_for_schema_doc
+from utils.redis_services import search as redis_search, get_doc_by_id
 from fastapi import status
 import aiofiles
 
@@ -149,7 +150,7 @@ async def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                             "resource_type": query.filter_types,
                             "shortname": query.filter_shortnames,
                             "tags": query.filter_tags,
-                            "subpath": [query.subpath]
+                            "subpath": [query.subpath] if query.subpath != "/" else []
                         },
                         limit=query.limit,
                         offset=query.offset,
@@ -157,25 +158,26 @@ async def serve_query(query: api.Query) -> tuple[int, list[core.Record]]:
                     )
                 )
             for one in search_res:
-                json_meta = json.loads(one.json)
+                doc_content = json.loads(one.json)
 
                 # This means redis returned content payload object not meta object
-                json_payload = None
-                if "meta" not in one.id:
-                    json_payload = json_meta
-                    json_meta = get_meta_doc_for_schema_doc(one.id)
+                payload_doc_content = None
+                if not re.match(regex.META_DOC_ID, one.id):
+                    payload_doc_content = doc_content
+                    doc_content = get_doc_by_id(payload_doc_content["meta_doc_id"])
 
-                if "tags" not in json_meta or json_meta["tags"] == "none":
-                    json_meta["tags"] = []
+                if "tags" not in doc_content or doc_content["tags"] == "none":
+                    doc_content["tags"] = []
 
-                resource_class = getattr(sys.modules["models.core"], json_meta["resource_type"].title())
-                resource_obj = resource_class.parse_obj(json_meta)
-                resource_base_record = resource_obj.to_record(json_meta["subpath"], json_meta["shortname"], query.include_fields)
-                if json_payload and query.retrieve_json_payload:
-                    json_payload.pop("subpath", None)
-                    json_payload.pop("resource_type", None)
-                    json_payload.pop("shortname", None)
-                    resource_base_record.attributes["payload"] = json_payload
+                resource_class = getattr(sys.modules["models.core"], doc_content["resource_type"].title())
+                resource_obj = resource_class.parse_obj(doc_content)
+                resource_base_record = resource_obj.to_record(doc_content["subpath"], doc_content["shortname"], query.include_fields)
+                if payload_doc_content and query.retrieve_json_payload:
+                    payload_doc_content.pop("subpath", None)
+                    payload_doc_content.pop("resource_type", None)
+                    payload_doc_content.pop("shortname", None)
+                    payload_doc_content.pop("meta_doc_id", None)
+                    resource_base_record.attributes["payload"] = payload_doc_content
                 records.append(resource_base_record)
 
         case api.QueryType.subpath:

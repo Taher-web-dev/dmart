@@ -61,7 +61,7 @@ def get_redis_index_fields(key_chain, property, redis_schema_definition):
     takes a key and a value of a schema definition, and return the redis schema index appropriate field class/es
     """
     if "type" in property and property["type"] != "object":
-        redis_schema_definition.append(REDIS_SCHEMA_DATA_TYPES_MAPPER[property["type"]](f"$.{key_chain}", as_name=key_chain.replace(".", "_")))
+        redis_schema_definition.append(REDIS_SCHEMA_DATA_TYPES_MAPPER[property["type"]](f"$.{key_chain}", sortable=True, as_name=key_chain.replace(".", "_")))
         return redis_schema_definition
 
     for property_key, property_value in property.items():
@@ -112,15 +112,24 @@ def create_indices_for_all_spaces_meta_and_schemas():
                 redis_schema_definition.extend([
                     TextField("$.subpath", as_name="subpath"),
                     TextField("$.resource_type", as_name="resource_type"),
-                    TextField("$.shortname", as_name="shortname")
+                    TextField("$.shortname", as_name="shortname"),
+                    TextField("$.meta_doc_id", as_name="meta_doc_id"),
                 ])
                 create_index(space_name, schema_shortname, tuple(redis_schema_definition))
 
 
+def generate_doc_id(
+    space_name:str,
+    schema_shortname: str,
+    shortname: str,
+    subpath: str
+):
+    return f"{space_name}:{schema_shortname}:{subpath}/{shortname}"
+
 
 def save_meta_doc(space_name: str, schema_shortname: str, subpath: str, meta: core.Meta):
     resource_type = meta.__class__.__name__.lower()
-    docid = f"{space_name}:{schema_shortname}:{subpath}/{meta.shortname}"
+    docid = generate_doc_id(space_name, schema_shortname, meta.shortname, subpath)
     meta_json = json.loads(meta.json(exclude_none=True))
 
     # Inject resource_type
@@ -132,11 +141,13 @@ def save_meta_doc(space_name: str, schema_shortname: str, subpath: str, meta: co
     client.json().set(docid, Path.root_path(), meta_json)
 
 def save_payload_doc(space_name: str, schema_shortname: str, subpath: str, payload_shortname, payload: dict):
-    docid = f"{space_name}:{schema_shortname}:{subpath}/{payload_shortname}"
+    meta_doc_id = generate_doc_id(space_name, "meta", payload_shortname, subpath)
+    docid = get_doc_id_format(space_name, schema_shortname, payload_shortname, subpath)
     
     payload["subpath"] = subpath
     payload["resource_type"] = "content"
     payload["shortname"] = payload_shortname
+    payload["meta_doc_id"] = meta_doc_id
     client.json().set(docid, Path.root_path(), payload)
 
     # TBD : If entry of type content and json payload, save the json document under the respective schema index
@@ -173,21 +184,11 @@ def search(
         search_query.sort_by(sort_by)
 
     search_query.paging(offset, limit)
-
-    # search_query.no_content()
-    # print("\n\n\n query: ", search_query.get_args())
-
+    
     try:
         return ft_index.search(query=search_query).docs
     except :
         return []
 
-def get_meta_doc_for_schema_doc(schema_doc_id: str):
-    # Example schema_doc_id "products:offer:offers/2140692"
-    # parent meta_doc_id "products:meta:offers/2140692"
-    schema_doc_id_parts = schema_doc_id.split(":")
-    space_name = schema_doc_id_parts[0]
-    schema_name = "meta"
-    subpath = schema_doc_id_parts[2].split("/")[0]
-    shortname = schema_doc_id_parts[2].split("/")[1]
-    return client.json().get(name=f"{space_name}:{schema_name}:{subpath}/{shortname}")
+def get_doc_by_id(doc_id: str):
+    return client.json().get(name=doc_id)
