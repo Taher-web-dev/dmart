@@ -71,11 +71,19 @@ def get_redis_index_fields(key_chain, property, redis_schema_definition):
     
 def create_indices_for_all_spaces_meta_and_schemas():
     """
-    Loop over all spaces, and for each one we create
+    Loop over all spaces, and for each one we create: (only if indexing_enabled is true for the space)
     1-index for meta file called space_name:meta
     2-indices for schema files called space_name:schema_shortname
     """
     for space_name in settings.space_names:
+        space_meta_file = settings.spaces_folder / space_name / ".dm/meta.space.json"
+        if not space_meta_file.is_file():
+            continue
+
+        space_meta_data = json.loads(space_meta_file.read_text())
+        if "indexing_enabled" not in space_meta_data or not space_meta_data["indexing_enabled"]:
+            continue
+        
         # CREATE REDIS INDEX FOR THE META FILES INSIDE THE SPACE
         redis_indices[space_name] = {}
         redis_indices[space_name]["meta"] = client.ft(f"{space_name}:meta")
