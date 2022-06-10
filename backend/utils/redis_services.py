@@ -17,6 +17,7 @@ redis_indices: dict[str, dict[str, Search]] = {}
 
 REDIS_SCHEMA_DATA_TYPES_MAPPER = {
     "string": TextField,
+    "boolean": TextField,
     "integer": NumericField,
     "number": NumericField,
 }
