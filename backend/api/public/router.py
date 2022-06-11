@@ -12,7 +12,6 @@ router = APIRouter()
 
 # Retrieve publically-available content
 
-
 @router.post("/query", response_model=api.Response, response_model_exclude_none=True)
 async def query_entries(query: api.Query) -> api.Response:
     total, records = await db.serve_query(query)
@@ -93,11 +92,11 @@ async def submit() -> api.Response:
     response_model=api.Response,
     response_model_exclude_none=True,
 )
-async def query_entries_via_urlparams(
+async def query_via_urlparams(
     query: api.Query = Depends(api.Query),
 ) -> api.Response:
 
-    total, records = db.serve_query(query)
+    total, records = await db.serve_query(query)
 
     return api.Response(
         status=api.Status.success,

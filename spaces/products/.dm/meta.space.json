@@ -7,5 +7,6 @@
   "resource_type": "Space",
   "languages": ["english"],
   "primary_website": "https://dmart.cc",
+  "indexing_enabled": true,
   "mirrors": []
 }
