@@ -121,7 +121,7 @@
 
   async function load_tags() {
     let resp = await dmart_pub_query(subpath, resourceTypes, [], viewType == "tag" ? "tags" : "folders");
-    tags = resp.records[0].attributes.tags;
+    if(resp.records.size > 0) tags = resp.records[0].attributes.tags;
     //console.log("Tags: ", tags, "parents: ", parents.join("/"), "qt: ", queryType);
   }
 
