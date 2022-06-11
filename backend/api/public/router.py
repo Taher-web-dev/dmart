@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Path, status
+from fastapi import APIRouter, Path, Depends, status
 import utils.db as db
 import models.api as api
 import utils.regex as regex
@@ -85,3 +86,21 @@ async def retrieve_entry_or_attachment_payload(
 async def submit() -> api.Response:
     return api.Response(status=api.Status.success)
 """
+
+
+@router.get(
+    "/query/{space_name}/{subpath:path}",
+    response_model=api.Response,
+    response_model_exclude_none=True,
+)
+async def query_entries_via_urlparams(
+    query: api.Query = Depends(api.Query),
+) -> api.Response:
+
+    total, records = db.serve_query(query)
+
+    return api.Response(
+        status=api.Status.success,
+        records=records,
+        attributes={"total": total, "returned": len(records)},
+    )

@@ -48,10 +48,10 @@
 
   $: {
     let query = {
-      query_type: "history",
+      type: "history",
       subpath: subpath,
-      resource_types: ["alteration"],
-      resource_shortnames: [shortname],
+      filter_types: ["alteration"],
+      filter_shortnames: [shortname],
       limit: 10,
       offset: 0,
     };
@@ -62,26 +62,24 @@
             one.hash = one.shortname.substring(5, 13);
 
             if (one.attributes.diff) {
-              one.current = `${one.attributes.diff.payload?.bytesize.new}/${one.attributes.new_checksum.substring(
-                5,
-                13
-              )}`;
-              one.previous = `${one.attributes.diff.payload?.bytesize.old}/${one.attributes.old_checksum.substring(
-                5,
-                13
-              )}`;
+              one.current = `${
+                one.attributes.diff.payload?.bytesize.new
+              }/${one.attributes.new_checksum.substring(5, 13)}`;
+              one.previous = `${
+                one.attributes.diff.payload?.bytesize.old
+              }/${one.attributes.old_checksum.substring(5, 13)}`;
             }
             return one;
           })
           .reverse();
         //alterations = json.records.reverse();
         //console.log(alterations);
-        if (json?.results[0].status == "success") {
+        if (json?.results?.[0].status == "success") {
           count = json.results[0].attributes.returned;
           total = json.results[0].attributes.total;
           status = "success";
         } else {
-          status = json?.results[0] || "Unknown error";
+          status = json?.results?.[0] || "Unknown error";
         }
       })
       .catch(console.log);
@@ -89,4 +87,4 @@
 </script>
 
 <h6>Returned {count} out of {total} with status {status}</h6>
-<Table cols="{cols}" rows="{alterations}" />
+<Table {cols} rows={alterations} />
