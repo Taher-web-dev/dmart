@@ -9,36 +9,61 @@ import utils.redis_services as redis_services
 from utils.settings import settings
 import utils.regex as regex
 
+
 def load_data_to_redis(space_name, subpath):
     """
     Load meta files inside subpath then store them to redis as :space_name:meta prefixed doc,
     and if the meta file has a separate payload file follwing a schema we loads the payload content and store it to redis as :space_name:schema_name prefixed doc
     """
     total, locators = db.locators_query(
-        api.Query(space_name=space_name, subpath=subpath, type=api.QueryType.subpath, limit=10000)
+        api.Query(
+            space_name=space_name,
+            subpath=subpath,
+            type=api.QueryType.subpath,
+            limit=10000,
+        )
     )
     loaded_to_redis = 0
     for one in locators:
         # myclass = db.resource_class(core.ResourceType(one.__class__.__name__.lower()))
         try:
-            myclass = getattr(sys.modules["models.core"], core.ResourceType("content").title())
+            myclass = getattr(
+                sys.modules["models.core"], core.ResourceType("content").title()
+            )
             # print("\n\n\n", "\n space_name: ", space_name, "\n subpath: ", one.subpath, "\n shortname: ", one.shortname, "\n class_type: ", myclass)
-            meta = db.load(space_name=space_name, subpath=one.subpath, shortname=one.shortname, class_type=myclass)
-            redis_services.save_meta_doc(space_name=space_name, schema_shortname="meta", subpath=subpath, meta=meta)
-            if meta.payload and meta.payload.content_type == ContentType.json and meta.payload.schema_shortname:
-                payload_path = db.payload_path(space_name, one.subpath, myclass) / str(meta.payload.body)
+            meta = db.load(
+                space_name=space_name,
+                subpath=one.subpath,
+                shortname=one.shortname,
+                class_type=myclass,
+            )
+            redis_services.save_meta_doc(
+                space_name=space_name,
+                schema_shortname="meta",
+                subpath=subpath,
+                meta=meta,
+            )
+            if (
+                meta.payload
+                and meta.payload.content_type == ContentType.json
+                and meta.payload.schema_shortname
+            ):
+                payload_path = db.payload_path(space_name, one.subpath, myclass) / str(
+                    meta.payload.body
+                )
                 payload_data = json.loads(payload_path.read_text())
                 redis_services.save_payload_doc(
-                    space_name=space_name, 
-                    schema_shortname=meta.payload.schema_shortname, 
-                    payload_shortname=meta.payload.body.split(".")[0], 
+                    space_name=space_name,
+                    schema_shortname=meta.payload.schema_shortname,
+                    payload_shortname=meta.payload.body.split(".")[0],
                     subpath=subpath,
-                    payload=payload_data
+                    payload=payload_data,
                 )
             loaded_to_redis += 1
         except:
             pass
     print(f"Added {loaded_to_redis} document to redis from {space_name}/{subpath}")
+
 
 def load_all_spaces_data_to_redis():
     """
@@ -49,16 +74,20 @@ def load_all_spaces_data_to_redis():
         if not path.is_dir():
             continue
 
-        space_meta_file = (path / ".dm/meta.space.json")
+        space_meta_file = path / ".dm/meta.space.json"
         if not space_meta_file.is_file():
             continue
         space_meta_data = json.loads(space_meta_file.read_text())
-        if "indexing_enabled" not in space_meta_data or not space_meta_data["indexing_enabled"]:
+        if (
+            "indexing_enabled" not in space_meta_data
+            or not space_meta_data["indexing_enabled"]
+        ):
             continue
 
         for subpath in path.iterdir():
             if subpath.is_dir() and re.match(regex.SUBPATH, subpath.name):
                 load_data_to_redis(space_name, subpath.name)
+
 
 if __name__ == "__main__":
     redis_services.create_indices_for_all_spaces_meta_and_schemas()

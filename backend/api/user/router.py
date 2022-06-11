@@ -115,17 +115,15 @@ async def login(
             secure=False,
             samesite="lax",
         )
-        return api.Response(
-            status=api.Status.success,
-            records=[
-                core.Record(
-                    resource_type=core.ResourceType.user,
-                    subpath="users",
-                    shortname=shortname,
-                    attributes={},
-                )
-            ],
+        record = core.Record(
+            resource_type=core.ResourceType.user,
+            subpath="users",
+            shortname=shortname,
+            attributes={},
         )
+        if user.displayname:
+            record.attributes["displayname"] = user.displayname
+        return api.Response(status=api.Status.success, records=[record])
     raise api.Exception(
         status.HTTP_401_UNAUTHORIZED,
         api.Error(type="auth", code=10, message="Bad creds"),

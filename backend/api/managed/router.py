@@ -319,7 +319,9 @@ async def import_resources_from_csv(
             keys_list = key.split(".")
             current_schema_property = schema_content
             for item in keys_list:
-                current_schema_property = current_schema_property["properties"][item.strip()]
+                current_schema_property = current_schema_property["properties"][
+                    item.strip()
+                ]
 
             if not value:
                 value = "null" if current_schema_property["type"] == "string" else "0"

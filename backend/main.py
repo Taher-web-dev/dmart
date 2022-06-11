@@ -61,7 +61,7 @@ app = FastAPI(
 json_logging.init_fastapi(enable_json=True)
 # json_logging.init_request_instrument(app)
 
-spaces : dict[str, core.Space] = {}
+spaces: dict[str, core.Space] = {}
 
 app.add_middleware(
     CORSMiddleware,
@@ -109,7 +109,6 @@ async def app_startup():
     for space_name in settings.space_names:
         space_meta_file = settings.spaces_folder / space_name / ".dm/meta.space.json"
         spaces[space_name] = core.Space.parse_raw(space_meta_file.read_text())
-
 
 
 @app.on_event("shutdown")

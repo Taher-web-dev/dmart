@@ -96,7 +96,7 @@ class Meta(Resource):
             "resource_type": type(self).__name__.lower(),
             "uuid": self.uuid,
             "shortname": self.shortname,
-            "subpath": subpath
+            "subpath": subpath,
         }
 
         meta_fields = list(Meta.__fields__.keys())
