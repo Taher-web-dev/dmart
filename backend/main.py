@@ -265,7 +265,14 @@ async def catchall():
 
 
 if __name__ == "__main__":
+    import logging
     #    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
     config = Config()
     config.bind=[f"{settings.listening_host}:{settings.listening_port}"]
+    #config.loglevel = "ERROR"
+    # config.logger_class = logging.StreamHandler
+    config.accesslog =logger
+    config.errorlog = logger
+    config.logconfig = "./json_log.ini"
+
     asyncio.run(serve(app, config))  # type: ignore
