@@ -1,3 +1,5 @@
+#!/usr/bin/env -S BACKEND_ENV=config.env python
+
 import json
 import re
 import models.api as api
@@ -77,6 +79,8 @@ def load_all_spaces_data_to_redis():
         space_meta_file = path / ".dm/meta.space.json"
         if not space_meta_file.is_file():
             continue
+
+        print("Checking space name: ", space_name)
         space_meta_data = json.loads(space_meta_file.read_text())
         if (
             "indexing_enabled" not in space_meta_data
@@ -90,6 +94,7 @@ def load_all_spaces_data_to_redis():
 
 
 if __name__ == "__main__":
+    print("Creating Redis indexes")
     redis_services.create_indices_for_all_spaces_meta_and_schemas()
     load_all_spaces_data_to_redis()
 

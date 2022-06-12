@@ -1,3 +1,5 @@
+#!/usr/bin/env -S BACKEND_ENV=config.env python
+
 """ Main module """
 
 import time
@@ -264,4 +266,6 @@ async def catchall():
 
 if __name__ == "__main__":
     #    uvicorn.run(app, host=settings.listening_host, port=settings.listening_port)  # type: ignore
-    asyncio.run(serve(app, Config()))  # type: ignore
+    config = Config()
+    config.bind=[f"{settings.listening_host}:{settings.listening_port}"]
+    asyncio.run(serve(app, config))  # type: ignore

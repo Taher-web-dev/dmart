@@ -7,7 +7,7 @@
   let username;
   let password;
 
-  async function handleSubmit() {
+  async function handleSubmit(event) {
     event.preventDefault();
     let resp = await dmart_login(username, password);
     signedin_user.login(resp.records[0]);
