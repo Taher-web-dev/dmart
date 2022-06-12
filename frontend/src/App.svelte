@@ -24,14 +24,14 @@
       //fonts.type = 'text/css';
 
 		if($dir == "rtl") {
-      document.head.children["bootstap"].href="/bootstrap.rtl.min.css"
+      document.head.children["bootstrap"].href="/bootstrap.rtl.min.css"
       document.head.children["fonts"].href="/fonts/rtl_fonts.css";
       //bootstrap.href =
       //document.getElementById("bootstrap").href = '/bootstrap.rtl.min.css';
       // fonts.href=
       //document.getElementById("fonts").href = '/fonts/rtl_fonts.css';
 		} else {
-      document.head.children["bootstap"].href="/bootstrap.min.css"
+      document.head.children["bootstrap"].href="/bootstrap.min.css"
       document.head.children["fonts"].href="/fonts/fonts.css";
       //document.getElementById("bootstrap").href = '/bootstrap.min.css';
       //document.getElementById("fonts").href = '/fonts/fonts.css';
