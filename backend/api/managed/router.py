@@ -335,8 +335,8 @@ async def import_resources_from_csv(
                     value = value or "[]"
                 case _:
                     value = value or "0"
-                    value.replace(",", "")
-                        
+                    value = value.replace(",", "")
+            
             value = data_types_mapper[current_schema_property["type"]](value)
             if current_schema_property["type"] == "array":
                 value = [str(item) for item in value]
