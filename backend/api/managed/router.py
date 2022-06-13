@@ -302,7 +302,12 @@ async def import_resources_from_csv(
     with open(schema_path) as schema_file:
         schema_content = json.load(schema_file)
 
-    data_types_mapper = {"integer": int, "number": float, "string": str}
+    data_types_mapper = {
+        "integer": int, 
+        "number": float, 
+        "string": str, 
+        "array": json.loads
+    }
 
     records: list = []
     for row in csv_reader:
@@ -323,14 +328,19 @@ async def import_resources_from_csv(
                     item.strip()
                 ]
 
-            if not value:
-                value = "null" if current_schema_property["type"] == "string" else "0"
+            match current_schema_property["type"]:
+                case "string":
+                    value = value or "null"
+                case "array":
+                    value = value or "[]"
+                case _:
+                    value = value or "0"
+                    value.replace(",", "")
+                        
+            value = data_types_mapper[current_schema_property["type"]](value)
+            if current_schema_property["type"] == "array":
+                value = [str(item) for item in value]
 
-            value = data_types_mapper[current_schema_property["type"]](
-                value
-                if current_schema_property["type"] == "string"
-                else value.replace(",", "")
-            )
 
             match len(keys_list):
                 case 1:
@@ -351,7 +361,6 @@ async def import_resources_from_csv(
                     continue
 
         if shortname:
-            payload_object["schema_shortname"] = schema_shortname
             records.append(
                 core.Record(
                     resource_type=resource_type,
