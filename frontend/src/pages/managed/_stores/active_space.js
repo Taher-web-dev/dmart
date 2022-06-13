@@ -1,6 +1,9 @@
 import { writable } from "svelte/store";
 
-const default_space = "products"; // "management"; 
+const default_space = {
+  space_name: "products",
+  backend: "http://localhost:8282",
+};
 let local;
 
 if (!localStorage.getItem("active_space")) {
@@ -9,7 +12,7 @@ if (!localStorage.getItem("active_space")) {
 
 local = JSON.parse(localStorage.getItem("active_space"));
 
-const {subscribe, set} = writable(local);
+const { subscribe, set } = writable(local);
 
 function customSet(spacename) {
   set(spacename);

@@ -1,6 +1,7 @@
 import dmart_fetch from "../custom-fetch.js";
-import { website } from "./space_config";
 import sha1 from "./sha1";
+import { active_space } from "./pages/managed/_stores/active_space.js";
+import { get } from "svelte/store";
 
 export async function dmart_register(
   shortname,
@@ -20,12 +21,13 @@ export async function dmart_register(
       invitation: invitation,
     },
   };
-  const url = `${website.backend}/user/create`;
+  const url = `${get(active_space).backend}/user/create`;
   const headers = {
     "Content-Type": "application/json",
     Accept: "application/json",
     Connection: "close",
   };
+
   const request = {
     method: "POST",
     headers: headers,
@@ -33,6 +35,7 @@ export async function dmart_register(
     mode: "cors",
     body: JSON.stringify(data),
   };
+
   return await dmart_fetch(url, request);
 }
 
@@ -41,12 +44,15 @@ export async function dmart_login(shortname, password) {
     shortname: shortname,
     password: password,
   };
-  const url = `${website.backend}/user/login`;
+
+  const url = `${get(active_space).backend}/user/login`;
+
   const headers = {
     "Content-Type": "application/json",
     Accept: "application/json",
     Connection: "close",
   };
+
   const request = {
     method: "POST",
     headers: headers,
@@ -54,16 +60,18 @@ export async function dmart_login(shortname, password) {
     mode: "cors",
     body: JSON.stringify(data),
   };
+
   return await dmart_fetch(url, request);
 }
 
 async function dmart_request(request_data) {
-  const url = `${website.backend}/managed/request`;
+  const url = `${get(active_space).backend}/managed/request`;
   const headers = {
     "Content-Type": "application/json",
     Accept: "application/json",
     Connection: "close",
   };
+
   const request = {
     method: "POST",
     headers: headers,
@@ -72,12 +80,13 @@ async function dmart_request(request_data) {
     mode: "cors",
     body: JSON.stringify(request_data),
   };
+
   return await dmart_fetch(url, request);
 }
 
 export async function dmart_query(query) {
-  query.space_name = website.space_name;
-  const url = `${website.backend}/managed/query`;
+  query.space_name = get(active_space).space_name;
+  const url = `${get(active_space).backend}/managed/query`;
   const headers = {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -125,8 +134,8 @@ export async function dmart_pub_query(
   limit = 10,
   offset = 0
 ) {
-  const url = `${website.backend}/public/query/${
-    website.space_name
+  const url = `${get(active_space).backend}/public/query/${
+    get(active_space).space_name
   }/${encodeURIComponent(subpath)}?type=${type}&search=${encodeURIComponent(
     search
   )}&resource_types=${resource_types}&resource_shortnames=${encodeURIComponent(
@@ -150,7 +159,11 @@ export async function dmart_pub_query(
             attachment.attributes.payload &&
             attachment.attributes.payload.filepath
           ) {
-            attachment.url = `${website.backend}/media/${website.space_name}/${attachment.subpath}/${record.shortname}/${attachment.attributes.payload.filepath}`;
+            attachment.url = `${get(active_space).backend}/media/${
+              get(active_space).space_name
+            }/${attachment.subpath}/${record.shortname}/${
+              attachment.attributes.payload.filepath
+            }`;
           }
         });
       }
@@ -186,8 +199,10 @@ export function dmart_entry_displayname(record) {
 export function dmart_attachment_url(attachment) {
   // FIXME: managed
   if (attachment.attributes.payload && attachment.attributes.payload.filepath) {
-    // return `${website.backend}/payload/${website.space_name}/${attachment.subpath}/${attachment.shortname}/${attachment.attributes.payload.filepath}`;
-    return `/payload/${attachment} ${website.space_name}/${attachment.subpath}/${attachment.shortname}/${attachment.attributes.payload.filepath}`;
+    // return `${get(active_space).backend}/payload/${get(active_space).space_name}/${attachment.subpath}/${attachment.shortname}/${attachment.attributes.payload.filepath}`;
+    return `/payload/${attachment} ${get(active_space).space_name}/${
+      attachment.subpath
+    }/${attachment.shortname}/${attachment.attributes.payload.filepath}`;
   }
 }
 
@@ -222,7 +237,11 @@ export async function dmart_entries(
             attachment.attributes.payload.filepath
           ) {
             // FIXME: needs updating managed?
-            attachment.url = `${website.backend}/managed/payload/media/${website.space_name}/${attachment.subpath}/${record.shortname}/${attachment.attributes.payload.filepath}`;
+            attachment.url = `${
+              get(active_space).backend
+            }/managed/payload/media/${get(active_space).space_name}/${
+              attachment.subpath
+            }/${record.shortname}/${attachment.attributes.payload.filepath}`;
           }
           return attachment;
         });
@@ -242,7 +261,7 @@ export async function dmart_pub_submit(
   attributes = {}
 ) {
   const request = {
-    space_name: website.space_name,
+    space_name: get(active_space).space_name,
     request_type: "submit",
     records: [
       {
@@ -258,7 +277,7 @@ export async function dmart_pub_submit(
 
   let formdata = new FormData();
   formdata.append("request", JSON.stringify(request));
-  const browse_url = `${website.backend}/submit`;
+  const browse_url = `${get(active_space).backend}/submit`;
   const browse_headers = { Accept: "application/json", Connection: "close" };
   const browse_request = {
     method: "POST",
@@ -273,14 +292,14 @@ export async function dmart_pub_submit(
 
 export async function dmart_postmedia(record, upload) {
   const request = {
-    space_name: website.space_name,
+    space_name: get(active_space).space_name,
     request_type: "create",
     records: [record],
   };
   let formdata = new FormData();
   formdata.append("request", JSON.stringify(request));
   formdata.append("file", upload);
-  const browse_url = `${website.backend}/media`;
+  const browse_url = `${get(active_space).backend}/media`;
   const browse_headers = { Accept: "application/json", Connection: "close" };
   const browse_request = {
     method: "POST",
@@ -295,7 +314,7 @@ export async function dmart_postmedia(record, upload) {
 
 export async function dmart_content(action, record) {
   const request = {
-    space_name: website.space_name,
+    space_name: get(active_space).space_name,
     request_type: action,
     records: [record],
   };
@@ -313,7 +332,7 @@ export async function dmart_delete_content(
   parent_shortname = null
 ) {
   const request = {
-    space_name: website.space_name,
+    space_name: get(active_space).space_name,
     request_type: "delete",
     records: [
       {
@@ -332,7 +351,7 @@ export async function dmart_delete_content(
 
 export async function dmart_folder(action, subpath, shortname) {
   const request = {
-    space_name: website.space_name,
+    space_name: get(active_space).space_name,
     request_type: action,
     records: [
       {
