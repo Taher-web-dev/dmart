@@ -340,14 +340,16 @@ export async function dmart_delete_content(
         resource_type: resource_type,
         subpath: subpath,
         shortname: shortname,
+        attributes: {},
+        parent_shortname: parent_shortname,
       },
     ],
   };
 
-  if (parent_shortname) request.records[0].parent_shortname = parent_shortname;
+  // if (parent_shortname) request.records[0].parent_shortname = parent_shortname;
 
   let resp = await dmart_request(request);
-  return resp.results[0];
+  return resp;
 }
 
 export async function dmart_folder(action, subpath, shortname) {

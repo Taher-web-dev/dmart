@@ -67,29 +67,29 @@
             website.space_name
           }/schema/${value.data.attributes.schema_shortname}.json`
         : null;
+
+      const headers = {
+        Accept: "application/json",
+        Connection: "close",
+      };
+
+      const request = {
+        method: "GET",
+        headers: headers,
+        credentials: "include",
+        cache: "no-cache",
+        mode: "cors",
+      };
+
+      dmart_fetch(url, request).then((resp) => (payload = { json: resp }));
+      dmart_fetch(schemaurl, request).then((resp) => {
+        schema = resp;
+      });
     } else {
       content = value.data;
       content_type = "unknown";
       url = "";
     }
-
-    const headers = {
-      Accept: "application/json",
-      Connection: "close",
-    };
-
-    const request = {
-      method: "GET",
-      headers: headers,
-      credentials: "include",
-      cache: "no-cache",
-      mode: "cors",
-    };
-
-    dmart_fetch(url, request).then((resp) => (payload = { json: resp }));
-    dmart_fetch(schemaurl, request).then((resp) => {
-      schema = resp;
-    });
 
     if (value.data.attributes && value.data.attributes.previous_change_id)
       old_change_id = value.data.attributes.previous_change_id;
@@ -309,13 +309,7 @@
     </div>
   </div>
   <div class="h-100 tab-pane" class:active={tab_option === "edit"}>
-    {#if url && !data.attributes.payload.endsWith("json")}
-      <MediaView {url} {displayname} {content_type} />
-    {:else if content_type && content_type.startsWith("text/html;")}
-      <HtmlEditor bind:content on:changed={hasChanged} />
-    {:else if content_type && content_type.startsWith("text/markdown;")}
-      <MarkdownEditor bind:content on:changed={hasChanged} />
-    {:else if data.attributes.payload.endsWith("json")}
+    {#if data?.attributes?.payload?.endsWith("json")}
       {#if validator && payload}
         <JSONEditor
           {validator}
@@ -324,7 +318,7 @@
         />
       {/if}
     {:else}
-      <h4>Unrecognized conent type {content_type}</h4>
+      <h4>Unrecognized conent type {content_type} or no payload exists</h4>
       <div
         class="px-1 pb-1 h-100"
         style="text-align: left; direction: ltr; overflow: hidden auto;"

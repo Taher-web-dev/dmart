@@ -1,5 +1,11 @@
 <script>
-  import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "sveltestrap";
+  import {
+    Button,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader,
+  } from "sveltestrap";
   import Input from "../../_components/Input.svelte";
   import { _ } from "../../../i18n";
   import { dmart_content, dmart_postmedia } from "../../../dmart";
@@ -22,14 +28,14 @@
   let displayname;
   let resource_type;
   let payload = "";
-  let payload_type = "text/html";
+  let payload_type = "json";
   let tags;
   let description;
   let displayed_subpath;
   let mediafile;
 
   if (fix_resource_type) resource_type = fix_resource_type;
-  else resource_type = "post";
+  else resource_type = "content";
 
   //console.log("Content modal data: ", data);
 
@@ -39,7 +45,11 @@
     displayname = data.displayname;
     description = data.attributes.description;
     resource_type = data.resource_type;
-    if ("attributes" in data && "embedded" in data.attributes && data.attributes.payload.embedded)
+    if (
+      "attributes" in data &&
+      "embedded" in data.attributes &&
+      data.attributes.payload.embedded
+    )
       payload = data.attributes.payload.embedded;
     if ("attributes" in data && "tags" in data.attributes)
       tags = data.attributes.tags.join(",");
@@ -103,13 +113,14 @@
           resp = await dmart_postmedia(record, mediafile);
         } else {
           alert("Media file must be selected");
-          resp = { results: [{ status: "failed" }] };
+          resp = { status: "failed" };
         }
       } else {
         record.attributes.payload = {
           checksum: `sha1:${sha1(payload)}`,
-          embedded: payload,
-          content_type: `${payload_type}; charset=utf8`,
+          body: payload,
+          // content_type: `${payload_type}; charset=utf8`,
+          content_type: payload_type,
           bytesize: new Blob([payload]).size,
         };
         resp = await dmart_content("create", record);
@@ -118,28 +129,29 @@
     }
 
     console.log("Content modal ...", resp, record);
-    if (resp.results[0].status == "success") {
+    if (resp.status == "success") {
       //console.log("Trying to update entries ...", $entries[subpath]);
       if (!parent_shortname) {
         // If this is not attachment, add it as main entry.
         let entry = { data: record };
         entry.data.subpath = subpath;
-        if (!entry.data.attachments) entry.data.attachments = { media: [], reply: [], reaction: [] };
+        if (!entry.data.attachments)
+          entry.data.attachments = { media: [], reply: [], reaction: [] };
         entry.data.displayname = record.attributes.displayname;
         entries.add(subpath, entry);
-        //console.log($entries[subpath]);
       }
 
       addNotification({
         text: `${op} "${shortname}" under ${subpath}`,
         position: "bottom-center",
-        type: resp.results[0].status == "success" ? "success" : "warning",
+        type: resp.status == "success" ? "success" : "warning",
         removeAfter: 5000,
       });
 
       dispatch(op, record);
       //console.log("Content modal: ", record, resp);
       //console.log("Content modal result: ", resp.results[0]);
+      //console.log($entries[subpath]);
 
       open = false;
     }
@@ -167,7 +179,7 @@
   }
 </script>
 
-<Modal isOpen="{open}" toggle="{toggle}" size="{size}">
+<Modal isOpen={open} {toggle} {size}>
   <ModalHeader>
     {#if data}
       {$_("edit")}
@@ -177,45 +189,85 @@
     {$_(resource_type)}
   </ModalHeader>
   <ModalBody>
-    <Input id="subpath" title="{$_('subpath')}" value="{displayed_subpath}" readonly="{true}" type="text" />
-    <Input id="shortname" title="{$_('shortname')}" bind:value="{shortname}" type="text" />
-    <Input id="displayname" title="{$_('displayname')}" bind:value="{displayname}" type="text" />
-    <Input id="tags" title="{$_('tags')}" bind:value="{tags}" type="text" />
-    <Input id="description" type="textarea" title="{$_('description')}" bind:value="{description}" />
+    <Input
+      id="subpath"
+      title={$_("subpath")}
+      value={displayed_subpath}
+      readonly={true}
+      type="text"
+    />
+    <Input
+      id="shortname"
+      title={$_("shortname")}
+      bind:value={shortname}
+      type="text"
+    />
+    <Input
+      id="displayname"
+      title={$_("displayname")}
+      bind:value={displayname}
+      type="text"
+    />
+    <Input id="tags" title={$_("tags")} bind:value={tags} type="text" />
+    <Input
+      id="description"
+      type="textarea"
+      title={$_("description")}
+      bind:value={description}
+    />
 
     {#if fix_resource_type || data}
-      <Input id="resource_type" title="{$_('resource_type')}" value="{resource_type}" readonly="{true}" type="text" />
+      <Input
+        id="resource_type"
+        title={$_("resource_type")}
+        value={resource_type}
+        readonly={true}
+        type="text"
+      />
     {:else}
       <Input
         id="resource_type"
         type="select"
-        title="{$_('resource_type')}"
-        bind:value="{resource_type}"
-        on:change="{resourceTypeChanged}">
+        title={$_("resource_type")}
+        bind:value={resource_type}
+        on:change={resourceTypeChanged}
+      >
         <option value="folder">{$_("folder")}</option>
-        <option value="post">{$_("post")}</option>
-        <option value="contact">{$_("contact")}</option>
-        <option value="media">{$_("media")}</option>
-        <option value="biography">{$_("biography")}</option>
-        <option value="term">{$_("term")}</option>
+        <option value="content">{$_("content")}</option>
       </Input>
     {/if}
 
     {#if !data && resource_type != "folder"}
       {#if enableUpload}
-        <Input id="upload" title="{$_('upload')}" type="file" on:change="{uploadMedia}" />
+        <Input
+          id="upload"
+          title={$_("upload")}
+          type="file"
+          on:change={uploadMedia}
+        />
       {:else}
-        <Input id="payload" type="textarea" title="{$_('payload')}" bind:value="{payload}" />
-        <Input id="payload_type" title="{$_('payload_type')}" bind:value="{payload_type}" type="select">
-          <option value="text/html">{$_("text_html")}</option>
-          <option value="text/markdown">{$_("text_markdown")}</option>
-          <option value="text/json">{$_("text_json")}</option>
+        <Input
+          id="payload"
+          type="textarea"
+          title={$_("payload")}
+          bind:value={payload}
+        />
+        <Input
+          id="payload_type"
+          title={$_("payload_type")}
+          bind:value={payload_type}
+          type="select"
+        >
+          <option value="markdown">{$_("text_markdown")}</option>
+          <option value="json">{$_("text_json")}</option>
         </Input>
       {/if}
     {/if}
   </ModalBody>
   <ModalFooter>
-    <Button color="secondary" on:click="{() => (open = false)}">{$_("cancel")}</Button>
-    <Button color="primary" on:click="{handle}">{$_("accept")}</Button>
+    <Button color="secondary" on:click={() => (open = false)}
+      >{$_("cancel")}</Button
+    >
+    <Button color="primary" on:click={handle}>{$_("accept")}</Button>
   </ModalFooter>
 </Modal>
