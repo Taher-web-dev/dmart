@@ -29,6 +29,8 @@ class ResourceType(str, Enum):
     relationship = "relationship"
     alteration = "alteration"
     space = "space"
+    permission = "permission"
+    role = "role"
 
 
 class ContentType(str, Enum):
