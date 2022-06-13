@@ -20,6 +20,7 @@ REDIS_SCHEMA_DATA_TYPES_MAPPER = {
     "boolean": TextField,
     "integer": NumericField,
     "number": NumericField,
+    "array": TagField,
 }
 
 META_SCHEMA = (
@@ -62,9 +63,14 @@ def get_redis_index_fields(key_chain, property, redis_schema_definition):
     takes a key and a value of a schema definition, and return the redis schema index appropriate field class/es
     """
     if "type" in property and property["type"] != "object":
+        property_name = key_chain.replace(".", "_")
+        sortable = True
+        if property["type"] == "array":
+            key_chain += ".*"
+            sortable = False
         redis_schema_definition.append(
             REDIS_SCHEMA_DATA_TYPES_MAPPER[property["type"]](
-                f"$.{key_chain}", sortable=True, as_name=key_chain.replace(".", "_")
+                f"$.{key_chain}", sortable=sortable, as_name=property_name
             )
         )
         return redis_schema_definition
