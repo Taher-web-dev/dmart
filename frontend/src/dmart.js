@@ -56,6 +56,7 @@ export async function dmart_login(shortname, password) {
   const request = {
     method: "POST",
     headers: headers,
+    credentials: "include",
     cache: "no-cache",
     mode: "cors",
     body: JSON.stringify(data),

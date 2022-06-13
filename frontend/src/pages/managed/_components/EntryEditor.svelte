@@ -81,6 +81,7 @@
     const request = {
       method: "GET",
       headers: headers,
+      credentials: "include",
       cache: "no-cache",
       mode: "cors",
     };
