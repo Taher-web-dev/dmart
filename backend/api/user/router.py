@@ -108,7 +108,7 @@ async def login(
         response.set_cookie(
             key="auth_token",
             value=access_token,
-            expires=settings.jwt_access_expires,
+            max_age=settings.jwt_access_expires,
             httponly=True,
             # samesite="none",
             # secure=True,
