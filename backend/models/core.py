@@ -87,7 +87,7 @@ class Meta(Resource):
                 payload_body[key] = value
 
         if len(payload_body) > 0:
-            self.payload = Payload(content_type=ContentType.text, body=payload_body)
+            self.payload = Payload(content_type=ContentType.json, body=payload_body)
 
     def to_record(self, subpath: str, shortname: str, include: list[str]):
         # Sanity check
@@ -153,7 +153,7 @@ class User(Actor):
 
 
 class Group(Actor):
-    members: list[Actor] = []  # list of actor_shortnames
+    members: list[str] = []  # list of actor_shortnames
 
 
 class Attachment(Meta):
@@ -206,20 +206,18 @@ class ActionType(str, Enum):
     update = "update"
     create = "create"
     delete = "delete"
-    attache = "attache"
+    attach = "attach"
 
 class ConditionType(str, Enum):
     is_active = "is_active"
     own = "own"
 
 class Permission (Meta):
-    shortname : str
-    subpaths : list[str]
+    subpaths : dict[str, list[str]] # {"space_name": ["subpath_one", "subpath_two"]}
     resource_types : list[ResourceType]
     actions : list[ActionType]
-    conditions : list[ConditionType]
+    conditions : list[ConditionType] = []
 
 class Role(Meta):
-    shortname : str
-    permissions : list[Permission]
+    permissions : list[str] # list of permissions_shortnames
     entitled_actors : list[str] # list of actor_shortnames
