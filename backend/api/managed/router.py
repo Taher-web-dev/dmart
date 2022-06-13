@@ -55,14 +55,9 @@ async def serve_request( request: api.Request, owner_shortname=Depends(JWTBearer
             for record in request.records:
                 resource_obj = core.Meta.from_record(record=record, shortname=owner_shortname)
                 # Check if the payload should goes in the meta file or in a separate file
-                # if record.payload_inline:
+                # if record.payload_location:
                 #    db.save(request.space_name, record.subpath, resource_obj)
                 # else :
-                if len(record.attributes) > 0:
-                    resource_obj.payload = core.Payload(  # detect the resource type
-                        content_type=ContentType.json,
-                        body=record.shortname + ".json",
-                    )
 
                 # Validate schema if present
                 if "schema_shortname" in record.attributes:
@@ -78,13 +73,19 @@ async def serve_request( request: api.Request, owner_shortname=Depends(JWTBearer
                         payload_data=record.attributes,
                     )
 
+                separate_payload_data = {}
+                if resource_obj.payload:
+                    separate_payload_data = resource_obj.payload.body
+                    resource_obj.payload.body = record.shortname + ".json"
+
                 await db.save(request.space_name, record.subpath, resource_obj)
-                if len(record.attributes) > 0:
+
+                if separate_payload_data:
                     await db.save_payload_from_json(
                         request.space_name,
                         record.subpath,
                         resource_obj,
-                        record.attributes,
+                        separate_payload_data,
                     )
 
         case api.RequestType.update:
