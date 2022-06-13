@@ -1,5 +1,4 @@
 <script>
-  // import JsonEditor from "./_components/JsonEditor.svelte";
   import EntryEditor from "./_components/EntryEditor.svelte";
   import { active_entry } from "./_stores/active_entry.js";
   import { _ } from "../../i18n";

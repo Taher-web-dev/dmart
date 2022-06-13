@@ -5,7 +5,6 @@
   import MediaView from "../../_components/MediaView.svelte";
   import History from "./History.svelte";
   import Attachments from "../../_components/Attachments.svelte";
-  //import InfoEditor from "./InfoEditor.svelte";
   import { JSONEditor, createAjvValidator } from "svelte-jsoneditor";
   import { Nav, Button, ButtonGroup } from "sveltestrap";
   import Icon from "../../_components/Icon.svelte";
@@ -14,6 +13,8 @@
   import { onDestroy } from "svelte";
   import { getNotificationsContext } from "svelte-notifications";
   import { dmart_update_embedded } from "../../../dmart";
+  import { active_space } from "../_stores/active_space.js";
+  import { get } from "svelte/store";
   import dmart_fetch from "../../../../custom-fetch.js";
 
   const { addNotification } = getNotificationsContext();
@@ -54,13 +55,17 @@
       content_type = value.data.attributes.payload.content_type;
       // FIXME: resource type (content) was hard coded here
       url = value.data.attributes.payload
-        ? `${website.backend}/managed/payload/content/${website.space_name}/${data.subpath}/${value.data.attributes.payload}`
+        ? `${get(active_space).backend}/managed/payload/content/${
+            website.space_name
+          }/${data.subpath}/${value.data.attributes.payload}`
         : null;
 
       // FIXME: subpath (schema) was hard coded here
       // FIXME: manually added extention (.json) to end of schema short name
       schemaurl = value.data.attributes.payload
-        ? `${website.backend}/managed/payload/schema/${website.space_name}/schema/${value.data.attributes.schema_shortname}.json`
+        ? `${get(active_space).backend}/managed/payload/schema/${
+            website.space_name
+          }/schema/${value.data.attributes.schema_shortname}.json`
         : null;
     } else {
       content = value.data;
@@ -76,6 +81,7 @@
     const request = {
       method: "GET",
       headers: headers,
+      credentials: "include",
       cache: "no-cache",
       mode: "cors",
     };
