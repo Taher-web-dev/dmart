@@ -153,7 +153,7 @@ class User(Actor):
 
 
 class Group(Actor):
-    pass
+    members: list[Actor] = []  # list of actor_shortnames
 
 
 class Attachment(Meta):
@@ -198,3 +198,28 @@ class Content(Meta):
 
 class Folder(Meta):
     pass
+
+from enum import Enum
+
+class ActionType(str, Enum):
+    query = "query"
+    update = "update"
+    create = "create"
+    delete = "delete"
+    attache = "attache"
+
+class ConditionType(str, Enum):
+    is_active = "is_active"
+    own = "own"
+
+class Permission (Meta):
+    shortname : str
+    subpaths : list[str]
+    resource_types : list[ResourceType]
+    actions : list[ActionType]
+    conditions : list[ConditionType]
+
+class Role(Meta):
+    shortname : str
+    permissions : list[Permission]
+    entitled_actors : list[str] # list of actor_shortnames
