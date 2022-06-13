@@ -361,7 +361,6 @@ async def import_resources_from_csv(
                     continue
 
         if shortname:
-            payload_object["schema_shortname"] = schema_shortname
             records.append(
                 core.Record(
                     resource_type=resource_type,
