@@ -1,7 +1,6 @@
 import csv
 import hashlib
 from io import StringIO
-import aiofiles
 from fastapi import APIRouter, Depends, UploadFile, Path, Form, status
 from fastapi.responses import FileResponse
 import models.api as api
@@ -9,18 +8,19 @@ import models.core as core
 from models.enums import ContentType, RequestType
 import utils.db as db
 import utils.regex as regex
-from utils.jwt import JWTBearer
 import sys
 from jsonschema import validate
 import json
 from pathlib import Path as FSPath
 from utils.settings import settings
+from utils.jwt import JWTBearer
 
 router = APIRouter()
 
 
 @router.post("/query", response_model=api.Response, response_model_exclude_none=True)
-async def query_entries(query: api.Query) -> api.Response:
+async def query_entries(query: api.Query,
+    _=Depends(JWTBearer())) -> api.Response:
     total, records = await db.serve_query(query)
     return api.Response(
         status=api.Status.success,
@@ -30,9 +30,7 @@ async def query_entries(query: api.Query) -> api.Response:
 
 
 @router.post("/request", response_model=api.Response, response_model_exclude_none=True)
-async def serve_request(
-    request: api.Request, shortname=Depends(JWTBearer())
-) -> api.Response:
+async def serve_request( request: api.Request, owner_shortname=Depends(JWTBearer())) -> api.Response:
     if request.space_name not in settings.space_names:
         raise api.Exception(
             status.HTTP_400_BAD_REQUEST,
@@ -55,7 +53,7 @@ async def serve_request(
     match request.request_type:
         case api.RequestType.create:
             for record in request.records:
-                resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+                resource_obj = core.Meta.from_record(record=record, shortname=owner_shortname)
                 # Check if the payload should goes in the meta file or in a separate file
                 # if record.payload_inline:
                 #    db.save(request.space_name, record.subpath, resource_obj)
@@ -91,7 +89,7 @@ async def serve_request(
 
         case api.RequestType.update:
             for record in request.records:
-                resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+                resource_obj = core.Meta.from_record(record=record, shortname=owner_shortname)
                 await db.update(request.space_name, record.subpath, resource_obj)
         case api.RequestType.delete:
             for record in request.records:
@@ -165,6 +163,7 @@ async def retrieve_entry_or_attachment_payload(
     subpath: str = Path(..., regex=regex.SUBPATH),
     shortname: str = Path(..., regex=regex.SHORTNAME),
     ext: str = Path(..., regex=regex.EXT),
+    _=Depends(JWTBearer())
 ) -> FileResponse:
 
     cls = getattr(sys.modules["models.core"], resource_type.capitalize())
@@ -195,7 +194,7 @@ async def create_or_update_resource_with_payload(
     payload_file: UploadFile,
     request_record: UploadFile,
     space_name: str = Form(...),
-    shortname=Depends(JWTBearer()),
+    owner_shortname=Depends(JWTBearer())
 ):
     # NOTE We currently make no distinction between create and update. in such case update should contain all the data every time.
     if space_name not in settings.space_names:
@@ -228,7 +227,7 @@ async def create_or_update_resource_with_payload(
     sha1.update(payload_file.file.read())
     checksum = sha1.hexdigest()
     await payload_file.seek(0)
-    resource_obj = core.Meta.from_record(record=record, shortname=shortname)
+    resource_obj = core.Meta.from_record(record=record, shortname=owner_shortname)
     resource_obj.payload = core.Payload(
         content_type=resource_content_type,
         checksum=checksum,
@@ -365,5 +364,5 @@ async def import_resources_from_csv(
         request=api.Request(
             space_name=space_name, request_type=RequestType.create, records=records
         ),
-        shortname=owner_shortname,
+        owner_shortname=owner_shortname,
     )
